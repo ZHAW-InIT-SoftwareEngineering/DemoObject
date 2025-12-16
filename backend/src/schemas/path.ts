@@ -17,6 +17,6 @@ export const CompilePathRequest = z.object({
 
 // schema for the server answer (i.e. the DSL)
 export const CompilePathResponse = z.object({
-    // TODO instead of a string probably an array of "blocks" i.e.: [RIGHT, LEFT, LEFT, STRAIGHT, ...]
-    dsl: z.string()
+    // Array of DSL blocks describing the path (e.g., ["RIGHT", "UP", ...])
+    dsl: z.array(z.string())
 });
