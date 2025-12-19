@@ -4,9 +4,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
+const mazePathRoutes_1 = require("./routes/mazePathRoutes");
+const findPathRoutes_1 = require("./routes/findPathRoutes");
+const mazeRoutes_1 = require("./routes/mazeRoutes");
+const sessionRoutes_1 = require("./routes/sessionRoutes");
+const sessionPathRoutes_1 = require("./routes/sessionPathRoutes");
+const openapiDocument_1 = require("./openapi/openapiDocument");
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
-app.get('/', (req, res) => {
-    res.send('Hello from TypeScript + Express!');
-});
+app.get("/openapi.json", (_req, res) => res.json(openapiDocument_1.openApiDocument));
+app.use("/docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(openapiDocument_1.openApiDocument));
+app.use("/maze-paths", mazePathRoutes_1.mazePathRouter);
+app.use("/maze-paths", findPathRoutes_1.findPathRouter);
+app.use("/mazes", mazeRoutes_1.mazeRouter);
+app.use("/sessions", sessionRoutes_1.sessionRouter);
+app.use("/sessions", sessionPathRoutes_1.sessionPathRouter);
 exports.default = app;

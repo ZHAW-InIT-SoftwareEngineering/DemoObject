@@ -1,0 +1,28 @@
+services:
+
+  mongo:
+    container_name: demoobject-mongo
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  api:
+    container_name: demoobject-api
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+
+volumes:
+  mongo-data:

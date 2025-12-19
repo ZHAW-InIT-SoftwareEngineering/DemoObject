@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { registry } from "../openapi/openapiRegistry";
 import { CompilePathRequest, CompilePathResponse } from "../schemas";
+import { pathToDsl } from "../services";
 
 
 export const mazePathRouter = Router();
@@ -38,27 +39,3 @@ mazePathRouter.post("/compile", (req, res) => {
 
     return res.json(CompilePathResponse.parse({ dsl }));
 });
-
-function pathToDsl(path: Array<{ x: number; y: number }>) {
-    const dslBlocks: string[] = [];
-
-    for (let i = 1; i < path.length; i++) {
-        const prevPoint = path[i - 1];
-        const currentPoint = path[i];
-
-        const dx = currentPoint.x - prevPoint.x;
-        const dy = currentPoint.y - prevPoint.y;
-
-        dslBlocks.push(decideDirection(dx, dy));
-    }
-    
-    return dslBlocks;
-}
-
-function decideDirection(dx: number, dy: number): string {
-    if (dx === 0 && dy > 0) return 'UP';
-    if (dx > 0 && dy === 0) return 'RIGHT';
-    if (dx < 0 && dy === 0) return 'LEFT';
-    if (dx === 0 && dy < 0) return 'DOWN';
-    return 'INVALID'; // diagonal move => not allowed!
-}
