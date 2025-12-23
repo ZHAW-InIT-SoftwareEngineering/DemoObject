@@ -18,4 +18,12 @@ export async function createSession(sessionId: string, mazeId: string) {
 
 export async function getSession(sessionId: string) { return (collection()).findOne({ sessionId }) }
 
-export async function updateSessionPath(sessionId: string, data: Partial<SessionDataClass>) { return (collection()).updateOne({ sessionId }, { $set: data }) }
+export async function updateSession(sessionId: string, data: Partial<SessionDataClass>) {
+    const result = await collection().findOneAndUpdate(
+        { sessionId },
+        { $set: data },
+        { returnDocument: "after" }
+    );
+
+    return result ? SessionDataClass.parse(result) : null;
+}

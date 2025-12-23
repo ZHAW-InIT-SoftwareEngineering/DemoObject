@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
-import { createSession, getSession, updateSessionPath } from "../repositories"; 
-import { SessionDataClass } from "../models/session";
+import { createSession, getSession, updateSession } from "../repositories";
+import type { SessionDataClass } from "../models/session";
 
 export async function createSessionService(mazeId: string) {
     console.log(`This is the mazeId: ${mazeId}}`)
@@ -10,8 +10,8 @@ export async function createSessionService(mazeId: string) {
     return doc.sessionId
 }
 
-export function updateSessionPathService(id: string, data: Partial<SessionDataClass>) {
-    return updateSessionPath(id, data)
+export function updateSessionService(id: string, data: Partial<SessionDataClass>) {
+    return updateSession(id, data)
 }
 
 export async function retrieveSessionService(sessionId: string) {

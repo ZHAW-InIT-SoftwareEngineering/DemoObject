@@ -1,25 +1,34 @@
 import { z } from "zod";
 import { Path } from "./path";
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
+import { SessionPublic } from "../models/session";
 extendZodWithOpenApi(z);
+
+const SessionApiShape = SessionPublic.omit({ createdAt: true }).extend({
+    expiresAt: z.coerce.date().optional(),
+});
 
 export const StorePathRequest = z.object({
     sessionId: z.uuid(),
     path: Path,
 });
 
-export const StorePathResponse = z.object({
-    mazeId: z.string().min(1),
-    path: Path,
-    dsl: z.array(z.string()),
+export const StorePathResponse = SessionApiShape.pick({
+    mazeId: true,
+    path: true,
+    dsl: true,
 });
 
 export const RetrievePathRequest = z.object({
     sessionId: z.uuid(),
 });
 
-export const RetrievePathResponse = z.object({
-    mazeId: z.string().min(1),
-    path: Path,
-    dsl: z.array(z.string()),
+export const RetrievePathResponse = SessionApiShape.pick({
+    mazeId: true,
+    path: true,
+    dsl: true,
 });
+
+export const UpdatePathRequest = SessionApiShape.partial().required({ sessionId: true });
+
+export const UpdatePathResponse = SessionApiShape;

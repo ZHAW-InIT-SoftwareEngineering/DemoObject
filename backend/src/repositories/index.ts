@@ -1,1 +1,1 @@
-export { createSession, getSession, updateSessionPath } from "./sessionRepository"
+export { createSession, getSession, updateSession } from "./sessionRepository"
