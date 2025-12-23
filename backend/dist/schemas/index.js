@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MazeWall = exports.MazeEdge = exports.MazeNode = exports.Maze = exports.RetrievePathResponse = exports.RetrievePathRequest = exports.StorePathResponse = exports.StorePathRequest = exports.CreateSessionResponse = exports.CreateSessionRequest = exports.FindPathBFSResponse = exports.FindPathBFSRequest = exports.CompilePathResponse = exports.CompilePathRequest = exports.Path = exports.Point = void 0;
+exports.MazeWall = exports.MazeEdge = exports.MazeNode = exports.Maze = exports.RetrievePathResponse = exports.RetrievePathRequest = exports.StorePathResponse = exports.StorePathRequest = exports.UpdatePathResponse = exports.UpdatePathRequest = exports.CreateSessionResponse = exports.CreateSessionRequest = exports.FindPathBFSResponse = exports.FindPathBFSRequest = exports.CompilePathResponse = exports.CompilePathRequest = exports.Path = exports.Point = void 0;
 var path_1 = require("./path");
 Object.defineProperty(exports, "Point", { enumerable: true, get: function () { return path_1.Point; } });
 Object.defineProperty(exports, "Path", { enumerable: true, get: function () { return path_1.Path; } });
@@ -13,6 +13,8 @@ var session_1 = require("./session");
 Object.defineProperty(exports, "CreateSessionRequest", { enumerable: true, get: function () { return session_1.CreateSessionRequest; } });
 Object.defineProperty(exports, "CreateSessionResponse", { enumerable: true, get: function () { return session_1.CreateSessionResponse; } });
 var sessionPath_1 = require("./sessionPath");
+Object.defineProperty(exports, "UpdatePathRequest", { enumerable: true, get: function () { return sessionPath_1.UpdatePathRequest; } });
+Object.defineProperty(exports, "UpdatePathResponse", { enumerable: true, get: function () { return sessionPath_1.UpdatePathResponse; } });
 Object.defineProperty(exports, "StorePathRequest", { enumerable: true, get: function () { return sessionPath_1.StorePathRequest; } });
 Object.defineProperty(exports, "StorePathResponse", { enumerable: true, get: function () { return sessionPath_1.StorePathResponse; } });
 Object.defineProperty(exports, "RetrievePathRequest", { enumerable: true, get: function () { return sessionPath_1.RetrievePathRequest; } });

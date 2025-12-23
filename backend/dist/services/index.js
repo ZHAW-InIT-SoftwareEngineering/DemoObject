@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.retrieveSessionService = exports.updateSessionPathService = exports.createSessionService = exports.findPathBFS = exports.getMazeById = exports.pathToDsl = void 0;
+exports.retrieveSessionService = exports.updateSessionService = exports.createSessionService = exports.findPathBFS = exports.getMazeById = exports.pathToDsl = void 0;
 var pathToDslService_1 = require("./pathToDslService");
 Object.defineProperty(exports, "pathToDsl", { enumerable: true, get: function () { return pathToDslService_1.pathToDsl; } });
 var mazeService_1 = require("./mazeService");
@@ -9,5 +9,5 @@ var findPathService_1 = require("./findPathService");
 Object.defineProperty(exports, "findPathBFS", { enumerable: true, get: function () { return findPathService_1.findPathBFS; } });
 var sessionService_1 = require("./sessionService");
 Object.defineProperty(exports, "createSessionService", { enumerable: true, get: function () { return sessionService_1.createSessionService; } });
-Object.defineProperty(exports, "updateSessionPathService", { enumerable: true, get: function () { return sessionService_1.updateSessionPathService; } });
+Object.defineProperty(exports, "updateSessionService", { enumerable: true, get: function () { return sessionService_1.updateSessionService; } });
 Object.defineProperty(exports, "retrieveSessionService", { enumerable: true, get: function () { return sessionService_1.retrieveSessionService; } });

@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createSessionService = createSessionService;
-exports.updateSessionPathService = updateSessionPathService;
+exports.updateSessionService = updateSessionService;
 exports.retrieveSessionService = retrieveSessionService;
 const crypto_1 = require("crypto");
 const repositories_1 = require("../repositories");
@@ -12,8 +12,8 @@ async function createSessionService(mazeId) {
     console.log(`in mongodb created doc:\n ${(JSON.stringify(doc))}`);
     return doc.sessionId;
 }
-function updateSessionPathService(id, data) {
-    return (0, repositories_1.updateSessionPath)(id, data);
+function updateSessionService(id, data) {
+    return (0, repositories_1.updateSession)(id, data);
 }
 async function retrieveSessionService(sessionId) {
     const doc = await ((0, repositories_1.getSession)(sessionId));

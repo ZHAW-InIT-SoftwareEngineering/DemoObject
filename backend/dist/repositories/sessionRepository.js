@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createSession = createSession;
 exports.getSession = getSession;
-exports.updateSessionPath = updateSessionPath;
+exports.updateSession = updateSession;
 const mongo_1 = require("../db/mongo");
 const mongodb_1 = require("mongodb");
 const session_1 = require("../models/session");
@@ -19,4 +19,7 @@ async function createSession(sessionId, mazeId) {
     return doc;
 }
 async function getSession(sessionId) { return (collection()).findOne({ sessionId }); }
-async function updateSessionPath(sessionId, data) { return (collection()).updateOne({ sessionId }, { $set: data }); }
+async function updateSession(sessionId, data) {
+    const result = await collection().findOneAndUpdate({ sessionId }, { $set: data }, { returnDocument: "after" });
+    return result ? session_1.SessionDataClass.parse(result) : null;
+}
