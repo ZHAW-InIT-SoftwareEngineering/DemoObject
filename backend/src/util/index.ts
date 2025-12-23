@@ -1,0 +1,1 @@
+export { isValidPath } from "./pathValidation";

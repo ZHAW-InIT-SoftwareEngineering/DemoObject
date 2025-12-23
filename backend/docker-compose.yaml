@@ -1,5 +1,4 @@
 services:
-
   mongo:
     container_name: demoobject-mongo
     image: mongo:7
@@ -13,7 +12,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 5s
-
+  
+  # DO NOT RUN THIS YET!!!
   api:
     container_name: demoobject-api
     build: .

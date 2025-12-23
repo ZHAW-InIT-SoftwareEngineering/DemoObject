@@ -1,25 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createSession = createSession;
-exports.getSession = getSession;
-exports.saveSessionSelection = saveSessionSelection;
+exports.createSessionService = createSessionService;
+exports.updateSessionPathService = updateSessionPathService;
+exports.retrieveSessionService = retrieveSessionService;
 const crypto_1 = require("crypto");
-const sessions = new Map();
-function createSession() {
-    const id = (0, crypto_1.randomUUID)();
-    const session = { id, createdAt: new Date() };
-    sessions.set(id, session);
-    return session;
+const repositories_1 = require("../repositories");
+async function createSessionService(mazeId) {
+    console.log(`This is the mazeId: ${mazeId}}`);
+    const sessionId = (0, crypto_1.randomUUID)();
+    const doc = await (0, repositories_1.createSession)(sessionId, mazeId);
+    console.log(`in mongodb created doc:\n ${(JSON.stringify(doc))}`);
+    return doc.sessionId;
 }
-function getSession(id) {
-    return sessions.get(id);
+function updateSessionPathService(id, data) {
+    return (0, repositories_1.updateSessionPath)(id, data);
 }
-function saveSessionSelection(id, selection) {
-    const session = sessions.get(id);
-    if (!session)
-        return undefined;
-    session.mazeId = selection.mazeId;
-    session.selection = selection;
-    sessions.set(id, session);
-    return session;
+async function retrieveSessionService(sessionId) {
+    const doc = await ((0, repositories_1.getSession)(sessionId));
+    return doc;
 }

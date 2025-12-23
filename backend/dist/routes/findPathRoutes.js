@@ -8,7 +8,7 @@ const services_1 = require("../services");
 exports.findPathRouter = (0, express_1.Router)();
 openapiRegistry_1.registry.registerPath({
     method: "post",
-    path: "/maze-paths/findPath",
+    path: "/mazePaths/findPath",
     request: {
         body: { content: { "application/json": { schema: schemas_1.FindPathBFSRequest } } },
     },
@@ -21,7 +21,7 @@ openapiRegistry_1.registry.registerPath({
         404: { description: "Maze or path not found" },
     },
 });
-exports.findPathRouter.post("/find-shortest", (req, res) => {
+exports.findPathRouter.post("/findPath", (req, res) => {
     const parsed = schemas_1.FindPathBFSRequest.safeParse(req.body);
     if (!parsed.success)
         return res.status(400).json({ error: parsed.error.issues });

@@ -8,7 +8,7 @@ const services_1 = require("../services");
 exports.mazePathRouter = (0, express_1.Router)();
 openapiRegistry_1.registry.registerPath({
     method: "post",
-    path: "/maze-paths/compile",
+    path: "/mazePaths/toDSL",
     request: {
         body: { content: { "application/json": { schema: schemas_1.CompilePathRequest } } },
     },
@@ -20,7 +20,7 @@ openapiRegistry_1.registry.registerPath({
         400: { description: "Invalid request / invalid path" }
     },
 });
-exports.mazePathRouter.post("/compile", (req, res) => {
+exports.mazePathRouter.post("/toDSL", (req, res) => {
     const parsed = schemas_1.CompilePathRequest.safeParse(req.body);
     if (!parsed.success)
         return res.status(400).json({ error: parsed.error.issues });

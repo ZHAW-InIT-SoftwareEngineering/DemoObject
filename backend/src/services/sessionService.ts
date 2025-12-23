@@ -1,36 +1,20 @@
 import { randomUUID } from "crypto";
+import { createSession, getSession, updateSessionPath } from "../repositories"; 
+import { SessionDataClass } from "../models/session";
 
-export type SessionPath = {
-    mazeId: string;
-    path: number[]; // node ids
-    dsl: string[];
-};
-
-export type Session = {
-    id: string;
-    createdAt: Date;
-    mazeId?: string;
-    selection?: SessionPath;
-};
-
-const sessions = new Map<string, Session>();
-
-export function createSession(): Session {
-    const id = randomUUID();
-    const session: Session = { id, createdAt: new Date() };
-    sessions.set(id, session);
-    return session;
+export async function createSessionService(mazeId: string) {
+    console.log(`This is the mazeId: ${mazeId}}`)
+    const sessionId = randomUUID()
+    const doc = await createSession(sessionId, mazeId)
+    console.log(`in mongodb created doc:\n ${(JSON.stringify(doc))}`)
+    return doc.sessionId
 }
 
-export function getSession(id: string): Session | undefined {
-    return sessions.get(id);
+export function updateSessionPathService(id: string, data: Partial<SessionDataClass>) {
+    return updateSessionPath(id, data)
 }
 
-export function saveSessionSelection(id: string, selection: SessionPath): Session | undefined {
-    const session = sessions.get(id);
-    if (!session) return undefined;
-    session.mazeId = selection.mazeId;
-    session.selection = selection;
-    sessions.set(id, session);
-    return session;
+export async function retrieveSessionService(sessionId: string) {
+    const doc = await(getSession(sessionId))
+    return doc
 }

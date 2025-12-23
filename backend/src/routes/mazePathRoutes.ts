@@ -8,7 +8,7 @@ export const mazePathRouter = Router();
 
 registry.registerPath({
     method: "post", 
-    path: "/maze-paths/compile",
+    path: "/mazePaths/toDSL",
     request: {
     body: { content: { "application/json": { schema: CompilePathRequest } } },
     },
@@ -22,7 +22,7 @@ registry.registerPath({
 });
 
 
-mazePathRouter.post("/compile", (req, res) => {
+mazePathRouter.post("/toDSL", (req, res) => {
     const parsed = CompilePathRequest.safeParse(req.body); 
     if (!parsed.success) return res.status(400).json({ error: parsed.error.issues })
 

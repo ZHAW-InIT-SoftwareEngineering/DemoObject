@@ -10,7 +10,7 @@ export function pathToDsl(path: Array<{ x: number; y: number }>) {
 
         dslBlocks.push(decideDirection(dx, dy));
     }
-    
+
     return dslBlocks;
 }
 

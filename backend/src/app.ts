@@ -13,9 +13,11 @@ app.use(express.json());
 app.get("/openapi.json", (_req, res) => res.json(openApiDocument));
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
 
-app.use("/maze-paths", mazePathRouter);
-app.use("/maze-paths", findPathRouter);
+app.use("/mazePaths", mazePathRouter);
+app.use("/mazePaths", findPathRouter);
+
 app.use("/mazes", mazeRouter);
+
 app.use("/sessions", sessionRouter);
 app.use("/sessions", sessionPathRouter);
 

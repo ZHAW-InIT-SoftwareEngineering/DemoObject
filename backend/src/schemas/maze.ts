@@ -7,7 +7,6 @@ export const MazeNode = z.object({
     y: z.number().int().nonnegative(),
 });
 
-// Undirected/graph edge between node ids
 export const MazeEdge = z.object({
     from: z.number().int().nonnegative(),
     to: z.number().int().nonnegative(),
@@ -25,3 +24,5 @@ export const Maze = z.object({
     edges: z.array(MazeEdge),
     walls: z.array(MazeWall).default([]),
 });
+
+export type Maze = z.infer<typeof Maze>;

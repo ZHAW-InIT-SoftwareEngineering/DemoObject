@@ -6,7 +6,7 @@ const openapiRegistry_1 = require("./openapiRegistry");
 require("../routes/mazePathRoutes");
 require("../routes/findPathRoutes");
 require("../routes/mazeRoutes");
-require("../routes/sessionRoutes");
+require("../routes/sessionCreateRoutes");
 require("../routes/sessionPathRoutes");
 exports.openApiDocument = new zod_to_openapi_1.OpenApiGeneratorV3(openapiRegistry_1.registry.definitions).generateDocument({
     openapi: "3.0.3",

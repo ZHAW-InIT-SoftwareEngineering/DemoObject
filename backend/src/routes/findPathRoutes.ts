@@ -7,7 +7,7 @@ export const findPathRouter = Router();
 
 registry.registerPath({
     method: "post",
-    path: "/maze-paths/findPath",
+    path: "/mazePaths/findPath",
     request: {
         body: { content: { "application/json": { schema: FindPathBFSRequest } } },
     },
