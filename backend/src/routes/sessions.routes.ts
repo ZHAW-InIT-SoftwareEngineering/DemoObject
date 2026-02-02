@@ -1,17 +1,55 @@
 import { Router } from "express";
 import { registry } from "../openapi/openapiRegistry";
+import { CreateSessionRequest, CreateSessionResponse } from "../schemas";
+import { createSessionService } from "../services";
 import { UpdatePathRequest, UpdatePathResponse, StorePathRequest, StorePathResponse, RetrievePathRequest, RetrievePathResponse } from "../schemas";
 import { pathToDsl, retrieveSessionService, updateSessionService } from "../services";
 import type { SessionDataClass } from "../models/session";
 import { z } from "zod";
 
-export const sessionPathRouter = Router();
+export const sessionRouter = Router();
+
+
+registry.registerPath({
+    method: "post",
+    path: "/sessions",
+    summary: "Create a new session and return a sessionId (and QR payload)",
+    request: {
+            body: { content: { "application/json": { schema: CreateSessionRequest } } }, 
+        },
+    responses: {
+        201: {
+            description: "Session created",
+            headers: {
+                Location: {
+                    description: "Cannoncial URI of the new created session resource", 
+                    schema: {type: "string", format: "uri"}
+                },
+            },
+            content: { "application/json": { schema: CreateSessionResponse } },
+        },
+    },
+});
+
+sessionRouter.post("/", async (req, res) => {
+    const parsed = CreateSessionRequest.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: parsed.error.issues });
+    const { mazeId } = parsed.data;
+    
+    const sessionId = await(createSessionService(mazeId))
+    
+    const qrPayload = `session:${sessionId}`;
+    const location =  req.protocol + '://' + req.get('host') + '/session/' + sessionId
+    return res.status(201)
+        .set('Location', location)
+        .json(CreateSessionResponse.parse({ sessionId: sessionId, qrPayload }));
+});
 
 const SessionIdParams = z.object( { sessionId: z.uuid() });
 
 registry.registerPath({
     method: "put",
-    path: "/session/{sessionId}/path",
+    path: "/{sessionId}/paths",
     summary: "Store a user-selected path and its DSL representation bund to a session ",
     request: {
         params: SessionIdParams,
@@ -29,7 +67,7 @@ registry.registerPath({
 
 registry.registerPath({
     method: "get",
-    path: "/session/{sessionId}/path",
+    path: "/{sessionId}/paths",
     summary: "Retrieve stored path for a session",
     request: { params: SessionIdParams },
     responses: {
@@ -43,8 +81,8 @@ registry.registerPath({
 
 registry.registerPath({
     method: "patch",
-    path: "/session/{sessionId}",
-    summary: "Update stored path for a session",
+    path: "/{sessionId}",
+    summary: "Update stored information (status, path, dsl, expiresAt) for a specific session",
     request: {
         params: SessionIdParams,
         body: { content: { "application/json": { schema: UpdatePathRequest } } }, 
@@ -58,7 +96,7 @@ registry.registerPath({
     },
 });
 
-sessionPathRouter.put("/:sessionId/path", async (req, res) => {
+sessionRouter.put("/:sessionId/paths", async (req, res) => {
     const params = SessionIdParams.safeParse(req.params);
     if (!params.success) return res.status(400).json({ error: params.error.issues });
 
@@ -79,7 +117,7 @@ sessionPathRouter.put("/:sessionId/path", async (req, res) => {
     return res.json(StorePathResponse.parse({ mazeId: updated.mazeId, path: updated.path, dsl: updated.dsl }));
 });
 
-sessionPathRouter.get("/:sessionId/path", async (req, res) => {
+sessionRouter.get("/:sessionId/paths", async (req, res) => {
     const parsed = SessionIdParams.safeParse(req.params)
     if (!parsed.success) return res.status(400).json({ error: parsed.error.issues })
 
@@ -92,7 +130,7 @@ sessionPathRouter.get("/:sessionId/path", async (req, res) => {
 });
 
 
-sessionPathRouter.patch("/:sessionId", async (req, res) => {
+sessionRouter.patch("/:sessionId", async (req, res) => {
     const parsed = UpdatePathRequest.safeParse(req.body)
     if (!parsed.success) return res.status(400).json({ error: parsed.error.issues });
     
@@ -121,3 +159,4 @@ sessionPathRouter.patch("/:sessionId", async (req, res) => {
     
     return res.json(UpdatePathResponse.parse(updatedDoc));
 })
+
