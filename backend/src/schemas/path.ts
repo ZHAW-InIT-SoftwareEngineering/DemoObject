@@ -10,7 +10,6 @@ export const Point = z.object({
 export const Path = z.array(Point).min(2);
 
 export const CompilePathRequest = z.object({
-    mazeId: z.string().min(1),
     path: Path
 });
 

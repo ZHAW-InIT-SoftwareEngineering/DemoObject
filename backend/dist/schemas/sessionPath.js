@@ -10,7 +10,6 @@ const SessionApiShape = session_1.SessionPublic.omit({ createdAt: true }).extend
     expiresAt: zod_1.z.coerce.date().optional(),
 });
 exports.StorePathRequest = zod_1.z.object({
-    sessionId: zod_1.z.uuid(),
     path: path_1.Path,
 });
 exports.StorePathResponse = SessionApiShape.pick({
@@ -26,5 +25,5 @@ exports.RetrievePathResponse = SessionApiShape.pick({
     path: true,
     dsl: true,
 });
-exports.UpdatePathRequest = SessionApiShape.partial().required({ sessionId: true });
+exports.UpdatePathRequest = SessionApiShape.omit({ sessionId: true, mazeId: true }).partial();
 exports.UpdatePathResponse = SessionApiShape;

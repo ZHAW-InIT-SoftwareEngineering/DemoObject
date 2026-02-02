@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 import { createSession, getSession, updateSession } from "../repositories";
 import type { SessionDataClass } from "../models/session";
 
-export async function createSessionService(mazeId: string) {
+export async function createSessionService(mazeId: number) {
     console.log(`This is the mazeId: ${mazeId}}`)
     const sessionId = randomUUID()
     const doc = await createSession(sessionId, mazeId)

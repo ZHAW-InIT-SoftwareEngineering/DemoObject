@@ -2,9 +2,15 @@ import { getDbCollection } from "../db/mongo";
 import { ObjectId } from "mongodb";
 import { SessionDataClass } from "../models/session";
 
-const collection = () => getDbCollection<SessionDataClass>(process.env.DEMO_OBJECT_COLLECTION_NAME)
+function getCollectionName(): string {
+    const name = process.env.DEMO_OBJECT_COLLECTION_NAME;
+    if (!name) throw new Error("DEMO_OBJECT_COLLECTION_NAME is not set in the environment");
+    return name;
+}
 
-export async function createSession(sessionId: string, mazeId: string) { 
+const collection = () => getDbCollection<SessionDataClass>(getCollectionName());
+
+export async function createSession(sessionId: string, mazeId: number) { 
     const doc: SessionDataClass = SessionDataClass.parse({
       _id: new ObjectId(),
       sessionId: sessionId,
@@ -19,11 +25,11 @@ export async function createSession(sessionId: string, mazeId: string) {
 export async function getSession(sessionId: string) { return (collection()).findOne({ sessionId }) }
 
 export async function updateSession(sessionId: string, data: Partial<SessionDataClass>) {
-    const result = await collection().findOneAndUpdate(
+    const updatedDocument = await collection().findOneAndUpdate(
         { sessionId },
         { $set: data },
         { returnDocument: "after" }
     );
 
-    return result ? SessionDataClass.parse(result) : null;
+    return updatedDocument ? SessionDataClass.parse(updatedDocument) : null;
 }

@@ -19,7 +19,7 @@ export const MazeWall = z.object({
 });
 
 export const Maze = z.object({
-    id: z.string().min(1),
+    id: z.number().int().nonnegative(),
     nodes: z.array(MazeNode).min(1),
     edges: z.array(MazeEdge),
     walls: z.array(MazeWall).default([]),

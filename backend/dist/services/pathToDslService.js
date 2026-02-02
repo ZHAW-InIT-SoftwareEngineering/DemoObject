@@ -13,13 +13,15 @@ function pathToDsl(path) {
     return dslBlocks;
 }
 function decideDirection(dx, dy) {
+    // Screen/maze coordinates use top-left origin: y increases downward.
+    // So positive dy means moving down, negative dy means moving up.
     if (dx === 0 && dy > 0)
-        return 'UP';
+        return 'DOWN';
     if (dx > 0 && dy === 0)
         return 'RIGHT';
     if (dx < 0 && dy === 0)
         return 'LEFT';
     if (dx === 0 && dy < 0)
-        return 'DOWN';
+        return 'UP';
     return 'INVALID'; // diagonal move => not allowed!
 }

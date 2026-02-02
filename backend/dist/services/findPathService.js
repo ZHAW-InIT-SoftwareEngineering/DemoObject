@@ -3,8 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.findPathBFS = findPathBFS;
 const mazeService_1 = require("./mazeService");
 // Compute shortest path using BFS on an undirected graph.
-function findPathBFS(params) {
-    const { mazeId, startNodeId, endNodeId } = params;
+function findPathBFS(startNodeId, endNodeId, mazeId) {
     const maze = (0, mazeService_1.getMazeById)(mazeId);
     if (!maze)
         return undefined;

@@ -10,7 +10,6 @@ exports.Point = zod_1.z.object({
 });
 exports.Path = zod_1.z.array(exports.Point).min(2);
 exports.CompilePathRequest = zod_1.z.object({
-    mazeId: zod_1.z.string().min(1),
     path: exports.Path
 });
 exports.CompilePathResponse = zod_1.z.object({

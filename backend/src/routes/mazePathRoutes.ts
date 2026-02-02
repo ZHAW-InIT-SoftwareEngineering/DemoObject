@@ -1,16 +1,20 @@
 import { Router } from "express";
 import { registry } from "../openapi/openapiRegistry";
 import { CompilePathRequest, CompilePathResponse } from "../schemas";
-import { pathToDsl } from "../services";
+import { pathToDsl } from "../services"
+import { z } from "zod";
 
 
-export const mazePathRouter = Router();
+export const mazePathRouter = Router()
+
+const MazeId = z.object( { mazeId: z.coerce.number().int().nonnegative() })
 
 registry.registerPath({
     method: "post", 
-    path: "/mazePaths/toDSL",
+    path: "/maze/{mazeId}/dsl",
     request: {
-    body: { content: { "application/json": { schema: CompilePathRequest } } },
+        params: MazeId,
+        body: { content: { "application/json": { schema: CompilePathRequest } } },
     },
     responses: {
         200: {
@@ -21,20 +25,17 @@ registry.registerPath({
     },
 });
 
-
-mazePathRouter.post("/toDSL", (req, res) => {
+mazePathRouter.post("/:mazeId/dsl", (req, res) => {
     const parsed = CompilePathRequest.safeParse(req.body); 
     if (!parsed.success) return res.status(400).json({ error: parsed.error.issues })
 
-    const { mazeId, path } = parsed.data
-    console.log("mazeId: " + mazeId)
+    const mazeId = MazeId.safeParse(req.params); 
+    if (!mazeId.success) return res.status(400).json({ error: mazeId.error.issues })
 
-    // TODO
-    /*
-    1. loadMaze(mazeId)
-    2, validPath(mazeId, path)
-    3. dsl = pathToDsl(path) - DONE
-    */
+    const { path } = parsed.data
+
+    // TODO: validate the path: validPath(mazeId, path)
+
     const dsl = pathToDsl(path);
 
     return res.json(CompilePathResponse.parse({ dsl }));

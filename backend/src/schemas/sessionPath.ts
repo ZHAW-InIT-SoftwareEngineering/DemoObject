@@ -9,7 +9,6 @@ const SessionApiShape = SessionPublic.omit({ createdAt: true }).extend({
 });
 
 export const StorePathRequest = z.object({
-    sessionId: z.uuid(),
     path: Path,
 });
 
@@ -29,6 +28,6 @@ export const RetrievePathResponse = SessionApiShape.pick({
     dsl: true,
 });
 
-export const UpdatePathRequest = SessionApiShape.partial().required({ sessionId: true });
+export const UpdatePathRequest = SessionApiShape.omit( {sessionId: true, mazeId: true}).partial();
 
 export const UpdatePathResponse = SessionApiShape;

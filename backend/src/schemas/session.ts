@@ -4,7 +4,7 @@ extendZodWithOpenApi(z);
 
 
 export const CreateSessionRequest = z.object({
-    mazeId: z.object({ mazeId: z.string().min(1) })
+    mazeId: z.int().nonnegative()
 });
 
 export const CreateSessionResponse = z.object({

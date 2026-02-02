@@ -4,14 +4,16 @@ import { Maze } from "../schemas";
 import { getMazeById } from "../services";
 import { z } from "zod";
 
-export const mazeRouter = Router();
+export const mazeRouter = Router()
+
+const MazeParams = z.object({ mazeId: z.coerce.number().int().nonnegative() })
 
 registry.registerPath({
     method: "get",
-    path: "/mazes/{mazeId}",
+    path: "/maze/{mazeId}",
     summary: "Retrieve a maze definition",
     request: {
-        params: z.object({ mazeId: z.string().min(1) })
+        params: MazeParams
     },
     responses: {
         200: {
@@ -23,8 +25,10 @@ registry.registerPath({
 });
 
 mazeRouter.get("/:mazeId", (req, res) => {
-    const { mazeId } = req.params;
-    const maze = getMazeById(mazeId);
+    const mazeId = MazeParams.safeParse(req.params)
+    if (!mazeId.success) return res.status(400).json({ error: mazeId.error.issues })
+    
+    const maze = getMazeById(mazeId.data.mazeId)
 
     if (!maze) return res.status(404).json({ error: "Maze not found" });
 

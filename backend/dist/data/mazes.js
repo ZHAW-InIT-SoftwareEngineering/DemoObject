@@ -72,5 +72,5 @@ function buildMaze(id) {
 }
 // Static maze definitions keyed by mazeId
 exports.mazes = {
-    "0": buildMaze("0"),
+    0: buildMaze(0),
 };

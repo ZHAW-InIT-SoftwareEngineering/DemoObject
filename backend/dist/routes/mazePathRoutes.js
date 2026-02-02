@@ -5,11 +5,14 @@ const express_1 = require("express");
 const openapiRegistry_1 = require("../openapi/openapiRegistry");
 const schemas_1 = require("../schemas");
 const services_1 = require("../services");
+const zod_1 = require("zod");
 exports.mazePathRouter = (0, express_1.Router)();
+const MazeId = zod_1.z.object({ mazeId: zod_1.z.coerce.number().int().nonnegative() });
 openapiRegistry_1.registry.registerPath({
     method: "post",
-    path: "/mazePaths/toDSL",
+    path: "/maze/{mazeId}/dsl",
     request: {
+        params: MazeId,
         body: { content: { "application/json": { schema: schemas_1.CompilePathRequest } } },
     },
     responses: {
@@ -20,18 +23,15 @@ openapiRegistry_1.registry.registerPath({
         400: { description: "Invalid request / invalid path" }
     },
 });
-exports.mazePathRouter.post("/toDSL", (req, res) => {
+exports.mazePathRouter.post("/:mazeId/dsl", (req, res) => {
     const parsed = schemas_1.CompilePathRequest.safeParse(req.body);
     if (!parsed.success)
         return res.status(400).json({ error: parsed.error.issues });
-    const { mazeId, path } = parsed.data;
-    console.log("mazeId: " + mazeId);
-    // TODO
-    /*
-    1. loadMaze(mazeId)
-    2, validPath(mazeId, path)
-    3. dsl = pathToDsl(path) - DONE
-    */
+    const mazeId = MazeId.safeParse(req.params);
+    if (!mazeId.success)
+        return res.status(400).json({ error: mazeId.error.issues });
+    const { path } = parsed.data;
+    // TODO: validate the path: validPath(mazeId, path)
     const dsl = (0, services_1.pathToDsl)(path);
     return res.json(schemas_1.CompilePathResponse.parse({ dsl }));
 });

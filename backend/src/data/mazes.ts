@@ -46,7 +46,7 @@ function hasHorizontalWall(x: number, y: number) {
   return horizontalWallCoords.has(`${x},${y}`);
 }
 
-function buildMaze(id: string): MazeDefinition {
+function buildMaze(id: number): MazeDefinition {
   const nodes = [];
   const edges = [];
   const walls = [];
@@ -82,6 +82,6 @@ function buildMaze(id: string): MazeDefinition {
 }
 
 // Static maze definitions keyed by mazeId
-export const mazes: Record<string, MazeDefinition> = {
-  "0": buildMaze("0"),
+export const mazes: Record<number, MazeDefinition> = {
+  0: buildMaze(0),
 };

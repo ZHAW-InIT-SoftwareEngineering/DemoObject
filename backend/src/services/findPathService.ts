@@ -1,14 +1,11 @@
 import { z } from "zod";
-import { FindPathBFSRequest, FindPathBFSResponse, Maze as MazeSchema } from "../schemas";
+import { Maze as MazeSchema } from "../schemas";
 import { getMazeById } from "./mazeService";
 
-type FindPathBFSRequestType = z.infer<typeof FindPathBFSRequest>;
-type FindPathBFSResponseType = z.infer<typeof FindPathBFSResponse>;
 type MazeType = z.infer<typeof MazeSchema>;
 
 // Compute shortest path using BFS on an undirected graph.
-export function findPathBFS(params: FindPathBFSRequestType): FindPathBFSResponseType | undefined {
-  const { mazeId, startNodeId, endNodeId } = params;
+export function findPathBFS(startNodeId: number, endNodeId: number, mazeId: number) {
   const maze = getMazeById(mazeId);
   if (!maze) return undefined;
 

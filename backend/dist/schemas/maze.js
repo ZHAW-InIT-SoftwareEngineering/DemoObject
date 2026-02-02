@@ -18,7 +18,7 @@ exports.MazeWall = zod_1.z.object({
     to: zod_1.z.number().int().nonnegative(),
 });
 exports.Maze = zod_1.z.object({
-    id: zod_1.z.string().min(1),
+    id: zod_1.z.number().int().nonnegative(),
     nodes: zod_1.z.array(exports.MazeNode).min(1),
     edges: zod_1.z.array(exports.MazeEdge),
     walls: zod_1.z.array(exports.MazeWall).default([]),
