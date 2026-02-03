@@ -49,12 +49,12 @@ openapiRegistry_1.registry.registerPath({
     summary: "Update stored information (status, path or expiresAt) for a specific session",
     request: {
         params: schemas_1.SessionId,
-        body: { content: { "application/json": { schema: schemas_1.UpdatePathRequest } } },
+        body: { content: { "application/json": { schema: schemas_1.UpdateSessionResponse } } },
     },
     responses: {
         200: {
             description: "Path found",
-            content: { "application/json": { schema: schemas_1.UpdatePathResponse } },
+            content: { "application/json": { schema: schemas_1.UpdateSessionResponse } },
         },
         404: { description: "Session not found" },
     },
@@ -103,7 +103,7 @@ exports.sessionRouter.put("/:sessionId/paths", async (req, res) => {
     return res.json(schemas_1.StorePathResponse.parse({ mazeId: updated.mazeId, path: updated.path, dsl: updated.dsl }));
 });
 exports.sessionRouter.patch("/:sessionId", async (req, res) => {
-    const parsed = schemas_1.UpdatePathRequest.safeParse(req.body);
+    const parsed = schemas_1.UpdateSessionRequest.safeParse(req.body);
     if (!parsed.success)
         return res.status(400).json({ error: parsed.error.issues });
     const path = parsed.data.path;

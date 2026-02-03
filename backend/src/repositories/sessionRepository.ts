@@ -1,13 +1,6 @@
-import { getDbCollection } from "../db/mongo";
 import { Session } from "../domain/session";
+import { collection } from "../persistence/mongo/mongo.db";
 
-function getCollectionName(): string {
-    const name = process.env.SESSION_COLLECTION_NAME;
-    if (!name) throw new Error("SESSION_COLLECTION_NAME is not set in the environment");
-    return name;
-};
-
-const collection = () => getDbCollection<Session>(getCollectionName());
 
 export async function createSession(sessionId: string, mazeId: number) { 
     const doc: Session = Session.parse({

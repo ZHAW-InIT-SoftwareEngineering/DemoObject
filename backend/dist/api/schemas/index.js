@@ -1,11 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MazeIdParams = exports.UpdateSessionRequest = exports.SessionPublic = exports.CreateSessionResponse = exports.CreateSessionRequest = exports.SessionId = exports.StorePathResponse = exports.RetrievePathResponse = exports.RetrievePathRequest = exports.StorePathRequest = exports.UpdatePathResponse = exports.UpdatePathRequest = exports.CompilePathResponse = exports.CompilePathRequest = exports.ShortestPathResponse = void 0;
+exports.MazeIdParams = exports.UpdateSessionResponse = exports.UpdateSessionRequest = exports.SessionPublic = exports.CreateSessionResponse = exports.CreateSessionRequest = exports.SessionId = exports.StorePathResponse = exports.RetrievePathResponse = exports.RetrievePathRequest = exports.StorePathRequest = exports.UpdatePathResponse = exports.CompilePathResponse = exports.CompilePathRequest = exports.ShortestPathResponse = void 0;
 var path_dto_1 = require("./path.dto");
 Object.defineProperty(exports, "ShortestPathResponse", { enumerable: true, get: function () { return path_dto_1.ShortestPathResponse; } });
 Object.defineProperty(exports, "CompilePathRequest", { enumerable: true, get: function () { return path_dto_1.CompilePathRequest; } });
 Object.defineProperty(exports, "CompilePathResponse", { enumerable: true, get: function () { return path_dto_1.CompilePathResponse; } });
-Object.defineProperty(exports, "UpdatePathRequest", { enumerable: true, get: function () { return path_dto_1.UpdatePathRequest; } });
 Object.defineProperty(exports, "UpdatePathResponse", { enumerable: true, get: function () { return path_dto_1.UpdatePathResponse; } });
 Object.defineProperty(exports, "StorePathRequest", { enumerable: true, get: function () { return path_dto_1.StorePathRequest; } });
 Object.defineProperty(exports, "RetrievePathRequest", { enumerable: true, get: function () { return path_dto_1.RetrievePathRequest; } });
@@ -17,5 +16,6 @@ Object.defineProperty(exports, "CreateSessionRequest", { enumerable: true, get: 
 Object.defineProperty(exports, "CreateSessionResponse", { enumerable: true, get: function () { return session_dto_1.CreateSessionResponse; } });
 Object.defineProperty(exports, "SessionPublic", { enumerable: true, get: function () { return session_dto_1.SessionPublic; } });
 Object.defineProperty(exports, "UpdateSessionRequest", { enumerable: true, get: function () { return session_dto_1.UpdateSessionRequest; } });
+Object.defineProperty(exports, "UpdateSessionResponse", { enumerable: true, get: function () { return session_dto_1.UpdateSessionResponse; } });
 var maze_dto_1 = require("./maze.dto");
 Object.defineProperty(exports, "MazeIdParams", { enumerable: true, get: function () { return maze_dto_1.MazeIdParams; } });

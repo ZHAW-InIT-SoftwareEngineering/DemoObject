@@ -6,6 +6,7 @@ const openapiRegistry_1 = require("../../openapi/openapiRegistry");
 const schemas_1 = require("../schemas");
 const services_1 = require("../../services");
 const domain_1 = require("../../domain");
+const util_1 = require("../../util");
 exports.mazeRouter = (0, express_1.Router)();
 openapiRegistry_1.registry.registerPath({
     method: "get",
@@ -35,7 +36,8 @@ openapiRegistry_1.registry.registerPath({
             description: "Compile a user-provided maze path do DSL",
             content: { "application/json": { schema: schemas_1.CompilePathResponse } }
         },
-        400: { description: "Invalid request / invalid path" }
+        400: { description: "Invalid request" },
+        412: { description: "Invalid path" }
     },
 });
 openapiRegistry_1.registry.registerPath({
@@ -72,10 +74,13 @@ exports.mazeRouter.post("/:mazeId/paths/dsl", (req, res) => {
     if (!params.success)
         return res.status(400).json({ error: params.error.issues });
     const mazeId = params.data.mazeId;
-    // TODO: validate the path: validPath(mazeId, path)
-    //TODO: fix path.path => ugly af
-    const dsl = (0, services_1.computeDSLFromPath)(path);
-    return res.json(schemas_1.CompilePathResponse.parse({ dsl }));
+    if ((0, util_1.isValidPath)(mazeId, path)) {
+        const dsl = (0, services_1.computeDSLFromPath)(path);
+        return res.json(schemas_1.CompilePathResponse.parse({ dsl }));
+    }
+    else {
+        return res.status(412).json({ error: "invalid path" });
+    }
 });
 exports.mazeRouter.get("/:mazeId/shortest-path", (req, res) => {
     const params = schemas_1.MazeIdParams.safeParse(req.params);

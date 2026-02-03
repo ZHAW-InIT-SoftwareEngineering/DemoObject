@@ -38,7 +38,8 @@ registry.registerPath({
             description: "Compile a user-provided maze path do DSL",
             content: {"application/json": {schema: CompilePathResponse}}
         },
-        400: { description: "Invalid request / invalid path"}
+        400: { description: "Invalid request"},
+        412: { description: "Invalid path"}
     },
 });
 

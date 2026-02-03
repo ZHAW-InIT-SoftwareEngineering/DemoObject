@@ -1,7 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isValidPath = isValidPath;
-function isValidPath(maze, path) {
+const services_1 = require("../services");
+function isValidPath(mazeId, path) {
+    const maze = (0, services_1.getMazeById)(mazeId);
     const coordToId = new Map(maze.nodes.map(n => [`${n.x}:${n.y}`, n.mazeNodeId]));
     const nodeIds = path.map(p => {
         const id = coordToId.get(`${p.x}:${p.y}`);
