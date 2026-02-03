@@ -1,4 +1,3 @@
-export { pathToDsl } from './pathToDslService';
-export { getMazeById } from './mazeService';
-export { findPathBFS } from './findPathService';
-export { createSessionService, updateSessionService, retrieveSessionService } from './sessionService';
+export { getMazeById } from './maze.service';
+export { createSessionService, updateSessionService, retrieveSessionService } from './session.service';
+export { storePathAndDSLForSession, computeDSLFromPath, computeShortestPath } from "./path.service"

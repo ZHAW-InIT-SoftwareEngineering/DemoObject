@@ -1,14 +1,11 @@
 import { Router } from "express";
-import { registry } from "../openapi/openapiRegistry";
-import { Maze, CompilePathRequest, CompilePathResponse, ShortestPathRequest, ShortestPathResponse } from "../schemas";
-import { getMazeById, findPathBFS } from "../services";
-import { z } from "zod";
-import { pathToDsl } from "../services"
+import { registry } from "../../openapi/openapiRegistry";
+import { CompilePathRequest, CompilePathResponse, ShortestPathResponse, MazeIdParams } from "../schemas";
+import { getMazeById, computeDSLFromPath, computeShortestPath } from "../../services";
+import { Maze } from "../../domain";
+
 
 export const mazeRouter = Router()
-
-const MazeParams = z.object({ mazeId: z.coerce.number().int().nonnegative() })
-const MazeId = z.object( { mazeId: z.coerce.number().int().nonnegative() })
 
 
 registry.registerPath({
@@ -16,7 +13,7 @@ registry.registerPath({
     path: "/mazes/{mazeId}",
     summary: "Retrieve a maze definition",
     request: {
-        params: MazeParams
+        params: MazeIdParams
     },
     responses: {
         200: {
@@ -30,8 +27,9 @@ registry.registerPath({
 registry.registerPath({
     method: "post", 
     path: "/mazes/{mazeId}/paths/dsl",
+    summary: "Compute the DSL of a specific provided path through the maze.",
     request: {
-        params: MazeId,
+        params: MazeIdParams,
         body: { content: { "application/json": { schema: CompilePathRequest } } },
     },
     responses: {
@@ -47,8 +45,7 @@ registry.registerPath({
     method: "get",
     path: "/mazes/{mazeId}/shortest-path",
     request: {
-        params: MazeId,
-        query: ShortestPathRequest
+        params: MazeIdParams
     },
     responses: {
         200: {
@@ -61,43 +58,40 @@ registry.registerPath({
 });
 
 mazeRouter.get("/:mazeId", (req, res) => {
-    const mazeId = MazeParams.safeParse(req.params)
-    if (!mazeId.success) return res.status(400).json({ error: mazeId.error.issues })
+    const params = MazeIdParams.safeParse(req.params)
+    if (!params.success) return res.status(400).json({ error: params.error.issues })
+    const mazeId = params.data.mazeId
     
-    const maze = getMazeById(mazeId.data.mazeId)
+    const maze = getMazeById(mazeId)
 
     if (!maze) return res.status(404).json({ error: "Maze not found" });
 
-    return res.json(maze);
+    return res.json( maze );
 });
 
 mazeRouter.post("/:mazeId/paths/dsl", (req, res) => {
-    const parsed = CompilePathRequest.safeParse(req.body); 
-    if (!parsed.success) return res.status(400).json({ error: parsed.error.issues })
-
-    const mazeId = MazeId.safeParse(req.params); 
-    if (!mazeId.success) return res.status(400).json({ error: mazeId.error.issues })
-
-    const { path } = parsed.data
+    const body = CompilePathRequest.safeParse(req.body); 
+    if (!body.success) return res.status(400).json({ error: body.error.issues })
+    const { path } = body.data
+    
+    const params = MazeIdParams.safeParse(req.params); 
+    if (!params.success) return res.status(400).json({ error: params.error.issues })
+    const mazeId = params.data.mazeId
 
     // TODO: validate the path: validPath(mazeId, path)
 
-    const dsl = pathToDsl(path);
+    //TODO: fix path.path => ugly af
+    const dsl = computeDSLFromPath(path);
 
     return res.json(CompilePathResponse.parse({ dsl }));
 });
 
 mazeRouter.get("/:mazeId/shortest-path", (req, res) => {
-    const parameters = MazeId.safeParse(req.params)
-    if (!parameters.success) return res.status(400).json({ error: parameters.error.issues })
-    const mazeId = parameters.data.mazeId
+    const params = MazeIdParams.safeParse(req.params)
+    if (!params.success) return res.status(400).json({ error: params.error.issues })
+    const mazeId = params.data.mazeId
 
-    const queries = ShortestPathRequest.safeParse(req.query)
-    if (!queries.success) return res.status(400).json({ error: queries.error.issues })
-
-    const {startNodeId, endNodeId} = queries.data
-    
-    const result = findPathBFS(startNodeId, endNodeId, mazeId);
+    const result = computeShortestPath(mazeId);
     if (!result) return res.status(404).json({ error: "Maze or path not found" });
 
     return res.json(ShortestPathResponse.parse(result));

@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import swaggerUi from "swagger-ui-express";
-import { mazeRouter } from './routes/mazes.routes';
-import { sessionRouter } from './routes/sessions.routes';
+import { mazeRouter } from './api/routes/mazes.routes';
+import { sessionRouter } from './api/routes/sessions.routes';
 import { openApiDocument } from './openapi/openapiDocument';
 
 const app = express();

@@ -1,8 +1,8 @@
 import { OpenApiGeneratorV3 } from "@asteasolutions/zod-to-openapi";
 import { registry } from "./openapiRegistry";
 
-import "../routes/mazes.routes";
-import "../routes/sessions.routes";
+import "../api/routes/mazes.routes";
+import "../api/routes/sessions.routes";
 
 export const openApiDocument = new OpenApiGeneratorV3(registry.definitions).generateDocument({
   openapi: "3.0.3",

@@ -1,7 +1,33 @@
 import { z } from "zod";
-import { Maze } from "../schemas";
 
-export type MazeDefinition = z.infer<typeof Maze>;
+export const MazeNode = z.object({
+  mazeNodeId: z.number().int().nonnegative(),
+  x: z.number().int().nonnegative(),
+  y: z.number().int().nonnegative(),
+});
+
+export const MazeEdge = z.object({
+  from: z.number().int().nonnegative(),
+  to: z.number().int().nonnegative(),
+});
+
+export const MazeWall = z.object({
+  from: z.number().int().nonnegative(),
+  to: z.number().int().nonnegative(),
+});
+
+export const Maze = z.object({
+  mazeId: z.number().int().nonnegative(),
+  startNodeId: z.number().int().nonnegative(),
+  endNodeId: z.number().int().nonnegative(),
+  nodes: z.array(MazeNode).min(1),
+  edges: z.array(MazeEdge),
+  walls: z.array(MazeWall).default([]),
+});
+
+export type Maze = z.infer<typeof Maze>;
+export type MazeId = Maze["mazeId"];
+
 
 const WIDTH = 16;
 const HEIGHT = 16;
@@ -46,7 +72,7 @@ function hasHorizontalWall(x: number, y: number) {
   return horizontalWallCoords.has(`${x},${y}`);
 }
 
-function buildMaze(id: number): MazeDefinition {
+function buildMaze(mazeId: number): Maze {
   const nodes = [];
   const edges = [];
   const walls = [];
@@ -54,7 +80,7 @@ function buildMaze(id: number): MazeDefinition {
   for (let y = 0; y < HEIGHT; y++) {
     for (let x = 0; x < WIDTH; x++) {
       const nodeId = y * WIDTH + x;
-      nodes.push({ id: nodeId, x, y });
+      nodes.push({ mazeNodeId: nodeId, x, y });
 
       // Right neighbor (x+1, y)
       if (x + 1 < WIDTH) {
@@ -78,10 +104,14 @@ function buildMaze(id: number): MazeDefinition {
     }
   }
 
-  return { id, nodes, edges, walls };
+  const startNodeId = 0;
+  const endNodeId = WIDTH * HEIGHT - 1;
+
+  return { mazeId, startNodeId, endNodeId, nodes, edges, walls };
 }
 
-// Static maze definitions keyed by mazeId
-export const mazes: Record<number, MazeDefinition> = {
+
+// REMARK: this implies that the maze is build during runtime & then saved in-memory!
+export const mazes: Record<number, Maze> = {
   0: buildMaze(0),
 };
