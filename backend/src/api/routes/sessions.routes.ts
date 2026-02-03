@@ -1,19 +1,20 @@
 import { Router } from "express";
 import { registry } from "../../openapi/openapiRegistry";
 import { createSessionService, 
-        retrieveSessionService, 
-        updateSessionService, 
-        storePathAndDSLForSession, 
-        computeDSLFromPath } from "../../services";
+         retrieveSessionService, 
+         updateSessionService, 
+         storePathAndDSLForSession, 
+         computeDSLFromPath } from "../../services";
 
-import { UpdatePathRequest, 
-         UpdatePathResponse, 
+import { UpdatePathResponse, 
          StorePathRequest, 
          StorePathResponse, 
          RetrievePathResponse, 
          SessionId, 
          CreateSessionRequest, 
-         CreateSessionResponse } from "../schemas";
+         CreateSessionResponse, 
+         UpdateSessionRequest,
+         UpdateSessionResponse} from "../schemas";
 
 
 export const sessionRouter = Router();
@@ -64,12 +65,12 @@ registry.registerPath({
     summary: "Update stored information (status, path or expiresAt) for a specific session",
     request: {
         params: SessionId,
-        body: { content: { "application/json": { schema: UpdatePathRequest } } }, 
+        body: { content: { "application/json": { schema: UpdateSessionResponse } } }, 
         },
     responses: {
         200: {
             description: "Path found",
-            content: { "application/json": { schema: UpdatePathResponse } },
+            content: { "application/json": { schema: UpdateSessionResponse } },
         },
         404: { description: "Session not found" },
     },
@@ -125,7 +126,7 @@ sessionRouter.put("/:sessionId/paths", async (req, res) => {
 });
 
 sessionRouter.patch("/:sessionId", async (req, res) => {
-    const parsed = UpdatePathRequest.safeParse(req.body)
+    const parsed = UpdateSessionRequest.safeParse(req.body)
     if (!parsed.success) return res.status(400).json({ error: parsed.error.issues });
     const path = parsed.data.path;
 

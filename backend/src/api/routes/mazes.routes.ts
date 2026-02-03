@@ -3,6 +3,7 @@ import { registry } from "../../openapi/openapiRegistry";
 import { CompilePathRequest, CompilePathResponse, ShortestPathResponse, MazeIdParams } from "../schemas";
 import { getMazeById, computeDSLFromPath, computeShortestPath } from "../../services";
 import { Maze } from "../../domain";
+import { isValidPath } from "../../util";
 
 
 export const mazeRouter = Router()
@@ -78,12 +79,12 @@ mazeRouter.post("/:mazeId/paths/dsl", (req, res) => {
     if (!params.success) return res.status(400).json({ error: params.error.issues })
     const mazeId = params.data.mazeId
 
-    // TODO: validate the path: validPath(mazeId, path)
-
-    //TODO: fix path.path => ugly af
-    const dsl = computeDSLFromPath(path);
-
-    return res.json(CompilePathResponse.parse({ dsl }));
+    if (isValidPath(mazeId, path)){
+        const dsl = computeDSLFromPath(path);
+        return res.json(CompilePathResponse.parse({ dsl }));
+    } else {
+        return res.status(412).json({ error: "invalid path" })
+    }
 });
 
 mazeRouter.get("/:mazeId/shortest-path", (req, res) => {

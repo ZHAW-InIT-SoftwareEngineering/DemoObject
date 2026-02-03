@@ -1,6 +1,8 @@
-import type { Path, Maze } from "../domain";
+import type { Path } from "../domain";
+import { getMazeById } from "../services";
 
-  export function isValidPath(maze: Maze, path: Path): boolean {
+  export function isValidPath(mazeId: number, path: Path): boolean {
+    const maze = getMazeById(mazeId);
     const coordToId = new Map(maze.nodes.map(n => [`${n.x}:${n.y}`, n.mazeNodeId]));
     const nodeIds = path.map(p => {
       const id = coordToId.get(`${p.x}:${p.y}`);

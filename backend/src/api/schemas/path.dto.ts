@@ -15,10 +15,6 @@ export const CompilePathResponse = z.object({
     dsl: DSL
 });
 
-export const UpdatePathRequest = z.object({
-    path: Path,
-});
-
 
 export const StorePathRequest = z.object({
     path: Path,

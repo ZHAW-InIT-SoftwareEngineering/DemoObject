@@ -3,7 +3,7 @@ import { Session } from "../domain/session";
 
 function getCollectionName(): string {
     const name = process.env.SESSION_COLLECTION_NAME;
-    if (!name) throw new Error("DEMO_OBJECT_COLLECTION_NAME is not set in the environment");
+    if (!name) throw new Error("SESSION_COLLECTION_NAME is not set in the environment");
     return name;
 };
 

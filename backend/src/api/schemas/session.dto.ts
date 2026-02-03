@@ -18,6 +18,8 @@ export const CreateSessionResponse = z.object({
 
 export const SessionPublic = Session.omit({ createdAt: true });
 
-export const UpdateSessionRequest = SessionPublic.partial().extend({
+export const UpdateSessionRequest = SessionPublic.omit({sessionId: true}).extend({
     expiresAt: z.coerce.date().optional(),
 });
+
+export const UpdateSessionResponse = UpdateSessionRequest;

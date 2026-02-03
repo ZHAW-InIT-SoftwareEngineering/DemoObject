@@ -1,6 +1,5 @@
 import { z } from "zod"
 import { Maze } from "./maze";
-import { getMazeById } from "../services";
 
 
 export const Point = z.object({
