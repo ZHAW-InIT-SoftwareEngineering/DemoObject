@@ -2,13 +2,11 @@ import { Router } from "express";
 import { registry } from "../../openapi/openapiRegistry";
 import { createSessionService, 
          retrieveSessionService, 
-         updateSessionService, 
-         storePathAndDSLForSession, 
+         updateSessionService,
          computeDSLFromPath } from "../../services";
 import type { Session } from "../../domain/session";
 
-import { UpdatePathResponse, 
-         StorePathRequest, 
+import { StorePathRequest, 
          StorePathResponse, 
          RetrievePathResponse, 
          SessionId, 
@@ -25,6 +23,7 @@ registry.registerPath({
     method: "post",
     path: "/sessions",
     summary: "Create a new session and return a sessionId (and QR payload)",
+    tags: ["sessions"],
     request: {
             body: { content: { "application/json": { schema: CreateSessionRequest } } }, 
         },
@@ -46,6 +45,7 @@ registry.registerPath({
     method: "put",
     path: "/sessions/{sessionId}/paths",
     summary: "Store a user-selected path and its automatically transpiled DSL representation bund to a session ",
+    tags: ["sessions"],
     request: {
         params: SessionId,
         body: { content: { "application/json": { schema: StorePathRequest } } },
@@ -64,6 +64,7 @@ registry.registerPath({
     method: "patch",
     path: "/sessions/{sessionId}",
     summary: "Update stored information (status, path or expiresAt) for a specific session",
+    tags: ["sessions"],
     request: {
         params: SessionId,
         body: { content: { "application/json": { schema: UpdateSessionResponse } } }, 
@@ -81,6 +82,7 @@ registry.registerPath({
     method: "get",
     path: "/sessions/{sessionId}/paths",
     summary: "Retrieve stored path for a session",
+    tags: ["sessions"],
     request: { params: SessionId },
     responses: {
         200: {

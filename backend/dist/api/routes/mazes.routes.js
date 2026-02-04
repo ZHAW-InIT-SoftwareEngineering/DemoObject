@@ -12,6 +12,7 @@ openapiRegistry_1.registry.registerPath({
     method: "get",
     path: "/mazes/{mazeId}",
     summary: "Retrieve a maze definition",
+    tags: ["mazes"],
     request: {
         params: schemas_1.MazeIdParams
     },
@@ -27,6 +28,7 @@ openapiRegistry_1.registry.registerPath({
     method: "post",
     path: "/mazes/{mazeId}/paths/dsl",
     summary: "Compute the DSL of a specific provided path through the maze.",
+    tags: ["mazes"],
     request: {
         params: schemas_1.MazeIdParams,
         body: { content: { "application/json": { schema: schemas_1.CompilePathRequest } } },
@@ -43,6 +45,7 @@ openapiRegistry_1.registry.registerPath({
 openapiRegistry_1.registry.registerPath({
     method: "get",
     path: "/mazes/{mazeId}/shortest-path",
+    tags: ["mazes"],
     request: {
         params: schemas_1.MazeIdParams
     },

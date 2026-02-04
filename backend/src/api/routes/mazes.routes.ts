@@ -13,6 +13,7 @@ registry.registerPath({
     method: "get",
     path: "/mazes/{mazeId}",
     summary: "Retrieve a maze definition",
+    tags: ["mazes"],
     request: {
         params: MazeIdParams
     },
@@ -29,6 +30,7 @@ registry.registerPath({
     method: "post", 
     path: "/mazes/{mazeId}/paths/dsl",
     summary: "Compute the DSL of a specific provided path through the maze.",
+    tags: ["mazes"],
     request: {
         params: MazeIdParams,
         body: { content: { "application/json": { schema: CompilePathRequest } } },
@@ -46,6 +48,7 @@ registry.registerPath({
 registry.registerPath({
     method: "get",
     path: "/mazes/{mazeId}/shortest-path",
+    tags: ["mazes"],
     request: {
         params: MazeIdParams
     },

@@ -10,6 +10,7 @@ openapiRegistry_1.registry.registerPath({
     method: "post",
     path: "/sessions",
     summary: "Create a new session and return a sessionId (and QR payload)",
+    tags: ["sessions"],
     request: {
         body: { content: { "application/json": { schema: schemas_1.CreateSessionRequest } } },
     },
@@ -30,6 +31,7 @@ openapiRegistry_1.registry.registerPath({
     method: "put",
     path: "/sessions/{sessionId}/paths",
     summary: "Store a user-selected path and its automatically transpiled DSL representation bund to a session ",
+    tags: ["sessions"],
     request: {
         params: schemas_1.SessionId,
         body: { content: { "application/json": { schema: schemas_1.StorePathRequest } } },
@@ -47,6 +49,7 @@ openapiRegistry_1.registry.registerPath({
     method: "patch",
     path: "/sessions/{sessionId}",
     summary: "Update stored information (status, path or expiresAt) for a specific session",
+    tags: ["sessions"],
     request: {
         params: schemas_1.SessionId,
         body: { content: { "application/json": { schema: schemas_1.UpdateSessionResponse } } },
@@ -63,6 +66,7 @@ openapiRegistry_1.registry.registerPath({
     method: "get",
     path: "/sessions/{sessionId}/paths",
     summary: "Retrieve stored path for a session",
+    tags: ["sessions"],
     request: { params: schemas_1.SessionId },
     responses: {
         200: {
