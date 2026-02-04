@@ -1,9 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.connectToDb = connectToDb;
-exports.getDb = getDb;
-exports.getDbCollection = getDbCollection;
+exports.insertSessionDoc = insertSessionDoc;
+exports.findSessionDoc = findSessionDoc;
+exports.updateSessionDoc = updateSessionDoc;
 const mongodb_1 = require("mongodb");
+const session_1 = require("../domain/session");
 require("dotenv/config");
 let client = null;
 let db = null;
@@ -38,3 +40,28 @@ function getDb() {
 function getDbCollection(dbCollectionName) {
     return getDb().collection(dbCollectionName);
 }
+function getCollectionName() {
+    const name = process.env.SESSION_COLLECTION_NAME;
+    if (!name)
+        throw new Error("SESSION_COLLECTION_NAME is not set in the environment");
+    return name;
+}
+;
+const collection = () => getDbCollection(getCollectionName());
+async function insertSessionDoc(sessionId, mazeId) {
+    const doc = session_1.Session.parse({
+        sessionId: sessionId,
+        mazeId: mazeId,
+        createdAt: new Date(),
+    });
+    await collection().insertOne(doc);
+    return doc;
+}
+;
+async function findSessionDoc(sessionId) { return await (collection()).findOne({ sessionId }); }
+;
+async function updateSessionDoc(sessionId, data) {
+    const updatedDocument = await collection().findOneAndUpdate({ sessionId }, { $set: data }, { returnDocument: "after" });
+    return updatedDocument ? session_1.Session.parse(updatedDocument) : null;
+}
+;

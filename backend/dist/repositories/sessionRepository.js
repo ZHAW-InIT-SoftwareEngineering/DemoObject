@@ -3,22 +3,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createSession = createSession;
 exports.getSession = getSession;
 exports.updateSession = updateSession;
-const session_1 = require("../domain/session");
-const mongo_db_1 = require("../persistence/mongo/mongo.db");
+const mongo_1 = require("../db/mongo");
 async function createSession(sessionId, mazeId) {
-    const doc = session_1.Session.parse({
-        sessionId: sessionId,
-        mazeId: mazeId,
-        createdAt: new Date(),
-    });
-    await (0, mongo_db_1.collection)().insertOne(doc);
-    return doc;
+    return await (0, mongo_1.insertSessionDoc)(sessionId, mazeId);
 }
 ;
-async function getSession(sessionId) { return ((0, mongo_db_1.collection)()).findOne({ sessionId }); }
+async function getSession(sessionId) {
+    return (0, mongo_1.findSessionDoc)(sessionId);
+}
 ;
 async function updateSession(sessionId, data) {
-    const updatedDocument = await (0, mongo_db_1.collection)().findOneAndUpdate({ sessionId }, { $set: data }, { returnDocument: "after" });
-    return updatedDocument ? session_1.Session.parse(updatedDocument) : null;
+    return await (0, mongo_1.updateSessionDoc)(sessionId, data);
 }
 ;

@@ -1,8 +1,10 @@
-import { MongoClient, Db, Collection } from "mongodb"; 
+import { MongoClient, Db, Collection } from "mongodb";
+import { Session } from "../domain/session";
 import "dotenv/config";
 
+
 let client: MongoClient | null = null; 
-let db: Db | null = null; 
+let db: Db | null = null;
 
 function validateEnvEntry(envVariableName: string): string {
     const variable = process.env[envVariableName]
@@ -24,7 +26,7 @@ export async function connectToDb() {
     return db
 }
 
-export function getDb(): Db {
+function getDb(): Db {
     if(!db) {
         throw new Error("Database not initialized. Call connectToDatabase() first.")
     } else{
@@ -32,6 +34,36 @@ export function getDb(): Db {
     } 
 }
 
-export function getDbCollection<T = any>(dbCollectionName: string): Collection<T> {
+function getDbCollection<T = any>(dbCollectionName: string): Collection<T> {
     return getDb().collection<T>(dbCollectionName);
 }
+
+function getCollectionName(): string {
+    const name = process.env.SESSION_COLLECTION_NAME;
+    if (!name) throw new Error("SESSION_COLLECTION_NAME is not set in the environment");
+    return name;
+};
+
+const collection = () => getDbCollection<Session>(getCollectionName());
+
+export async function insertSessionDoc(sessionId: string, mazeId: number) { 
+    const doc: Session = Session.parse({
+      sessionId: sessionId,
+      mazeId: mazeId,
+      createdAt: new Date(),
+    });
+    await collection().insertOne(doc)
+    return doc ;
+};
+
+export async function findSessionDoc(sessionId: string) { return await (collection()).findOne({ sessionId }) };
+
+export async function updateSessionDoc(sessionId: string, data: Partial<Session>) {
+    const updatedDocument = await collection().findOneAndUpdate(
+        { sessionId },
+        { $set: data },
+        { returnDocument: "after" }
+    );
+
+    return updatedDocument ? Session.parse(updatedDocument) : null;
+};

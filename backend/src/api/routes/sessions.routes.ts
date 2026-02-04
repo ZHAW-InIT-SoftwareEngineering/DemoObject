@@ -5,6 +5,7 @@ import { createSessionService,
          updateSessionService, 
          storePathAndDSLForSession, 
          computeDSLFromPath } from "../../services";
+import type { Session } from "../../domain/session";
 
 import { UpdatePathResponse, 
          StorePathRequest, 
@@ -128,15 +129,20 @@ sessionRouter.put("/:sessionId/paths", async (req, res) => {
 sessionRouter.patch("/:sessionId", async (req, res) => {
     const parsed = UpdateSessionRequest.safeParse(req.body)
     if (!parsed.success) return res.status(400).json({ error: parsed.error.issues });
-    const path = parsed.data.path;
+    const update: Partial<Session> = { ...parsed.data };
 
     const params = SessionId.safeParse(req.params);
     if (!params.success) return res.status(400).json({ error: params.error.issues });
     const sessionId = params.data.sessionId
-    
-    const updatedDoc = await storePathAndDSLForSession(sessionId, path);
 
-    return res.json(UpdatePathResponse.parse(updatedDoc));
+    if (update.path) {
+        update.dsl = computeDSLFromPath(update.path);
+    }
+
+    const updatedDoc = await updateSessionService(sessionId, update);
+    if (!updatedDoc) return res.status(404).json({ error: "Session not found" });
+
+    return res.json(UpdateSessionResponse.parse(updatedDoc));
 })
 
 sessionRouter.get("/:sessionId/paths", async (req, res) => {

@@ -6,7 +6,6 @@ export const SessionId = z.object({
     sessionId: Session.shape.sessionId, 
 });
 
-
 export const CreateSessionRequest = z.object({
     mazeId: Session.shape.mazeId
 });
@@ -18,7 +17,7 @@ export const CreateSessionResponse = z.object({
 
 export const SessionPublic = Session.omit({ createdAt: true });
 
-export const UpdateSessionRequest = SessionPublic.omit({sessionId: true}).extend({
+export const UpdateSessionRequest = SessionPublic.omit({ sessionId: true, dsl: true }).extend({
     expiresAt: z.coerce.date().optional(),
 });
 
