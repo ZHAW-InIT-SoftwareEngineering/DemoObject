@@ -1,0 +1,1 @@
+export { startAdventure } from "./adventure"

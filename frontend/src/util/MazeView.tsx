@@ -1,0 +1,143 @@
+import type {
+  MazesMazeIdGet200Response,
+  MazesMazeIdGet200ResponseEdgesInner,
+  MazesMazeIdGet200ResponseNodesInner,
+} from "@/api";
+
+type MazeViewProps = {
+  maze: MazesMazeIdGet200Response;
+  width?: number;
+  height?: number;
+  onNodeClick?: (node: MazesMazeIdGet200ResponseNodesInner) => void;
+  selectedNodeIds?: number[];
+  className?: string;
+};
+
+type Bounds = {
+  minX: number;
+  maxX: number;
+  minY: number;
+  maxY: number;
+};
+
+const DEFAULT_SIZE = 520;
+const PADDING = 20;
+
+function getBounds(nodes: MazesMazeIdGet200ResponseNodesInner[]): Bounds {
+  const xs = nodes.map((n) => n.x);
+  const ys = nodes.map((n) => n.y);
+  return {
+    minX: Math.min(...xs),
+    maxX: Math.max(...xs),
+    minY: Math.min(...ys),
+    maxY: Math.max(...ys),
+  };
+}
+
+function scalePoint(
+  x: number,
+  y: number,
+  bounds: Bounds,
+  width: number,
+  height: number,
+) {
+  const rangeX = Math.max(1, bounds.maxX - bounds.minX);
+  const rangeY = Math.max(1, bounds.maxY - bounds.minY);
+  const sx = (width - PADDING * 2) / rangeX;
+  const sy = (height - PADDING * 2) / rangeY;
+  const scale = Math.min(sx, sy);
+
+  return {
+    x: PADDING + (x - bounds.minX) * scale,
+    y: PADDING + (y - bounds.minY) * scale,
+  };
+}
+
+function renderEdge(
+  edge: MazesMazeIdGet200ResponseEdgesInner,
+  nodeById: Map<number, MazesMazeIdGet200ResponseNodesInner>,
+  bounds: Bounds,
+  width: number,
+  height: number,
+  stroke: string,
+  strokeWidth: number,
+) {
+  const from = nodeById.get(edge.from);
+  const to = nodeById.get(edge.to);
+  if (!from || !to) return null;
+
+  const p1 = scalePoint(from.x, from.y, bounds, width, height);
+  const p2 = scalePoint(to.x, to.y, bounds, width, height);
+
+  return (
+    <line
+      key={`${edge.from}-${edge.to}`}
+      x1={p1.x}
+      y1={p1.y}
+      x2={p2.x}
+      y2={p2.y}
+      stroke={stroke}
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+    />
+  );
+}
+
+export function MazeView({
+  maze,
+  width = DEFAULT_SIZE,
+  height = DEFAULT_SIZE,
+  onNodeClick,
+  selectedNodeIds = [],
+  className,
+}: MazeViewProps) {
+  const nodes = maze.nodes ?? [];
+  const edges = maze.edges ?? [];
+
+  if (nodes.length === 0) return null;
+
+  const bounds = getBounds(nodes);
+  const nodeById = new Map(nodes.map((n) => [n.mazeNodeId, n]));
+  const selected = new Set(selectedNodeIds);
+
+  return (
+    <svg
+      className={className}
+      width={width}
+      height={height}
+      viewBox={`0 0 ${width} ${height}`}
+    >
+      <rect
+        x="0"
+        y="0"
+        width={width}
+        height={height}
+        fill="#ffffff"
+        stroke="#e5e7eb"
+      />
+
+      {edges.map((edge) =>
+        renderEdge(edge, nodeById, bounds, width, height, "#d1d5db", 2),
+      )}
+
+      {nodes.map((node) => {
+        const p = scalePoint(node.x, node.y, bounds, width, height);
+        const isSelected = selected.has(node.mazeNodeId);
+        return (
+          <g key={node.mazeNodeId}>
+            <circle
+              cx={p.x}
+              cy={p.y}
+              r={8}
+              fill={isSelected ? "#111827" : "#3b82f6"}
+              stroke="#ffffff"
+              strokeWidth={2}
+              style={{ cursor: onNodeClick ? "pointer" : "default" }}
+              onClick={() => onNodeClick?.(node)}
+            />
+          </g>
+        );
+      })}
+    </svg>
+  );
+}

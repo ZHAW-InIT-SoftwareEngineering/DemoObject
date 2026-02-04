@@ -1,36 +1,19 @@
-import { useState } from "react";
-import { sessionsApi, mazeApi } from "./lib/api";
-import { Button } from "@/components/ui/button"; 
+import { useAdventure } from "./hooks/";
+import { Button } from "@/components/ui/button";
+import { MazeView } from "@/util";
 
 export default function App() {
-const [loading, setLoading] = useState(false);
-const [session, setSession] = useState<any>(null);
-const [maze, setMaze] = useState<any>(null);
-const [error, setError] = useState<string | null>(null);
+  const { loading, session, maze, error, start } = useAdventure();
 
-const startAdventure = async () => {
-    setLoading(true);
-    setError(null);
+  const handleStartAdventure = () => {
+    const mazeId = 0;
+    start(mazeId);
+  };
 
-    try {
-    const sessionRes = await sessionsApi.sessionsPost({
-        sessionsPostRequest: {mazeId: 0}, // if your backend expects fields, put them here
-    });
-    setSession(sessionRes);
-
-    const mazeRes = await mazeApi.mazesMazeIdGet({ mazeId: 0 });
-    setMaze(mazeRes);
-    } catch (e: any) {
-    setError(e?.message ?? "Something went wrong");
-    } finally {
-    setLoading(false);
-    }
-};
-
-return (
+  return (
     <div className="p-6 space-y-4">
-    <Button onClick={startAdventure} disabled={loading}>
-        {loading ? "Starting..." : "Start Adventure"}
+    <Button onClick={handleStartAdventure} disabled={loading}>
+      {loading ? "Starting..." : "Start Adventure"}
     </Button>
 
     {error && <div className="text-red-600">{error}</div>}
@@ -42,10 +25,12 @@ return (
     )}
 
     {maze && (
-        <pre className="bg-gray-100 p-3 rounded">
-        {JSON.stringify(maze, null, 2)}
-        </pre>
+      <MazeView
+        maze={maze}
+        className="border rounded bg-white"
+        onNodeClick={(node) => console.log("node clicked", node)}
+      />
     )}
     </div>
-);
+  );
 }
