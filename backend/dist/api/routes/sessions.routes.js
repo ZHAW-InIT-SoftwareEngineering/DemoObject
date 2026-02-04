@@ -106,13 +106,18 @@ exports.sessionRouter.patch("/:sessionId", async (req, res) => {
     const parsed = schemas_1.UpdateSessionRequest.safeParse(req.body);
     if (!parsed.success)
         return res.status(400).json({ error: parsed.error.issues });
-    const path = parsed.data.path;
+    const update = { ...parsed.data };
     const params = schemas_1.SessionId.safeParse(req.params);
     if (!params.success)
         return res.status(400).json({ error: params.error.issues });
     const sessionId = params.data.sessionId;
-    const updatedDoc = await (0, services_1.storePathAndDSLForSession)(sessionId, path);
-    return res.json(schemas_1.UpdatePathResponse.parse(updatedDoc));
+    if (update.path) {
+        update.dsl = (0, services_1.computeDSLFromPath)(update.path);
+    }
+    const updatedDoc = await (0, services_1.updateSessionService)(sessionId, update);
+    if (!updatedDoc)
+        return res.status(404).json({ error: "Session not found" });
+    return res.json(schemas_1.UpdateSessionResponse.parse(updatedDoc));
 });
 exports.sessionRouter.get("/:sessionId/paths", async (req, res) => {
     const parsed = schemas_1.SessionId.safeParse(req.params);

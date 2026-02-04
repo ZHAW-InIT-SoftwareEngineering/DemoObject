@@ -14,7 +14,7 @@ exports.CreateSessionResponse = zod_1.z.object({
     qrPayload: zod_1.z.string(),
 });
 exports.SessionPublic = session_1.Session.omit({ createdAt: true });
-exports.UpdateSessionRequest = exports.SessionPublic.omit({ sessionId: true }).extend({
+exports.UpdateSessionRequest = exports.SessionPublic.omit({ sessionId: true, dsl: true }).extend({
     expiresAt: zod_1.z.coerce.date().optional(),
 });
 exports.UpdateSessionResponse = exports.UpdateSessionRequest;
