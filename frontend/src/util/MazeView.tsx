@@ -10,6 +10,7 @@ type MazeViewProps = {
   height?: number;
   onNodeClick?: (node: MazesMazeIdGet200ResponseNodesInner) => void;
   selectedNodeIds?: number[];
+  highlightedEdgeKeys?: string[];
   className?: string;
 };
 
@@ -89,6 +90,7 @@ export function MazeView({
   height = DEFAULT_SIZE,
   onNodeClick,
   selectedNodeIds = [],
+  highlightedEdgeKeys = [],
   className,
 }: MazeViewProps) {
   const nodes = maze.nodes ?? [];
@@ -99,6 +101,7 @@ export function MazeView({
   const bounds = getBounds(nodes);
   const nodeById = new Map(nodes.map((n) => [n.mazeNodeId, n]));
   const selected = new Set(selectedNodeIds);
+  const highlightedEdges = new Set(highlightedEdgeKeys);
 
   return (
     <svg
@@ -116,22 +119,44 @@ export function MazeView({
         stroke="#e5e7eb"
       />
 
-      {edges.map((edge) =>
-        renderEdge(edge, nodeById, bounds, width, height, "#d1d5db", 2),
-      )}
+      {edges.map((edge) => {
+        const isHighlighted = highlightedEdges.has(
+          `${edge.from}-${edge.to}`,
+        );
+        return renderEdge(
+          edge,
+          nodeById,
+          bounds,
+          width,
+          height,
+          isHighlighted ? "#16a34a" : "#d1d5db",
+          isHighlighted ? 3 : 2,
+        );
+      })}
 
       {nodes.map((node) => {
         const p = scalePoint(node.x, node.y, bounds, width, height);
         const isSelected = selected.has(node.mazeNodeId);
+        const isStart = node.mazeNodeId === maze.startNodeId;
+        const isEnd = node.mazeNodeId === maze.endNodeId;
+        const fill = isSelected
+          ? "#111827"
+          : isStart
+            ? "#16a34a"
+            : isEnd
+              ? "#dc2626"
+              : "#3b82f6";
+        const strokeColor = isStart ? "#14532d" : isEnd ? "#991b1b" : "#ffffff";
+        const strokeWidth = isStart || isEnd ? 3 : 2;
         return (
           <g key={node.mazeNodeId}>
             <circle
               cx={p.x}
               cy={p.y}
               r={8}
-              fill={isSelected ? "#111827" : "#3b82f6"}
-              stroke="#ffffff"
-              strokeWidth={2}
+              fill={fill}
+              stroke={strokeColor}
+              strokeWidth={strokeWidth}
               style={{ cursor: onNodeClick ? "pointer" : "default" }}
               onClick={() => onNodeClick?.(node)}
             />
