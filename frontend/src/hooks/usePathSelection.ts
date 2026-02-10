@@ -3,7 +3,9 @@ import type {
   MazesMazeIdGet200Response,
   MazesMazeIdGet200ResponseNodesInner,
   MazesMazeIdPathsDslPostRequest,
+  SessionsSessionIdPathsGet200Response,
 } from "@/api";
+import { sessionsApi } from "../lib/api";
 
 type PathPoint = { x: number; y: number };
 
@@ -14,6 +16,11 @@ type PathSelection = {
   highlightedEdgeKeys: string[];
   selectNode: (node: MazesMazeIdGet200ResponseNodesInner) => boolean;
   resetPath: () => void;
+  getDSL: () => Promise<SessionsSessionIdPathsGet200Response | null>;
+  dsl: string[] | null;
+  submitError: string | null;
+  submitting: boolean;
+  lastSubmittedKey: string | null;
 };
 
 function edgeKey(from: number, to: number) {
@@ -22,8 +29,13 @@ function edgeKey(from: number, to: number) {
 
 export function usePathSelection(
   maze: MazesMazeIdGet200Response | null,
+  sessionId?: string | null,
 ): PathSelection {
   const [selectedNodeIds, setSelectedNodeIds] = useState<number[]>([]);
+  const [dsl, setDsl] = useState<string[] | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [lastSubmittedKey, setLastSubmittedKey] = useState<string | null>(null);
 
   const nodeById = useMemo(() => {
     const nodes = maze?.nodes ?? [];
@@ -48,9 +60,67 @@ export function usePathSelection(
     setSelectedNodeIds([]);
   }, [maze?.mazeId]);
 
+  useEffect(() => {
+    setLastSubmittedKey(null);
+  }, [sessionId]);
+
   const resetPath = useCallback(() => {
     setSelectedNodeIds([]);
+    setDsl(null);
+    setSubmitError(null);
+    setLastSubmittedKey(null);
   }, []);
+
+  const pathKey = useMemo(() => selectedNodeIds.join(","), [selectedNodeIds]);
+
+  const path = useMemo(() => {
+    return selectedNodeIds
+      .map((id) => nodeById.get(id))
+      .filter(Boolean)
+      .map((n) => ({ x: n!.x, y: n!.y }));
+  }, [nodeById, selectedNodeIds]);
+
+  const apiRequest = useMemo(() => {
+    if (!maze || path.length === 0) return null;
+    return { path };
+  }, [maze, path]);
+
+  const highlightedEdgeKeys = useMemo(() => {
+    if (selectedNodeIds.length < 2) return [];
+    const keys: string[] = [];
+    for (let i = 0; i < selectedNodeIds.length - 1; i += 1) {
+      const from = selectedNodeIds[i];
+      const to = selectedNodeIds[i + 1];
+      keys.push(edgeKey(from, to));
+      keys.push(edgeKey(to, from));
+    }
+    return keys;
+  }, [selectedNodeIds]);
+
+  useEffect(() => {
+    setDsl(null);
+    setSubmitError(null);
+  }, [pathKey, sessionId]);
+
+  const getDSL = useCallback(async () => {
+    if (!sessionId || !apiRequest) return null;
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const response = await sessionsApi.sessionsSessionIdPathsPut({
+        sessionId,
+        mazesMazeIdPathsDslPostRequest: apiRequest,
+      });
+      setDsl(response.dsl ?? null);
+      setLastSubmittedKey(pathKey);
+      return response;
+    } catch (err) {
+      setSubmitError("Failed to submit path.");
+      return null;
+    } finally {
+      setSubmitting(false);
+    }
+  }, [apiRequest, pathKey, sessionId]);
 
   const selectNode = useCallback(
     (node: MazesMazeIdGet200ResponseNodesInner) => {
@@ -80,30 +150,6 @@ export function usePathSelection(
     [adjacency, maze, selectedNodeIds],
   );
 
-  const path = useMemo(() => {
-    return selectedNodeIds
-      .map((id) => nodeById.get(id))
-      .filter(Boolean)
-      .map((n) => ({ x: n!.x, y: n!.y }));
-  }, [nodeById, selectedNodeIds]);
-
-  const apiRequest = useMemo(() => {
-    if (!maze || path.length === 0) return null;
-    return { path };
-  }, [maze, path]);
-
-  const highlightedEdgeKeys = useMemo(() => {
-    if (selectedNodeIds.length < 2) return [];
-    const keys: string[] = [];
-    for (let i = 0; i < selectedNodeIds.length - 1; i += 1) {
-      const from = selectedNodeIds[i];
-      const to = selectedNodeIds[i + 1];
-      keys.push(edgeKey(from, to));
-      keys.push(edgeKey(to, from));
-    }
-    return keys;
-  }, [selectedNodeIds]);
-
   return {
     selectedNodeIds,
     path,
@@ -111,5 +157,10 @@ export function usePathSelection(
     highlightedEdgeKeys,
     selectNode,
     resetPath,
+    getDSL,
+    dsl,
+    submitError,
+    submitting,
+    lastSubmittedKey,
   };
 }

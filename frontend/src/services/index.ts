@@ -1,1 +1,1 @@
-export { startAdventure } from "./adventure"
+export { getSessionId } from "./session"

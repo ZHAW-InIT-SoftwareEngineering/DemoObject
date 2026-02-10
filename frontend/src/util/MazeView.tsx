@@ -11,6 +11,7 @@ type MazeViewProps = {
   onNodeClick?: (node: MazesMazeIdGet200ResponseNodesInner) => void;
   selectedNodeIds?: number[];
   highlightedEdgeKeys?: string[];
+  secondaryHighlightedEdgeKeys?: string[];
   className?: string;
 };
 
@@ -91,6 +92,7 @@ export function MazeView({
   onNodeClick,
   selectedNodeIds = [],
   highlightedEdgeKeys = [],
+  secondaryHighlightedEdgeKeys = [],
   className,
 }: MazeViewProps) {
   const nodes = maze.nodes ?? [];
@@ -102,6 +104,7 @@ export function MazeView({
   const nodeById = new Map(nodes.map((n) => [n.mazeNodeId, n]));
   const selected = new Set(selectedNodeIds);
   const highlightedEdges = new Set(highlightedEdgeKeys);
+  const secondaryHighlightedEdges = new Set(secondaryHighlightedEdgeKeys);
 
   return (
     <svg
@@ -120,17 +123,23 @@ export function MazeView({
       />
 
       {edges.map((edge) => {
-        const isHighlighted = highlightedEdges.has(
-          `${edge.from}-${edge.to}`,
-        );
+        const key = `${edge.from}-${edge.to}`;
+        const isHighlighted = highlightedEdges.has(key);
+        const isSecondaryHighlighted = secondaryHighlightedEdges.has(key);
+        const stroke = isHighlighted
+          ? "#16a34a"
+          : isSecondaryHighlighted
+            ? "#f97316"
+            : "#d1d5db";
+        const strokeWidth = isHighlighted || isSecondaryHighlighted ? 3 : 2;
         return renderEdge(
           edge,
           nodeById,
           bounds,
           width,
           height,
-          isHighlighted ? "#16a34a" : "#d1d5db",
-          isHighlighted ? 3 : 2,
+          stroke,
+          strokeWidth,
         );
       })}
 
@@ -146,7 +155,7 @@ export function MazeView({
             : isEnd
               ? "#dc2626"
               : "#3b82f6";
-        const strokeColor = isStart ? "#14532d" : isEnd ? "#991b1b" : "#ffffff";
+        const strokeColor = isStart ? "#14532d" : isEnd ? "#dd1b1b" : "#ffffff";
         const strokeWidth = isStart || isEnd ? 3 : 2;
         return (
           <g key={node.mazeNodeId}>

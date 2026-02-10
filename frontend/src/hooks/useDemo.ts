@@ -1,7 +1,8 @@
 import { useCallback, useState } from "react";
-import { startAdventure } from "../services";
+import { getSessionId } from "../services";
+import { getMazeById } from "../services/maze";
 
-export function useAdventure() {
+export function useDemo() {
   const [loading, setLoading] = useState(false);
   const [session, setSession] = useState<any>(null);
   const [maze, setMaze] = useState<any>(null);
@@ -12,8 +13,9 @@ export function useAdventure() {
     setError(null);
 
     try {
-      const { sessionRes, mazeRes } = await startAdventure(mazeId);
+      const sessionRes = await getSessionId(mazeId);
       setSession(sessionRes);
+      const mazeRes = await getMazeById(mazeId)
       setMaze(mazeRes);
     } catch (e: any) {
       setError(e?.message ?? "Something went wrong");
