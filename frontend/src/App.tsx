@@ -3,14 +3,14 @@ import {
   usePathSelection,
   useShortestPath,
   useShortestPathEdgeKeys,
-  useToast,
 } from "./hooks/";
-import { Toast } from "@/components/ui";
+import { Toaster } from "@/components/ui";
 import { ActionButtons } from "@/components/app/ActionButtons";
 import { DslStrip } from "@/components/app/DslStrip";
 import { MazePanel } from "@/components/app/MazePanel";
 import { PathInfo } from "@/components/app/PathInfo";
 import { StartScreen } from "@/components/app/StartScreen";
+import { toast } from "sonner";
 
 export default function App() {
   const mazeId = 0;
@@ -38,8 +38,6 @@ export default function App() {
   );
   const userPathLength = Math.max(0, selectedNodeIds.length - 1);
   
-  const { toast, showToast } = useToast();
-
   const handleStartAdventure = () => {
     start(mazeId);
   };
@@ -51,9 +49,9 @@ export default function App() {
   const handleSubmitPath = async () => {
     const response = await getDSL();
     if (response) {
-      showToast("Path submitted.", "success");
+      toast.success("Path submitted.");
     } else {
-      showToast("Failed to submit path.", "error");
+      toast.error("Failed to submit path.");
     }
   };
 
@@ -61,13 +59,13 @@ export default function App() {
     try {
       const shortestPathRes = await getShortestPath(mazeId);
       if (shortestPathRes) {
-        showToast("Shortest path loaded.", "success");
+        toast.success("Shortest path loaded.");
       } else {
-        showToast("Failed to compute shortest path.", "error");
+        toast.error("Failed to compute shortest path.");
       }
     } catch (err: any) {
       console.error("Failed to find a shortest path.")
-      showToast("Failed to find a shortest path.", "error");
+      toast.error("Failed to find a shortest path.");
     }
   }
 
@@ -81,7 +79,7 @@ export default function App() {
           : "min-h-screen p-6 flex flex-col items-center justify-start md:justify-center"
       }
     >
-      <Toast toast={toast} />
+      <Toaster />
 
       {isStartScreen ? (
         <div className="w-full max-w-[520px] space-y-4">

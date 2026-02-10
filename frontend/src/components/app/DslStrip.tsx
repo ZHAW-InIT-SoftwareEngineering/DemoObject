@@ -1,3 +1,5 @@
+import { Badge, Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
+
 type DslStripProps = {
   dsl: string[] | null;
 };
@@ -6,20 +8,24 @@ export function DslStrip({ dsl }: DslStripProps) {
   if (!dsl || dsl.length === 0) return null;
 
   return (
-    <div className="space-y-2">
-      <div className="text-base font-bold text-gray-1000">DSL</div>
-      <div className="flex items-center gap-2 overflow-x-auto pb-2">
-        {dsl.map((token, index) => (
-          <div key={`${token}-${index}`} className="flex items-center gap-2 shrink-0">
-            <span className="rounded bg-gray-900 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white whitespace-nowrap">
-              {token}
-            </span>
-            {index < dsl.length - 1 && (
-              <span className="text-gray-400">➞</span>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
+    <Card className="py-4 gap-3">
+      <CardHeader className="px-4">
+        <CardTitle className="text-sm">DSL</CardTitle>
+      </CardHeader>
+      <CardContent className="px-4">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2">
+          {dsl.map((token, index) => (
+            <div key={`${token}-${index}`} className="flex items-center gap-2 shrink-0">
+              <Badge variant="secondary" className="uppercase tracking-wide">
+                {token}
+              </Badge>
+              {index < dsl.length - 1 && (
+                <span className="text-gray-400">➞</span>
+              )}
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

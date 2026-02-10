@@ -1,3 +1,15 @@
-export { Maze } from "./maze"
+export { Maze } from "../app/Maze"
 export { Button } from "./button"
-export { Toast } from "./toast"
+export { Toaster } from "./sonner"
+export { Badge } from "./badge"
+export {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardAction,
+  CardDescription,
+  CardContent,
+} from "./card"
+export { Separator } from "./separator"
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "./tooltip"
