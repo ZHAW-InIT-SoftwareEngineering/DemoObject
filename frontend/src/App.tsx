@@ -1,11 +1,16 @@
-import { useDemo, 
-         usePathSelection, 
-         useShortestPath,
-         useShortestPathEdgeKeys,
-         useToast } from "./hooks/";
-import { Button } from "@/components/ui";
+import {
+  useDemo,
+  usePathSelection,
+  useShortestPath,
+  useShortestPathEdgeKeys,
+  useToast,
+} from "./hooks/";
 import { Toast } from "@/components/ui";
-import { Maze } from "@/components/ui";
+import { ActionButtons } from "@/components/app/ActionButtons";
+import { DslStrip } from "@/components/app/DslStrip";
+import { MazePanel } from "@/components/app/MazePanel";
+import { PathInfo } from "@/components/app/PathInfo";
+import { StartScreen } from "@/components/app/StartScreen";
 
 export default function App() {
   const mazeId = 0;
@@ -31,6 +36,7 @@ export default function App() {
     maze,
     shortestPath?.path,
   );
+  const userPathLength = Math.max(0, selectedNodeIds.length - 1);
   
   const { toast, showToast } = useToast();
 
@@ -65,92 +71,56 @@ export default function App() {
     }
   }
 
-  return (
-    <div className="p-6 space-y-4">
-      <div className="flex gap-2">
-        {!session && (
-          <Button onClick={handleStartAdventure} disabled={loading}>
-            {loading ? "Starting..." : "Start Adventure"}
-          </Button>
-        )}
-        {session && (
-          <Button
-            onClick={handleResetPath}
-            variant="secondary"
-            disabled={!selectedNodeIds.length}
-          >
-            Reset Path
-          </Button>
-        )}
-        {session && (
-          <Button
-            onClick={handleSubmitPath}
-            disabled={
-              !apiRequest ||
-              submitting ||
-              selectedNodeIds.length < 2 ||
-              pathKey === lastSubmittedKey
-            }
-          >
-            {submitting ? "Submitting..." : "Submit Path"}
-          </Button>
-        )}
-        {session && (
-          <Button
-            onClick={handleShortestPath}
-          >
-            Shortest Path
-          </Button>
-        )}
-      </div>
+  const isStartScreen = !session;
 
-      {error && <div className="text-red-600">{error}</div>}
-      {submitError && <div className="text-red-600">{submitError}</div>}
+  return (
+    <div
+      className={
+        isStartScreen
+          ? "min-h-screen p-6 flex flex-col items-center justify-center"
+          : "min-h-screen p-6"
+      }
+    >
       <Toast toast={toast} />
 
-      {dsl && dsl.length > 0 && (
-        <div className="space-y-2">
-          <div className="text-sm font-medium text-gray-700">DSL</div>
-          <div className="flex flex-wrap items-center gap-2">
-            {dsl.map((token, index) => (
-              <div key={`${token}-${index}`} className="flex items-center gap-2">
-                <span className="rounded bg-gray-900 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-                  {token}
-                </span>
-                {index < dsl.length - 1 && (
-                  <span className="text-gray-400">➞</span>
-                )}
-              </div>
-            ))}
-          </div>
+      {isStartScreen ? (
+        <div className="w-full max-w-[520px] space-y-4">
+          {error && <div className="text-red-600">{error}</div>}
+          <StartScreen loading={loading} onStart={handleStartAdventure} />
+        </div>
+      ) : (
+        <div className="mx-auto w-full max-w-[520px] space-y-4">
+          {error && <div className="text-red-600">{error}</div>}
+          {submitError && <div className="text-red-600">{submitError}</div>}
+          <DslStrip dsl={dsl} />
+          {maze && (
+            <PathInfo
+              userPathLength={userPathLength}
+              shortestPathLength={shortestPath?.length}
+            />
+          )}
+          {maze && (
+            <MazePanel
+              maze={maze}
+              onNodeClick={selectNode}
+              selectedNodeIds={selectedNodeIds}
+              highlightedEdgeKeys={highlightedEdgeKeys}
+              secondaryHighlightedEdgeKeys={shortestPathEdgeKeys}
+            />
+          )}
+          <ActionButtons
+            maze={maze}
+            selectedNodeIds={selectedNodeIds}
+            apiRequest={apiRequest}
+            submitting={submitting}
+            pathKey={pathKey}
+            lastSubmittedKey={lastSubmittedKey}
+            onReset={handleResetPath}
+            onSubmit={handleSubmitPath}
+            onShortestPath={handleShortestPath}
+          />
         </div>
       )}
-
-      {maze && (
-        <Maze
-          maze={maze}
-          className="border rounded bg-white"
-          onNodeClick={selectNode}
-          selectedNodeIds={selectedNodeIds}
-          highlightedEdgeKeys={highlightedEdgeKeys}
-          secondaryHighlightedEdgeKeys={shortestPathEdgeKeys}
-        />
-      )}
-
-      {/*
-      {apiRequest && (
-        <pre className="bg-gray-100 p-3 rounded">
-          {JSON.stringify(apiRequest, null, 2)}
-        </pre>
-      )}
-
-      {session && (
-        <pre className="bg-gray-100 p-3 rounded">
-          {JSON.stringify(session, null, 2)}
-        </pre>
-      )}
-      */}
-      
     </div>
   );
 }

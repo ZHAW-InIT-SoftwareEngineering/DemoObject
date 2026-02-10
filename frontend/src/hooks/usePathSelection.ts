@@ -58,7 +58,11 @@ export function usePathSelection(
   }, [maze?.edges]);
 
   useEffect(() => {
-    setSelectedNodeIds([]);
+    if (maze?.startNodeId !== undefined && maze?.startNodeId !== null) {
+      setSelectedNodeIds([maze.startNodeId]);
+    } else {
+      setSelectedNodeIds([]);
+    }
   }, [maze?.mazeId]);
 
   useEffect(() => {
@@ -66,11 +70,15 @@ export function usePathSelection(
   }, [sessionId]);
 
   const resetPath = useCallback(() => {
-    setSelectedNodeIds([]);
+    if (maze?.startNodeId !== undefined && maze?.startNodeId !== null) {
+      setSelectedNodeIds([maze.startNodeId]);
+    } else {
+      setSelectedNodeIds([]);
+    }
     setDsl(null);
     setSubmitError(null);
     setLastSubmittedKey(null);
-  }, []);
+  }, [maze?.startNodeId]);
 
   const pathKey = useMemo(() => selectedNodeIds.join(","), [selectedNodeIds]);
 

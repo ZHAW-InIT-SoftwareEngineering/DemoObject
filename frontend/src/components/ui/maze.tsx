@@ -112,6 +112,8 @@ export function Maze({
       width={width}
       height={height}
       viewBox={`0 0 ${width} ${height}`}
+      preserveAspectRatio="xMidYMid meet"
+      style={{ width: "100%", height: "100%" }}
     >
       <rect
         x="0"
