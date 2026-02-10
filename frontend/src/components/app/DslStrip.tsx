@@ -7,7 +7,7 @@ export function DslStrip({ dsl }: DslStripProps) {
 
   return (
     <div className="space-y-2">
-      <div className="text-sm font-medium text-gray-700">DSL</div>
+      <div className="text-base font-bold text-gray-1000">DSL</div>
       <div className="flex items-center gap-2 overflow-x-auto pb-2">
         {dsl.map((token, index) => (
           <div key={`${token}-${index}`} className="flex items-center gap-2 shrink-0">

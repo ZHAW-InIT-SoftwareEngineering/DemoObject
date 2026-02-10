@@ -78,7 +78,7 @@ export default function App() {
       className={
         isStartScreen
           ? "min-h-screen p-6 flex flex-col items-center justify-center"
-          : "min-h-screen p-6"
+          : "min-h-screen p-6 flex flex-col items-center justify-start md:justify-center"
       }
     >
       <Toast toast={toast} />
@@ -89,7 +89,7 @@ export default function App() {
           <StartScreen loading={loading} onStart={handleStartAdventure} />
         </div>
       ) : (
-        <div className="mx-auto w-full max-w-[520px] space-y-4">
+        <div className="w-full max-w-[520px] space-y-4">
           {error && <div className="text-red-600">{error}</div>}
           {submitError && <div className="text-red-600">{submitError}</div>}
           <DslStrip dsl={dsl} />
