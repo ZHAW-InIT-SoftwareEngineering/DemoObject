@@ -12,6 +12,7 @@ type PathPoint = { x: number; y: number };
 type PathSelection = {
   selectedNodeIds: number[];
   path: PathPoint[];
+  pathKey: string;
   apiRequest: MazesMazeIdPathsDslPostRequest | null;
   highlightedEdgeKeys: string[];
   selectNode: (node: MazesMazeIdGet200ResponseNodesInner) => boolean;
@@ -153,6 +154,7 @@ export function usePathSelection(
   return {
     selectedNodeIds,
     path,
+    pathKey,
     apiRequest,
     highlightedEdgeKeys,
     selectNode,

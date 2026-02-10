@@ -14,6 +14,6 @@ export function useShortestPath() {
 
     return {
         shortestPath,
-        getShortestPath
+        getShortestPath,
     }
 }

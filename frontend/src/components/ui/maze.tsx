@@ -85,7 +85,7 @@ function renderEdge(
   );
 }
 
-export function MazeView({
+export function Maze({
   maze,
   width = DEFAULT_SIZE,
   height = DEFAULT_SIZE,

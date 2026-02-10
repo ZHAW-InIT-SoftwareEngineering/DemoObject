@@ -1,11 +1,11 @@
-import { useMemo } from "react";
 import { useDemo, 
          usePathSelection, 
          useShortestPath,
+         useShortestPathEdgeKeys,
          useToast } from "./hooks/";
-import { Button } from "@/components/ui/button";
-import { Toast } from "@/components/ui/toast";
-import { MazeView } from "@/util";
+import { Button } from "@/components/ui";
+import { Toast } from "@/components/ui";
+import { Maze } from "@/components/ui";
 
 export default function App() {
   const mazeId = 0;
@@ -16,6 +16,7 @@ export default function App() {
     selectedNodeIds,
     highlightedEdgeKeys,
     apiRequest,
+    pathKey,
     selectNode,
     resetPath,
     getDSL,
@@ -26,35 +27,16 @@ export default function App() {
   } = usePathSelection(maze, session?.sessionId);
   
   const { shortestPath, getShortestPath } = useShortestPath();
+  const shortestPathEdgeKeys = useShortestPathEdgeKeys(
+    maze,
+    shortestPath?.path,
+  );
   
   const { toast, showToast } = useToast();
 
   const handleStartAdventure = () => {
     start(mazeId);
   };
-
-  const pathKey = useMemo(() => selectedNodeIds.join(","), [selectedNodeIds]);
-  const shortestPathEdgeKeys = useMemo(() => {
-    if (!maze || !shortestPath?.path?.length) return [];
-    const nodeIdByCoord = new Map<string, number>();
-    for (const node of maze.nodes ?? []) {
-      nodeIdByCoord.set(`${node.x},${node.y}`, node.mazeNodeId);
-    }
-    const ids: number[] = [];
-    for (const point of shortestPath.path) {
-      const id = nodeIdByCoord.get(`${point.x},${point.y}`);
-      if (id !== undefined) ids.push(id);
-    }
-    if (ids.length < 2) return [];
-    const keys: string[] = [];
-    for (let i = 0; i < ids.length - 1; i += 1) {
-      const from = ids[i];
-      const to = ids[i + 1];
-      keys.push(`${from}-${to}`);
-      keys.push(`${to}-${from}`);
-    }
-    return keys;
-  }, [maze, shortestPath?.path]);
 
   const handleResetPath = () => {
     resetPath();
@@ -145,7 +127,7 @@ export default function App() {
       )}
 
       {maze && (
-        <MazeView
+        <Maze
           maze={maze}
           className="border rounded bg-white"
           onNodeClick={selectNode}
