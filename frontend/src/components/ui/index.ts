@@ -12,4 +12,3 @@ export {
   CardContent,
 } from "./card"
 export { Separator } from "./separator"
-export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "./tooltip"
