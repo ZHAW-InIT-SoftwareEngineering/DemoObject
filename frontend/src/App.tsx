@@ -5,7 +5,7 @@ import {
   useShortestPathEdgeKeys,
 } from "./hooks/";
 import { Toaster } from "@/components/ui";
-import { ActionButtons } from "@/components/app/ActionButtons";
+import { ActionPanel } from "@/components/app/ActionPanel";
 import { DslStrip } from "@/components/app/DslStrip";
 import { MazePanel } from "@/components/app/MazePanel";
 import { PathInfo } from "@/components/app/PathInfo";
@@ -106,16 +106,20 @@ export default function App() {
               secondaryHighlightedEdgeKeys={shortestPathEdgeKeys}
             />
           )}
-          <ActionButtons
+          <ActionPanel
             maze={maze}
-            selectedNodeIds={selectedNodeIds}
-            apiRequest={apiRequest}
-            submitting={submitting}
-            pathKey={pathKey}
-            lastSubmittedKey={lastSubmittedKey}
-            onReset={handleResetPath}
-            onSubmit={handleSubmitPath}
-            onShortestPath={handleShortestPath}
+            pathState={{
+              selectedNodeIds,
+              apiRequest,
+              submitting,
+              pathKey,
+              lastSubmittedKey,
+            }}
+            actions={{
+              onReset: handleResetPath,
+              onSubmit: handleSubmitPath,
+              onShortestPath: handleShortestPath,
+            }}
           />
         </div>
       )}
