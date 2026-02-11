@@ -3,6 +3,7 @@ import {
   usePathSelection,
   useShortestPath,
   useShortestPathEdgeKeys,
+  usePathAnimation,
 } from "./hooks/";
 import { Toaster } from "@/components/ui";
 import { ActionPanel } from "@/components/app/ActionPanel";
@@ -10,13 +11,14 @@ import { DslStrip } from "@/components/app/DslStrip";
 import { MazePanel } from "@/components/app/MazePanel";
 import { PathInfo } from "@/components/app/PathInfo";
 import { StartScreen } from "@/components/app/StartScreen";
+import { AnimationView } from "./components/app/AnimationView";
 import { toast } from "sonner";
 
 export default function App() {
-  const mazeId = 0;
+  const MAZEID = 0;
 
-  const { loading, session, maze, error, start } = useDemo();
-  
+  const { loading, session, maze, error, startAdventure } = useDemo();
+
   const {
     selectedNodeIds,
     highlightedEdgeKeys,
@@ -31,16 +33,18 @@ export default function App() {
     submitting,
     lastSubmittedKey,
   } = usePathSelection(maze, session?.sessionId);
-  
+
   const { shortestPath, getShortestPath } = useShortestPath();
   const shortestPathEdgeKeys = useShortestPathEdgeKeys(
     maze,
     shortestPath?.path,
   );
+  const { animationState, startAnimation, finishAnimation } = usePathAnimation();
+
   const userPathLength = Math.max(0, selectedNodeIds.length - 1);
   
   const handleStartAdventure = () => {
-    start(mazeId);
+    startAdventure(MAZEID);
   };
 
   const handleResetPath = () => {
@@ -58,90 +62,97 @@ export default function App() {
 
   const handleShortestPath = async () => {
     try {
-      const shortestPathRes = await getShortestPath(mazeId);
+      const shortestPathRes = await getShortestPath(MAZEID);
       if (shortestPathRes) {
         toast.success("Shortest path loaded.");
       } else {
         toast.error("Failed to compute shortest path.");
       }
     } catch (err: any) {
-      console.error("Failed to find a shortest path.")
+      console.error("Failed to find a shortest path.");
       toast.error("Failed to find a shortest path.");
     }
-  }
+  };
 
   const handleUndoNodeSelection = () => {
     undoNodeSelection();
   };
 
   const handleShowAnimation = () => {
-    toast("Path animation is not implemented yet.");
+    toast("Path animation on-going.");
+    startAnimation();
   };
 
   const isPathSubmitted =
     Boolean(lastSubmittedKey) && pathKey === lastSubmittedKey;
   const hasShortestPathDisplayed = shortestPathEdgeKeys.length > 0;
-  const canShowAnimation = isPathSubmitted && hasShortestPathDisplayed;
+  const canShowAnimationButton = isPathSubmitted && hasShortestPathDisplayed;
 
   const isStartScreen = !session;
+  const isAnimationView =
+    animationState.status === "playing";
 
-  return (
-    <div
-      className={
-        isStartScreen
-          ? "min-h-screen p-6 flex flex-col items-center justify-center"
-          : "min-h-screen p-6 flex flex-col items-center justify-start md:justify-center"
-      }
-    >
-      <Toaster />
-
-      {isStartScreen ? (
+  if (isStartScreen) {
+    return (
+      <div className="min-h-screen p-6 flex flex-col items-center justify-center">
+        <Toaster />
         <div className="w-full max-w-[520px] space-y-4">
           {error && <div className="text-red-600">{error}</div>}
           <StartScreen loading={loading} onStart={handleStartAdventure} />
         </div>
-      ) : (
-        <div className="w-full max-w-[520px] space-y-4">
-          {error && <div className="text-red-600">{error}</div>}
-          {submitError && <div className="text-red-600">{submitError}</div>}
-          <DslStrip dsl={dsl} />
-          {maze && (
-            <PathInfo
-              userPathLength={userPathLength}
-              shortestPathLength={shortestPath?.length}
-            />
-          )}
-          {maze && (
-            <MazePanel
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen p-6 flex flex-col items-center justify-start md:justify-center">
+      <Toaster />
+      <div className="w-full max-w-[520px] space-y-4">
+        {isAnimationView ? (
+          <AnimationView onComplete={finishAnimation} />
+        ) : (
+          <>
+            {error && <div className="text-red-600">{error}</div>}
+            {submitError && <div className="text-red-600">{submitError}</div>}
+            <DslStrip dsl={dsl} />
+            {maze && (
+              <PathInfo
+                userPathLength={userPathLength}
+                shortestPathLength={shortestPath?.length}
+              />
+            )}
+            {maze && (
+              <MazePanel
+                maze={maze}
+                onNodeClick={selectNode}
+                onUndo={handleUndoNodeSelection}
+                onShowAnimation={handleShowAnimation}
+                isPathSubmitted={isPathSubmitted}
+                canShowAnimationButton={canShowAnimationButton}
+                selectedNodeIds={selectedNodeIds}
+                highlightedEdgeKeys={highlightedEdgeKeys}
+                secondaryHighlightedEdgeKeys={shortestPathEdgeKeys}
+              />
+            )}
+            <ActionPanel
               maze={maze}
-              onNodeClick={selectNode}
-              onUndo={handleUndoNodeSelection}
-              onShowAnimation={handleShowAnimation}
-              isPathSubmitted={isPathSubmitted}
-              canShowAnimation={canShowAnimation}
-              selectedNodeIds={selectedNodeIds}
-              highlightedEdgeKeys={highlightedEdgeKeys}
-              secondaryHighlightedEdgeKeys={shortestPathEdgeKeys}
+              pathState={{
+                selectedNodeIds,
+                apiRequest,
+                submitting,
+                pathKey,
+                lastSubmittedKey,
+                hasShortestPathDisplayed,
+              }}
+              actions={{
+                onReset: handleResetPath,
+                onSubmit: handleSubmitPath,
+                onShortestPath: handleShortestPath,
+              }}
             />
-          )}
-          <ActionPanel
-            maze={maze}
-            pathState={{
-              selectedNodeIds,
-              apiRequest,
-              submitting,
-              pathKey,
-              lastSubmittedKey,
-              hasShortestPathDisplayed,
-            }}
-            actions={{
-              onReset: handleResetPath,
-              onSubmit: handleSubmitPath,
-              onShortestPath: handleShortestPath,
-            }}
-          />
-        </div>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

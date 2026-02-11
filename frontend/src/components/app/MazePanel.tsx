@@ -12,7 +12,7 @@ type MazePanelProps = {
   onUndo: () => void;
   onShowAnimation: () => void;
   isPathSubmitted: boolean;
-  canShowAnimation: boolean;
+  canShowAnimationButton: boolean;
   selectedNodeIds: number[];
   highlightedEdgeKeys: string[];
   secondaryHighlightedEdgeKeys: string[];
@@ -24,7 +24,7 @@ export function MazePanel({
   onUndo,
   onShowAnimation,
   isPathSubmitted,
-  canShowAnimation,
+  canShowAnimationButton,
   selectedNodeIds,
   highlightedEdgeKeys,
   secondaryHighlightedEdgeKeys,
@@ -34,7 +34,7 @@ export function MazePanel({
     <Card className="py-4">
       <CardContent className="px-4 space-y-3">
         <MazePanelHeader
-          pathState={{ selectedNodeIds, isPathSubmitted, canShowAnimation }}
+          pathState={{ selectedNodeIds, isPathSubmitted, canShowAnimationButton }}
           actions={{ onUndo, onShowAnimation }}
         />
         <Separator />

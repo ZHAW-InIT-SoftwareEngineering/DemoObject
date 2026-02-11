@@ -8,7 +8,7 @@ export function useDemo() {
   const [maze, setMaze] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const start = useCallback(async (mazeId: number) => {
+  const startAdventure = useCallback(async (mazeId: number) => {
     setLoading(true);
     setError(null);
 
@@ -24,5 +24,5 @@ export function useDemo() {
     }
   }, []);
 
-  return { loading, session, maze, error, start };
+  return { loading, session, maze, error, startAdventure };
 }

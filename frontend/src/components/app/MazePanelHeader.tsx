@@ -5,7 +5,7 @@ type MazePanelHeaderProps = {
     pathState: {
         selectedNodeIds: number[];
         isPathSubmitted: boolean;
-        canShowAnimation: boolean;
+        canShowAnimationButton: boolean;
     };
     actions: {
         onUndo: () => void;
@@ -17,7 +17,7 @@ export function MazePanelHeader({ actions, pathState }: MazePanelHeaderProps) {
     const { onUndo, onShowAnimation } = actions;
 
     const canUndo = pathState.selectedNodeIds.length >= 2;
-    const { isPathSubmitted, canShowAnimation } = pathState;
+    const { isPathSubmitted, canShowAnimationButton } = pathState;
 
     return (
         <div className="flex items-center justify-between gap-3 text-sm text-gray-700">
@@ -35,7 +35,7 @@ export function MazePanelHeader({ actions, pathState }: MazePanelHeaderProps) {
             <ActionButton
               label="Show Animation"
               onClick={onShowAnimation}
-              disabled={!canShowAnimation}
+              disabled={!canShowAnimationButton}
               fullWidth={false}
             />
           ) : (
