@@ -13,6 +13,7 @@ type ActionPanelProps = {
     submitting: boolean;
     pathKey: string;
     lastSubmittedKey: string | null;
+    hasShortestPathDisplayed: boolean;
   };
   actions: {
     onReset: () => void;
@@ -28,6 +29,7 @@ export function ActionPanel({ maze, pathState, actions }: ActionPanelProps) {
     submitting,
     pathKey,
     lastSubmittedKey,
+    hasShortestPathDisplayed,
   } = pathState;
   const { onReset, onSubmit, onShortestPath } = actions;
 
@@ -41,7 +43,8 @@ export function ActionPanel({ maze, pathState, actions }: ActionPanelProps) {
   const canRequestShortestPath = Boolean(lastSubmittedKey);
   const isResetDisabled = selectedNodeIds.length === 0;
   const isSubmitDisabled = !canSubmit;
-  const isShortestDisabled = !canRequestShortestPath;
+  const isShortestDisabled =
+    !canRequestShortestPath || hasShortestPathDisplayed;
 
   return (
     <Card className="py-4">

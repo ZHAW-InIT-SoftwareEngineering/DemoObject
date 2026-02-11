@@ -23,6 +23,7 @@ export default function App() {
     apiRequest,
     pathKey,
     selectNode,
+    undoNodeSelection,
     resetPath,
     getDSL,
     dsl,
@@ -69,6 +70,19 @@ export default function App() {
     }
   }
 
+  const handleUndoNodeSelection = () => {
+    undoNodeSelection();
+  };
+
+  const handleShowAnimation = () => {
+    toast("Path animation is not implemented yet.");
+  };
+
+  const isPathSubmitted =
+    Boolean(lastSubmittedKey) && pathKey === lastSubmittedKey;
+  const hasShortestPathDisplayed = shortestPathEdgeKeys.length > 0;
+  const canShowAnimation = isPathSubmitted && hasShortestPathDisplayed;
+
   const isStartScreen = !session;
 
   return (
@@ -101,6 +115,10 @@ export default function App() {
             <MazePanel
               maze={maze}
               onNodeClick={selectNode}
+              onUndo={handleUndoNodeSelection}
+              onShowAnimation={handleShowAnimation}
+              isPathSubmitted={isPathSubmitted}
+              canShowAnimation={canShowAnimation}
               selectedNodeIds={selectedNodeIds}
               highlightedEdgeKeys={highlightedEdgeKeys}
               secondaryHighlightedEdgeKeys={shortestPathEdgeKeys}
@@ -114,6 +132,7 @@ export default function App() {
               submitting,
               pathKey,
               lastSubmittedKey,
+              hasShortestPathDisplayed,
             }}
             actions={{
               onReset: handleResetPath,

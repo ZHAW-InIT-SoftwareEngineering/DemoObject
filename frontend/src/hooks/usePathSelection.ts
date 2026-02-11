@@ -18,6 +18,7 @@ type PathSelection = {
   selectNode: (node: MazesMazeIdGet200ResponseNodesInner) => boolean;
   resetPath: () => void;
   getDSL: () => Promise<SessionsSessionIdPathsGet200Response | null>;
+  undoNodeSelection: () => void;
   dsl: string[] | null;
   submitError: string | null;
   submitting: boolean;
@@ -77,6 +78,7 @@ export function usePathSelection(
     }
     setDsl(null);
     setSubmitError(null);
+    
     setLastSubmittedKey(null);
   }, [maze?.startNodeId]);
 
@@ -110,6 +112,10 @@ export function usePathSelection(
     setDsl(null);
     setSubmitError(null);
   }, [pathKey, sessionId]);
+
+  const undoNodeSelection = useCallback(() => {
+    setSelectedNodeIds((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev))
+  }, []);
 
   const getDSL = useCallback(async () => {
     if (!sessionId || !apiRequest) return null;
@@ -168,6 +174,7 @@ export function usePathSelection(
     selectNode,
     resetPath,
     getDSL,
+    undoNodeSelection,
     dsl,
     submitError,
     submitting,

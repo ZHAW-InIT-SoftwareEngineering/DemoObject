@@ -9,6 +9,10 @@ import { MazePanelHeader } from "./MazePanelHeader";
 type MazePanelProps = {
   maze: MazesMazeIdGet200Response;
   onNodeClick: (node: MazesMazeIdGet200ResponseNodesInner) => void;
+  onUndo: () => void;
+  onShowAnimation: () => void;
+  isPathSubmitted: boolean;
+  canShowAnimation: boolean;
   selectedNodeIds: number[];
   highlightedEdgeKeys: string[];
   secondaryHighlightedEdgeKeys: string[];
@@ -17,15 +21,22 @@ type MazePanelProps = {
 export function MazePanel({
   maze,
   onNodeClick,
+  onUndo,
+  onShowAnimation,
+  isPathSubmitted,
+  canShowAnimation,
   selectedNodeIds,
   highlightedEdgeKeys,
   secondaryHighlightedEdgeKeys,
 }: MazePanelProps) {
+
   return (
     <Card className="py-4">
       <CardContent className="px-4 space-y-3">
-        <MazePanelHeader>
-        </MazePanelHeader>
+        <MazePanelHeader
+          pathState={{ selectedNodeIds, isPathSubmitted, canShowAnimation }}
+          actions={{ onUndo, onShowAnimation }}
+        />
         <Separator />
         <div className="w-full aspect-square">
           <Maze
