@@ -79,14 +79,25 @@ export default function App() {
   };
 
   const handleShowAnimation = () => {
+    const animationEdgeKeys =
+      shortestPathEdgeKeys.length > 0
+        ? shortestPathEdgeKeys
+        : highlightedEdgeKeys;
+
+    if (!startAnimation(animationEdgeKeys)) {
+      toast.error("No path available to animate.");
+      return;
+    }
+
     toast("Path animation on-going.");
-    startAnimation();
   };
 
   const isPathSubmitted =
     Boolean(lastSubmittedKey) && pathKey === lastSubmittedKey;
   const hasShortestPathDisplayed = shortestPathEdgeKeys.length > 0;
-  const canShowAnimationButton = isPathSubmitted && hasShortestPathDisplayed;
+  const hasAnimatablePath =
+    highlightedEdgeKeys.length > 0 || shortestPathEdgeKeys.length > 0;
+  const canShowAnimationButton = isPathSubmitted && hasAnimatablePath;
 
   const isStartScreen = !session;
   const isAnimationView =
@@ -109,7 +120,11 @@ export default function App() {
       <Toaster />
       <div className="w-full max-w-[520px] space-y-4">
         {isAnimationView ? (
-          <AnimationView onComplete={finishAnimation} />
+          <AnimationView
+            maze={maze}
+            edgeKeys={animationState.edgeKeys}
+            onComplete={finishAnimation}
+          />
         ) : (
           <>
             {error && <div className="text-red-600">{error}</div>}
