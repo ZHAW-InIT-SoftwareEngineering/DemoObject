@@ -1,81 +1,83 @@
-# Path Animation Plan (3D First)
+# 3D Animation Spec (Single Source of Truth)
 
-## Goal
-- Implement path animation incrementally with minimal risk.
-- Reuse the current path array.
-- Satisfy the non-functional requirement that animation must be 3D and eye-catching.
+This file is the only canonical specification for frontend path animation.
 
-## Non-Functional Requirement
-- The animation must be 3D from the first user-visible version.
-- The result should act as an eye-catcher, not only a technical preview.
-- The user cannot stop or pause the animation once it starts.
+## Objective
+When the user clicks `Show Animation`, the app runs a 3D animation of the submitted user path using the same maze layout/topology shown in the 2D `MazePanel` SVG.
 
-## Technology Decision
-- MVP rendering: `three.js` via `@react-three/fiber` in the current React + TypeScript app.
-- MVP perspective: POV/first-person camera moving along the path.
-- Blender is optional for asset polish and should not block MVP.
-- Keep animation logic renderer-agnostic so visuals can evolve without changing core motion code.
+## Mandatory Product Behavior
+1. Trigger: animation starts from `Show Animation`.
+2. Source path (MVP): animate submitted user path only.
+3. Visuals: animation is 3D from the first user-visible MVP.
+4. Camera mode: POV / first-person traversal along the selected path.
+5. Interruption rules: no stop, no pause, no quit, no interruption controls.
+6. Completion behavior: after playback ends, return to the same normal screen shown before animation started.
+7. Failure behavior (MVP): if 3D rendering/initialization fails, show a toast error.
 
-## Key Concepts
-- `three.js`: browser 3D rendering/runtime library (WebGL).
-- Blender: 3D content creation tool (models/animations), exports `.glb/.gltf`.
-- Typical flow: Blender creates assets, Three.js loads and renders them.
+## Scope
+### In MVP
+1. 3D maze rendering using runtime `maze.nodes` and `maze.edges`.
+2. Time-based camera movement across ordered path segments.
+3. Stable animation state model: `idle | playing | done`.
+4. Disable conflicting actions while animation is playing.
+5. Reset animation state when the underlying submitted path changes.
 
-## Phase 1: MVP 3D Animation (Required)
-1. Add animation state model:
-   - `idle | playing | done`
-2. Add controls:
-   - `Show Animation` (already added)
-   - optional `Replay` (only after `done`)
-   - no pause/stop controls
-3. Build animation engine:
-   - Use `requestAnimationFrame`.
-   - Animate the POV camera from node `i` to node `i+1`.
-   - Interpolate position with progress `t` in `[0, 1]`.
-4. Render in 3D from day one:
-   - Draw maze nodes/edges as simple 3D primitives (spheres/lines/boxes).
-   - Move camera with look-ahead direction (no character animation needed in MVP).
-   - Add key light + rim light, and subtle environment/background.
-4. Data input:
-   - Use the submitted user path array as source.
-   - Keep shortest-path animation as a follow-up pass.
-5. UX behavior:
-   - Disable conflicting actions while animation is playing.
-   - Animation is non-interruptible once started.
-   - Reset animation when path changes.
-6. Done criteria:
-   - POV camera travels full path smoothly in a 3D scene.
-   - Non-interruptible playback is stable.
-   - 3D presentation is visually strong enough for demo impact.
-   - No TypeScript errors.
+### Out of MVP
+1. Shortest-path animation pipeline (follow-up phase).
+2. Any pause/stop/exit controls.
+3. Blender assets.
+4. Visual effects beyond essential demo quality.
 
-## Suggested Implementation Shape
-1. Add a hook `usePathAnimation`:
-   - Input: `points`, `speed`, `isPlaying`
-   - Output: current interpolated position, segment index, state controls
-2. Render layer:
-   - Build `Maze3DScene` with `@react-three/fiber`.
-   - Drive camera transform from animation state (POV path traversal).
-   - Keep maze interaction and animation concerns separated.
-3. Trigger flow:
-   - `Show Animation` starts animation of user path.
-   - Later, chain shortest-path animation after user-path completes.
+## Technical Direction
+1. Renderer: `three` + `@react-three/fiber`.
+2. Scene composition:
+   - `MazeScene3D`: canvas, lighting, environment, lifecycle.
+   - `MazeGeometry`: 3D primitives from graph layout.
+   - `PovCameraRig`: camera motion and look-ahead.
+3. Motion: `requestAnimationFrame`/frame-loop driven interpolation by elapsed time.
+4. Keep motion logic independent from visual styling so polish can evolve without changing traversal behavior.
 
-## Phase 2: Eye-Catcher Polish
-1. Improve camera choreography:
-   - intro angle, follow movement, and finish framing.
-2. Improve visual style:
-   - stronger materials, shadows, fog, and background treatment.
-3. Add effects carefully:
-   - path glow/trail, checkpoint pulse, subtle motion blur.
-4. Keep frame time stable on common laptop hardware.
+## Data Contracts
+Animation input must be renderer-agnostic and path-source-agnostic:
 
-## Phase 3: Optional Blender Assets
-1. Create/export `.glb` maze tiles/player.
-2. Load assets in Three.js scene.
-3. Keep motion logic unchanged (same path engine).
+```ts
+type RuntimeAnimationPath = {
+  nodeIds: number[];
+  edgeKeys: string[];
+  source: "user" | "shortest";
+};
+```
 
-## Why This Order
-- Meets 3D requirement in MVP.
-- Delivers visible impact early while keeping implementation risk controlled.
-- Keeps Blender as an enhancement path, not a dependency for first delivery.
+MVP rule:
+- `source` must be `"user"` for launched animation.
+
+## Layout Fidelity Requirement
+The 3D maze must preserve the same graph layout relationships as the 2D SVG maze:
+1. Node identity mapping is deterministic (`mazeNodeId` preserved).
+2. Edge connectivity is identical.
+3. Relative spatial structure is preserved via deterministic coordinate transform from 2D coordinates to 3D world coordinates.
+
+## Integration Plan
+1. Keep existing path selection/submission flow.
+2. Build animation payload from submitted user path state.
+3. `Show Animation` transitions app view to animation mode.
+4. On complete, transition back to normal maze screen.
+5. On runtime failure, show toast and keep app usable.
+
+## Acceptance Criteria
+1. Clicking `Show Animation` plays a 3D POV traversal over the submitted user path.
+2. During playback, user cannot pause/stop/quit/interfere with animation flow.
+3. Playback runs to completion and returns to the prior non-animation screen.
+4. Maze structure seen in 3D matches the 2D maze graph layout.
+5. No TypeScript errors from animation additions.
+
+## QA Checklist (MVP)
+1. Two-node path plays correctly.
+2. Long path with multiple turns plays end-to-end.
+3. Path updates reset animation state correctly.
+4. Failure path (forced 3D init failure) shows toast.
+5. Post-animation state matches pre-animation screen state.
+
+## Follow-Up Phase
+1. Extend same pipeline to shortest-path animation (`source: "shortest"`).
+2. Add visual polish (lighting/material/effects) without changing core traversal contract.

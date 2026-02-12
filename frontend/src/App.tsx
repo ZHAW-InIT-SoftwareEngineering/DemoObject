@@ -79,10 +79,13 @@ export default function App() {
   };
 
   const handleShowAnimation = () => {
+    /*
     const animationEdgeKeys =
       shortestPathEdgeKeys.length > 0
         ? shortestPathEdgeKeys
         : highlightedEdgeKeys;
+    */
+    const animationEdgeKeys = highlightedEdgeKeys
 
     if (!startAnimation(animationEdgeKeys)) {
       toast.error("No path available to animate.");

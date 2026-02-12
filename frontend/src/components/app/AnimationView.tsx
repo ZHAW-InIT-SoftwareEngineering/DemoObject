@@ -1,6 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { MazesMazeIdGet200Response } from "@/api";
-import { Card, CardContent, Maze } from "@/components/ui";
+import { Card, CardContent } from "@/components/ui";
+import { useEdgePlayback } from "@/hooks/useEdgePlayback";
+import { buildAnimationSceneData } from "@/lib/animation";
+import { Canvas } from "@react-three/fiber";
+import { Line } from "@react-three/drei";
+import { AnimationCameraRig } from "./AnimationCameraRig";
 
 type AnimationViewProps = {
   maze: MazesMazeIdGet200Response | null;
@@ -17,71 +22,77 @@ export function AnimationView({
   stepMs = 220,
   settleMs = 450,
 }: AnimationViewProps) {
-  const [visibleGroupCount, setVisibleGroupCount] = useState(0);
+  const { progress, total } = useEdgePlayback({
+    edgeKeys,
+    onComplete,
+    stepMs,
+    settleMs,
+  });
 
-  const edgeGroups = useMemo(() => {
-    const groups: string[][] = [];
-    for (let i = 0; i < edgeKeys.length; i += 1) {
-      const current = edgeKeys[i];
-      const next = edgeKeys[i + 1];
-      if (next) {
-        const [fromA, toA] = current.split("-");
-        const [fromB, toB] = next.split("-");
-        if (fromA === toB && toA === fromB) {
-          groups.push([current, next]);
-          i += 1;
-          continue;
-        }
-      }
-      groups.push([current]);
-    }
-    return groups;
-  }, [edgeKeys]);
-
-  const visibleEdgeKeys = useMemo(
-    () => edgeGroups.slice(0, visibleGroupCount).flat(),
-    [edgeGroups, visibleGroupCount],
+  const sceneData = useMemo(
+    () => buildAnimationSceneData(maze, edgeKeys, progress),
+    [maze, edgeKeys, progress],
   );
-
-  useEffect(() => {
-    setVisibleGroupCount(0);
-  }, [edgeGroups]);
-
-  useEffect(() => {
-    if (edgeGroups.length === 0) {
-      onComplete();
-      return;
-    }
-
-    if (visibleGroupCount >= edgeGroups.length) {
-      const timer = window.setTimeout(() => {
-        onComplete();
-      }, settleMs);
-      return () => window.clearTimeout(timer);
-    }
-
-    const timer = window.setTimeout(() => {
-      setVisibleGroupCount((count) => count + 1);
-    }, stepMs);
-
-    return () => window.clearTimeout(timer);
-  }, [edgeGroups.length, onComplete, settleMs, stepMs, visibleGroupCount]);
-
   if (!maze) return null;
 
   return (
     <Card className="py-4">
       <CardContent className="px-4 space-y-3">
         <div className="text-sm text-gray-700">
-          Playing animation ({Math.min(visibleGroupCount, edgeGroups.length)}/
-          {edgeGroups.length})
+          Playing animation ({progress}/{total})
         </div>
-        <div className="w-full aspect-square">
-          <Maze
-            maze={maze}
-            className="h-full w-full border rounded bg-white"
-            highlightedEdgeKeys={visibleEdgeKeys}
-          />
+        <div className="w-full aspect-square overflow-hidden rounded border bg-slate-100">
+          <Canvas camera={{ fov: 75, near: 0.01, far: 500 }}>
+            <color attach="background" args={["#f8fafc"]} />
+            <ambientLight intensity={0.9} />
+            <directionalLight position={[8, 18, 8]} intensity={1.25} />
+
+            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.04, 0]}>
+              <planeGeometry args={sceneData.floorSize} />
+              <meshStandardMaterial color="#e2e8f0" />
+            </mesh>
+
+            {sceneData.mazeEdgeLines.map((line, index) => (
+              <Line
+                key={`maze-${index}-${line[0][0]}-${line[0][2]}-${line[1][0]}-${line[1][2]}`}
+                points={line}
+                color="#cbd5e1"
+                lineWidth={1}
+              />
+            ))}
+
+            {sceneData.routeLine.length >= 2 && (
+              <Line points={sceneData.routeLine} color="#94a3b8" lineWidth={1} />
+            )}
+
+            {sceneData.visibleRouteLine.length >= 2 && (
+              <Line
+                points={sceneData.visibleRouteLine}
+                color="#16a34a"
+                lineWidth={2}
+              />
+            )}
+
+            {sceneData.startPoint && (
+              <mesh position={sceneData.startPoint}>
+                <sphereGeometry args={[0.22, 20, 20]} />
+                <meshStandardMaterial color="#16a34a" />
+              </mesh>
+            )}
+
+            {sceneData.endPoint && (
+              <mesh position={sceneData.endPoint}>
+                <sphereGeometry args={[0.22, 20, 20]} />
+                <meshStandardMaterial color="#dc2626" />
+              </mesh>
+            )}
+
+            <AnimationCameraRig
+              pathPoints={sceneData.routeLine}
+              progress={progress}
+              total={total}
+            />
+          </Canvas>
         </div>
       </CardContent>
     </Card>
