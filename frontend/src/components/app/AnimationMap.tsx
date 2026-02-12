@@ -10,6 +10,8 @@ type AnimationMapProps = {
   settleMs?: number;
 };
 
+// TODO: this component is unused as for now 
+//        consider to use it as a mini-map during the 3D animation
 export function AnimationMap({
   maze,
   edgeKeys,
