@@ -1,7 +1,12 @@
 import { useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { getPlaybackCameraTarget, type Vec3 } from "@/lib/animation";
+import {
+  CAMERA_HEIGHT,
+  CAMERA_LOOK_HEIGHT,
+  getPlaybackCameraTarget,
+  type Vec3,
+} from "@/lib/animation";
 
 type AnimationCameraRigProps = {
   pathPoints: Vec3[];
@@ -32,7 +37,7 @@ export function AnimationCameraRig({
     if (!target) return;
 
     const targetPosition = toVector3(target.position).add(
-      new THREE.Vector3(0, 1, 0),
+      new THREE.Vector3(0, CAMERA_HEIGHT, 0),
     );
 
     const lookDirection = toVector3(target.lookAt).sub(toVector3(target.position));
@@ -40,7 +45,7 @@ export function AnimationCameraRig({
 
     const targetLookAt = toVector3(target.position)
       .add(lookDirection.normalize().multiplyScalar(2))
-      .add(new THREE.Vector3(0, 0.7, 0));
+      .add(new THREE.Vector3(0, CAMERA_LOOK_HEIGHT, 0));
 
     if (!initializedRef.current) {
       currentPositionRef.current.copy(targetPosition);

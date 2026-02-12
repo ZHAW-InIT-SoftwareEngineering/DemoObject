@@ -1,5 +1,9 @@
-export { groupBidirectionalEdges } from "./groupBidirectionalEdges";
-export { edgeKeysToNodePath } from "./pathFromEdgeKeys";
 export { buildAnimationSceneData } from "./maze3dScene";
 export { getPlaybackCameraTarget } from "./cameraTarget";
-export type { Vec3, CameraTarget, AnimationSceneData } from "./types";
+export {
+  CAMERA_HEIGHT,
+  CAMERA_LOOK_HEIGHT,
+  WALL_HEIGHT,
+  WALL_THICKNESS,
+} from "./constants";
+export type { Vec3, CameraTarget, WallSegment, AnimationSceneData } from "./types";

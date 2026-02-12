@@ -4,6 +4,7 @@ import type {
 } from "@/api";
 import { Card, CardContent, Maze, Separator } from "@/components/ui";
 import { MazePanelHeader } from "./MazePanelHeader";
+import type { NodePath } from "@/lib/path/transforms";
 
 
 type MazePanelProps = {
@@ -11,11 +12,11 @@ type MazePanelProps = {
   onNodeClick: (node: MazesMazeIdGet200ResponseNodesInner) => void;
   onUndo: () => void;
   onShowAnimation: () => void;
+  onOpen3DPreview: () => void;
   isPathSubmitted: boolean;
   canShowAnimationButton: boolean;
-  selectedNodeIds: number[];
-  highlightedEdgeKeys: string[];
-  secondaryHighlightedEdgeKeys: string[];
+  nodePath: NodePath;
+  secondaryHighlightedNodePath: NodePath;
 };
 
 export function MazePanel({
@@ -23,19 +24,23 @@ export function MazePanel({
   onNodeClick,
   onUndo,
   onShowAnimation,
+  onOpen3DPreview,
   isPathSubmitted,
   canShowAnimationButton,
-  selectedNodeIds,
-  highlightedEdgeKeys,
-  secondaryHighlightedEdgeKeys,
+  nodePath,
+  secondaryHighlightedNodePath,
 }: MazePanelProps) {
 
   return (
     <Card className="py-4">
       <CardContent className="px-4 space-y-3">
         <MazePanelHeader
-          pathState={{ selectedNodeIds, isPathSubmitted, canShowAnimationButton }}
-          actions={{ onUndo, onShowAnimation }}
+          pathState={{
+            nodePath,
+            isPathSubmitted,
+            canShowAnimationButton,
+          }}
+          actions={{ onUndo, onShowAnimation, onOpen3DPreview }}
         />
         <Separator />
         <div className="w-full aspect-square">
@@ -43,9 +48,9 @@ export function MazePanel({
             maze={maze}
             className="h-full w-full border rounded bg-white"
             onNodeClick={onNodeClick}
-            selectedNodeIds={selectedNodeIds}
-            highlightedEdgeKeys={highlightedEdgeKeys}
-            secondaryHighlightedEdgeKeys={secondaryHighlightedEdgeKeys}
+            selectedNodePath={nodePath}
+            highlightedNodePath={nodePath}
+            secondaryHighlightedNodePath={secondaryHighlightedNodePath}
           />
         </div>
       </CardContent>

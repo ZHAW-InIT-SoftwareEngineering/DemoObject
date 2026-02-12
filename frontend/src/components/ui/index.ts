@@ -1,4 +1,4 @@
-export { Maze } from "../app/Maze"
+export { Maze } from "../app/maze/Maze"
 export { Button } from "./button"
 export { Toaster } from "./sonner"
 export { Badge } from "./badge"

@@ -4,11 +4,12 @@ import type {
 } from "@/api";
 import { Card, CardContent } from "@/components/ui";
 import { ActionButton } from "./ActionButton";
+import type { NodePath } from "@/lib/path/transforms";
 
 type ActionPanelProps = {
   maze: MazesMazeIdGet200Response | null;
   pathState: {
-    selectedNodeIds: number[];
+    nodePath: NodePath;
     apiRequest: MazesMazeIdPathsDslPostRequest | null;
     submitting: boolean;
     pathKey: string;
@@ -24,7 +25,7 @@ type ActionPanelProps = {
 
 export function ActionPanel({ maze, pathState, actions }: ActionPanelProps) {
   const {
-    selectedNodeIds,
+    nodePath,
     apiRequest,
     submitting,
     pathKey,
@@ -36,12 +37,12 @@ export function ActionPanel({ maze, pathState, actions }: ActionPanelProps) {
   const canSubmit =
     Boolean(apiRequest) &&
     !submitting &&
-    selectedNodeIds.length >= 2 &&
+    nodePath.length >= 2 &&
     pathKey !== lastSubmittedKey &&
     maze !== null;
 
   const canRequestShortestPath = Boolean(lastSubmittedKey);
-  const isResetDisabled = selectedNodeIds.length === 0;
+  const isResetDisabled = nodePath.length === 0;
   const isSubmitDisabled = !canSubmit;
   const isShortestDisabled =
     !canRequestShortestPath || hasShortestPathDisplayed;

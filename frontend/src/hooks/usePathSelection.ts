@@ -6,15 +6,12 @@ import type {
   SessionsSessionIdPathsGet200Response,
 } from "@/api";
 import { sessionsApi } from "../lib/api";
-
-type PathPoint = { x: number; y: number };
+import { nodePathToCoordPath, type NodePath } from "@/lib/path/transforms";
 
 type PathSelection = {
-  selectedNodeIds: number[];
-  path: PathPoint[];
+  nodePath: NodePath;
   pathKey: string;
   apiRequest: MazesMazeIdPathsDslPostRequest | null;
-  highlightedEdgeKeys: string[];
   selectNode: (node: MazesMazeIdGet200ResponseNodesInner) => boolean;
   resetPath: () => void;
   getDSL: () => Promise<SessionsSessionIdPathsGet200Response | null>;
@@ -25,15 +22,11 @@ type PathSelection = {
   lastSubmittedKey: string | null;
 };
 
-function edgeKey(from: number, to: number) {
-  return `${from}-${to}`;
-}
-
 export function usePathSelection(
   maze: MazesMazeIdGet200Response | null,
   sessionId?: string | null,
 ): PathSelection {
-  const [selectedNodeIds, setSelectedNodeIds] = useState<number[]>([]);
+  const [nodePath, setNodePath] = useState<NodePath>([]);
   const [dsl, setDsl] = useState<string[] | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -60,9 +53,9 @@ export function usePathSelection(
 
   useEffect(() => {
     if (maze?.startNodeId !== undefined && maze?.startNodeId !== null) {
-      setSelectedNodeIds([maze.startNodeId]);
+      setNodePath([maze.startNodeId]);
     } else {
-      setSelectedNodeIds([]);
+      setNodePath([]);
     }
   }, [maze?.mazeId]);
 
@@ -72,41 +65,23 @@ export function usePathSelection(
 
   const resetPath = useCallback(() => {
     if (maze?.startNodeId !== undefined && maze?.startNodeId !== null) {
-      setSelectedNodeIds([maze.startNodeId]);
+      setNodePath([maze.startNodeId]);
     } else {
-      setSelectedNodeIds([]);
+      setNodePath([]);
     }
     setDsl(null);
     setSubmitError(null);
-    
     setLastSubmittedKey(null);
   }, [maze?.startNodeId]);
 
-  const pathKey = useMemo(() => selectedNodeIds.join(","), [selectedNodeIds]);
-
-  const path = useMemo(() => {
-    return selectedNodeIds
-      .map((id) => nodeById.get(id))
-      .filter(Boolean)
-      .map((n) => ({ x: n!.x, y: n!.y }));
-  }, [nodeById, selectedNodeIds]);
+  const pathKey = useMemo(() => nodePath.join(","), [nodePath]);
 
   const apiRequest = useMemo(() => {
-    if (!maze || path.length === 0) return null;
+    if (!maze || nodePath.length === 0) return null;
+    const path = nodePathToCoordPath(nodePath, nodeById);
+    if (path.length !== nodePath.length) return null;
     return { path };
-  }, [maze, path]);
-
-  const highlightedEdgeKeys = useMemo(() => {
-    if (selectedNodeIds.length < 2) return [];
-    const keys: string[] = [];
-    for (let i = 0; i < selectedNodeIds.length - 1; i += 1) {
-      const from = selectedNodeIds[i];
-      const to = selectedNodeIds[i + 1];
-      keys.push(edgeKey(from, to));
-      keys.push(edgeKey(to, from));
-    }
-    return keys;
-  }, [selectedNodeIds]);
+  }, [maze, nodeById, nodePath]);
 
   useEffect(() => {
     setDsl(null);
@@ -114,7 +89,7 @@ export function usePathSelection(
   }, [pathKey, sessionId]);
 
   const undoNodeSelection = useCallback(() => {
-    setSelectedNodeIds((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev))
+    setNodePath((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
   }, []);
 
   const getDSL = useCallback(async () => {
@@ -129,7 +104,7 @@ export function usePathSelection(
       setDsl(response.dsl ?? null);
       setLastSubmittedKey(pathKey);
       return response;
-    } catch (err) {
+    } catch {
       setSubmitError("Failed to submit path.");
       return null;
     } finally {
@@ -141,10 +116,10 @@ export function usePathSelection(
     (node: MazesMazeIdGet200ResponseNodesInner) => {
       if (!maze) return false;
 
-      if (selectedNodeIds.length === 0) {
+      if (nodePath.length === 0) {
         const canStart = node.mazeNodeId === maze.startNodeId;
         if (canStart) {
-          setSelectedNodeIds([node.mazeNodeId]);
+          setNodePath([node.mazeNodeId]);
         }
         return canStart;
       }
@@ -152,25 +127,23 @@ export function usePathSelection(
       const canAppend =
         Boolean(
           adjacency
-            .get(selectedNodeIds[selectedNodeIds.length - 1])
+            .get(nodePath[nodePath.length - 1])
             ?.has(node.mazeNodeId),
         );
 
       if (canAppend) {
-        setSelectedNodeIds((prev) => [...prev, node.mazeNodeId]);
+        setNodePath((prev) => [...prev, node.mazeNodeId]);
       }
 
       return canAppend;
     },
-    [adjacency, maze, selectedNodeIds],
+    [adjacency, maze, nodePath],
   );
 
   return {
-    selectedNodeIds,
-    path,
+    nodePath,
     pathKey,
     apiRequest,
-    highlightedEdgeKeys,
     selectNode,
     resetPath,
     getDSL,

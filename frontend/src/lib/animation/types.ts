@@ -5,8 +5,14 @@ export type CameraTarget = {
   lookAt: Vec3;
 };
 
+export type WallSegment = {
+  position: Vec3;
+  size: Vec3;
+  rotationY: number;
+};
+
 export type AnimationSceneData = {
-  mazeEdgeLines: Vec3[][];
+  wallSegments: WallSegment[];
   routeLine: Vec3[];
   visibleRouteLine: Vec3[];
   startPoint: Vec3 | null;

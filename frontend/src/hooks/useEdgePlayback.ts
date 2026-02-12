@@ -1,45 +1,45 @@
 import { useEffect, useMemo, useState } from "react";
-import { groupBidirectionalEdges } from "@/lib/animation/groupBidirectionalEdges";
+import type { NodePath } from "@/lib/path/transforms";
 
 type UseEdgePlaybackOptions = {
-  edgeKeys: string[];
+  nodePath: NodePath;
   onComplete: () => void;
   stepMs?: number;
   settleMs?: number;
 };
 
 type UseEdgePlaybackResult = {
-  visibleEdgeKeys: string[];
+  visibleNodePath: NodePath;
   progress: number;
   total: number;
 };
 
 export function useEdgePlayback({
-  edgeKeys,
+  nodePath,
   onComplete,
   stepMs = 220,
   settleMs = 450,
 }: UseEdgePlaybackOptions): UseEdgePlaybackResult {
-  const [visibleGroupCount, setVisibleGroupCount] = useState(0);
+  const [visibleSegmentCount, setVisibleSegmentCount] = useState(0);
+  const totalSegments = Math.max(nodePath.length - 1, 0);
 
-  const edgeGroups = useMemo(() => groupBidirectionalEdges(edgeKeys), [edgeKeys]);
-
-  const visibleEdgeKeys = useMemo(
-    () => edgeGroups.slice(0, visibleGroupCount).flat(),
-    [edgeGroups, visibleGroupCount],
-  );
-
-  useEffect(() => {
-    setVisibleGroupCount(0);
-  }, [edgeGroups]);
+  const visibleNodePath = useMemo(() => {
+    if (nodePath.length === 0) return [];
+    const visibleNodeCount = Math.min(nodePath.length, visibleSegmentCount + 1);
+    return nodePath.slice(0, visibleNodeCount);
+  }, [nodePath, visibleSegmentCount]);
 
   useEffect(() => {
-    if (edgeGroups.length === 0) {
+    setVisibleSegmentCount(0);
+  }, [nodePath]);
+
+  useEffect(() => {
+    if (totalSegments === 0) {
       onComplete();
       return;
     }
 
-    if (visibleGroupCount >= edgeGroups.length) {
+    if (visibleSegmentCount >= totalSegments) {
       const timer = window.setTimeout(() => {
         onComplete();
       }, settleMs);
@@ -47,15 +47,15 @@ export function useEdgePlayback({
     }
 
     const timer = window.setTimeout(() => {
-      setVisibleGroupCount((count) => count + 1);
+      setVisibleSegmentCount((count) => count + 1);
     }, stepMs);
 
     return () => window.clearTimeout(timer);
-  }, [edgeGroups.length, onComplete, settleMs, stepMs, visibleGroupCount]);
+  }, [onComplete, settleMs, stepMs, totalSegments, visibleSegmentCount]);
 
   return {
-    visibleEdgeKeys,
-    progress: Math.min(visibleGroupCount, edgeGroups.length),
-    total: edgeGroups.length,
+    visibleNodePath,
+    progress: Math.min(visibleSegmentCount, totalSegments),
+    total: totalSegments,
   };
 }

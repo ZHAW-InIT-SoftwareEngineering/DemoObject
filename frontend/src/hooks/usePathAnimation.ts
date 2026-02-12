@@ -1,44 +1,59 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import type { NodePath } from "@/lib/path/transforms";
 
 
-type AnimationStatus = "idle" | "playing";
+type AnimationStatus = "idle" | "playing" | "preview";
 
 type AnimationState = {
     status: AnimationStatus;
-    edgeKeys: string[];
+    nodePath: NodePath;
 };
 
 
 export function usePathAnimation() {
-    const [animationState, setAnimationState] = useState<AnimationState>({
-        status: "idle",
-        edgeKeys: [],
-    });
+  const [animationState, setAnimationState] = useState<AnimationState>({
+    status: "idle",
+    nodePath: [],
+  });
 
-    const startAnimation = (edgeKeys: string[]) => {
-        if (edgeKeys.length === 0) return false;
+  const startAnimation = useCallback((nodePath: NodePath) => {
+    if (nodePath.length < 2) return false;
 
-        setAnimationState((s) =>
-            s.status === "idle"
-                ? {status: "playing", edgeKeys: [...edgeKeys]}
-            : s
-        );
+    setAnimationState((s) =>
+      s.status === "idle"
+        ? { status: "playing", nodePath: [...nodePath] }
+        : s,
+    );
 
-        return true;
-    };
+    return true;
+  }, []);
 
-    const finishAnimation = () => {
-        setAnimationState((s) =>
-            s.status === "playing" 
-                ? {status: "idle", edgeKeys: []}
-            : s
-        ); 
-    }
+  const startPreviewAnimation = useCallback((nodePath: NodePath) => {
+    if (!import.meta.env.DEV) return;
+    setAnimationState(() => ({ status: "preview", nodePath: [...nodePath] }));
+  }, []);
 
-    return {
-        animationState,
-        startAnimation, 
-        finishAnimation
-    }
-    
+  const onCompleteAnimation = useCallback(() => {
+    setAnimationState((s) =>
+      s.status === "playing"
+        ? { status: "idle", nodePath: [] }
+        : s,
+    );
+  }, []);
+
+  const closeAnimationView = useCallback(() => {
+    setAnimationState((s) =>
+      s.status === "idle"
+        ? s
+        : { status: "idle", nodePath: [] },
+    );
+  }, []);
+
+  return {
+    animationState,
+    startAnimation,
+    startPreviewAnimation,
+    onCompleteAnimation,
+    closeAnimationView,
+  };
 };

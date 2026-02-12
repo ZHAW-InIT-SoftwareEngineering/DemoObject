@@ -3,15 +3,20 @@ import type {
   MazesMazeIdGet200ResponseEdgesInner,
   MazesMazeIdGet200ResponseNodesInner,
 } from "@/api";
+import {
+  nodePathToUndirectedEdgeKeySet,
+  undirectedEdgeKey,
+  type NodePath,
+} from "@/lib/path/transforms";
 
 type MazeViewProps = {
   maze: MazesMazeIdGet200Response;
   width?: number;
   height?: number;
   onNodeClick?: (node: MazesMazeIdGet200ResponseNodesInner) => void;
-  selectedNodeIds?: number[];
-  highlightedEdgeKeys?: string[];
-  secondaryHighlightedEdgeKeys?: string[];
+  selectedNodePath?: NodePath;
+  highlightedNodePath?: NodePath;
+  secondaryHighlightedNodePath?: NodePath;
   className?: string;
 };
 
@@ -90,9 +95,9 @@ export function Maze({
   width = DEFAULT_SIZE,
   height = DEFAULT_SIZE,
   onNodeClick,
-  selectedNodeIds = [],
-  highlightedEdgeKeys = [],
-  secondaryHighlightedEdgeKeys = [],
+  selectedNodePath = [],
+  highlightedNodePath = [],
+  secondaryHighlightedNodePath = [],
   className,
 }: MazeViewProps) {
   const nodes = maze.nodes ?? [];
@@ -102,9 +107,11 @@ export function Maze({
 
   const bounds = getBounds(nodes);
   const nodeById = new Map(nodes.map((n) => [n.mazeNodeId, n]));
-  const selected = new Set(selectedNodeIds);
-  const highlightedEdges = new Set(highlightedEdgeKeys);
-  const secondaryHighlightedEdges = new Set(secondaryHighlightedEdgeKeys);
+  const selected = new Set(selectedNodePath);
+  const highlightedEdges = nodePathToUndirectedEdgeKeySet(highlightedNodePath);
+  const secondaryHighlightedEdges = nodePathToUndirectedEdgeKeySet(
+    secondaryHighlightedNodePath,
+  );
 
   return (
     <svg
@@ -125,7 +132,7 @@ export function Maze({
       />
 
       {edges.map((edge) => {
-        const key = `${edge.from}-${edge.to}`;
+        const key = undirectedEdgeKey(edge.from, edge.to);
         const isHighlighted = highlightedEdges.has(key);
         const isSecondaryHighlighted = secondaryHighlightedEdges.has(key);
         const stroke = isHighlighted

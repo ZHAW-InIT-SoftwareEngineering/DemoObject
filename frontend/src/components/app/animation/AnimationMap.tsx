@@ -1,31 +1,22 @@
 import type { MazesMazeIdGet200Response } from "@/api";
 import { Card, CardContent, Maze } from "@/components/ui";
-import { useEdgePlayback } from "@/hooks/useEdgePlayback";
+import type { NodePath } from "@/lib/path/transforms";
 
 type AnimationMapProps = {
   maze: MazesMazeIdGet200Response | null;
-  edgeKeys: string[];
-  onComplete: () => void;
-  stepMs?: number;
-  settleMs?: number;
+  visibleNodePath: NodePath;
+  progress: number;
+  total: number;
 };
 
 // TODO: this component is unused as for now 
 //        consider to use it as a mini-map during the 3D animation
 export function AnimationMap({
   maze,
-  edgeKeys,
-  onComplete,
-  stepMs = 220,
-  settleMs = 450,
+  visibleNodePath,
+  progress,
+  total,
 }: AnimationMapProps) {
-  const { visibleEdgeKeys, progress, total } = useEdgePlayback({
-    edgeKeys,
-    onComplete,
-    stepMs,
-    settleMs,
-  });
-
   if (!maze) return null;
 
   return (
@@ -38,7 +29,7 @@ export function AnimationMap({
           <Maze
             maze={maze}
             className="h-full w-full border rounded bg-white"
-            highlightedEdgeKeys={visibleEdgeKeys}
+            highlightedNodePath={visibleNodePath}
           />
         </div>
       </CardContent>

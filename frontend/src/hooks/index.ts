@@ -1,6 +1,7 @@
 export { useDemo } from "./useDemo"
+export { useAnimationScenePlayback } from "./useAnimationScenePlayback"
 export { usePathSelection } from "./usePathSelection"
 export { useShortestPath } from "./useShortestPath"
-export { useShortestPathEdgeKeys } from "./useShortestPathEdgeKeys"
+export { useShortestPathNodePath } from "./useShortestPathNodePath"
 export { usePathAnimation } from "./usePathAnimation"
 export { useEdgePlayback } from "./useEdgePlayback"

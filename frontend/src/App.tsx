@@ -1,17 +1,20 @@
+import { useMemo } from "react";
 import {
+  useAnimationScenePlayback,
   useDemo,
   usePathSelection,
   useShortestPath,
-  useShortestPathEdgeKeys,
+  useShortestPathNodePath,
   usePathAnimation,
 } from "./hooks/";
+import { buildAnimationSceneData } from "@/lib/animation";
 import { Toaster } from "@/components/ui";
 import { ActionPanel } from "@/components/app/ActionPanel";
 import { DslStrip } from "@/components/app/DslStrip";
-import { MazePanel } from "@/components/app/MazePanel";
+import { MazePanel } from "@/components/app/maze/MazePanel";
 import { PathInfo } from "@/components/app/PathInfo";
 import { StartScreen } from "@/components/app/StartScreen";
-import { AnimationView } from "./components/app/AnimationView";
+import { AnimationView } from "@/components/app/animation/AnimationView";
 import { toast } from "sonner";
 
 export default function App() {
@@ -20,8 +23,7 @@ export default function App() {
   const { loading, session, maze, error, startAdventure } = useDemo();
 
   const {
-    selectedNodeIds,
-    highlightedEdgeKeys,
+    nodePath,
     apiRequest,
     pathKey,
     selectNode,
@@ -35,13 +37,27 @@ export default function App() {
   } = usePathSelection(maze, session?.sessionId);
 
   const { shortestPath, getShortestPath } = useShortestPath();
-  const shortestPathEdgeKeys = useShortestPathEdgeKeys(
+  const shortestPathNodePath = useShortestPathNodePath(
     maze,
     shortestPath?.path,
   );
-  const { animationState, startAnimation, finishAnimation } = usePathAnimation();
+  const {
+    animationState,
+    startAnimation,
+    startPreviewAnimation,
+    onCompleteAnimation,
+    closeAnimationView,
+  } = usePathAnimation();
+  const playbackNodePath =
+    animationState.status === "playing" ? animationState.nodePath : [];
+  const { progress, total, sceneData } = useAnimationScenePlayback({
+    maze,
+    nodePath: playbackNodePath,
+    onComplete: onCompleteAnimation,
+  });
+  const isDevMode = import.meta.env.DEV;
 
-  const userPathLength = Math.max(0, selectedNodeIds.length - 1);
+  const userPathLength = Math.max(0, nodePath.length - 1);
   
   const handleStartAdventure = () => {
     startAdventure(MAZEID);
@@ -78,16 +94,13 @@ export default function App() {
     undoNodeSelection();
   };
 
-  const handleShowAnimation = () => {
-    /*
-    const animationEdgeKeys =
-      shortestPathEdgeKeys.length > 0
-        ? shortestPathEdgeKeys
-        : highlightedEdgeKeys;
-    */
-    const animationEdgeKeys = highlightedEdgeKeys
+  const getPreferredAnimationNodePath = () =>
+    shortestPathNodePath.length > 1 ? shortestPathNodePath : nodePath;
 
-    if (!startAnimation(animationEdgeKeys)) {
+  const handleShowAnimation = () => {
+    const animationNodePath = getPreferredAnimationNodePath();
+
+    if (!startAnimation(animationNodePath)) {
       toast.error("No path available to animate.");
       return;
     }
@@ -95,16 +108,35 @@ export default function App() {
     toast("Path animation on-going.");
   };
 
+  const handleOpenDev3DPreview = () => {
+    if (!isDevMode) return;
+    startPreviewAnimation(getPreferredAnimationNodePath());
+  };
+
+  const handleCloseAnimationView = () => {
+    closeAnimationView();
+  };
+
   const isPathSubmitted =
     Boolean(lastSubmittedKey) && pathKey === lastSubmittedKey;
-  const hasShortestPathDisplayed = shortestPathEdgeKeys.length > 0;
+  const hasShortestPathDisplayed = shortestPathNodePath.length > 1;
   const hasAnimatablePath =
-    highlightedEdgeKeys.length > 0 || shortestPathEdgeKeys.length > 0;
+    nodePath.length > 1 || shortestPathNodePath.length > 1;
   const canShowAnimationButton = isPathSubmitted && hasAnimatablePath;
+  const isPreviewView = isDevMode && animationState.status === "preview";
+  const previewProgress = Math.max(animationState.nodePath.length - 1, 0);
+  const previewSceneData = useMemo(
+    () =>
+      buildAnimationSceneData(maze, animationState.nodePath, previewProgress),
+    [maze, animationState.nodePath, previewProgress],
+  );
+  const viewProgress = isPreviewView ? previewProgress : progress;
+  const viewTotal = isPreviewView ? previewProgress : total;
+  const viewSceneData = isPreviewView ? previewSceneData : sceneData;
 
   const isStartScreen = !session;
   const isAnimationView =
-    animationState.status === "playing";
+    animationState.status === "playing" || isPreviewView;
 
   if (isStartScreen) {
     return (
@@ -124,9 +156,12 @@ export default function App() {
       <div className="w-full max-w-[520px] space-y-4">
         {isAnimationView ? (
           <AnimationView
-            maze={maze}
-            edgeKeys={animationState.edgeKeys}
-            onComplete={finishAnimation}
+            sceneData={viewSceneData}
+            progress={viewProgress}
+            total={viewTotal}
+            label={isDevMode && isPreviewView ? "3D maze preview (dev only)" : undefined}
+            showPlaybackCamera={!isPreviewView}
+            onClose={isPreviewView ? handleCloseAnimationView : undefined}
           />
         ) : (
           <>
@@ -145,17 +180,17 @@ export default function App() {
                 onNodeClick={selectNode}
                 onUndo={handleUndoNodeSelection}
                 onShowAnimation={handleShowAnimation}
+                onOpen3DPreview={handleOpenDev3DPreview}
                 isPathSubmitted={isPathSubmitted}
                 canShowAnimationButton={canShowAnimationButton}
-                selectedNodeIds={selectedNodeIds}
-                highlightedEdgeKeys={highlightedEdgeKeys}
-                secondaryHighlightedEdgeKeys={shortestPathEdgeKeys}
+                nodePath={nodePath}
+                secondaryHighlightedNodePath={shortestPathNodePath}
               />
             )}
             <ActionPanel
               maze={maze}
               pathState={{
-                selectedNodeIds,
+                nodePath,
                 apiRequest,
                 submitting,
                 pathKey,
