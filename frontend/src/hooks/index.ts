@@ -1,6 +1,7 @@
 export { useDemo } from "./useDemo"
 export { useAnimationScenePlayback } from "./useAnimationScenePlayback"
 export { usePathSelection } from "./usePathSelection"
+export { usePerfectPathCelebration } from "./usePerfectPathCelebration"
 export { useShortestPath } from "./useShortestPath"
 export { useShortestPathNodePath } from "./useShortestPathNodePath"
 export { usePathAnimation } from "./usePathAnimation"

@@ -8,6 +8,7 @@ import {
   undirectedEdgeKey,
   type NodePath,
 } from "@/lib/path/transforms";
+import { SHOW_NODE_COORDS } from "@/lib/env";
 
 type MazeViewProps = {
   maze: MazesMazeIdGet200Response;
@@ -177,7 +178,9 @@ export function Maze({
               strokeWidth={strokeWidth}
               style={{ cursor: onNodeClick ? "pointer" : "default" }}
               onClick={() => onNodeClick?.(node)}
-            />
+            >
+              {SHOW_NODE_COORDS && <title>{`(${node.x},${node.y})`}</title>}
+            </circle>
           </g>
         );
       })}

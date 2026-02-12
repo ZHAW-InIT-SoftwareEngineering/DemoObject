@@ -3,17 +3,20 @@ import {
   useAnimationScenePlayback,
   useDemo,
   usePathSelection,
+  usePerfectPathCelebration,
   useShortestPath,
   useShortestPathNodePath,
   usePathAnimation,
 } from "./hooks/";
 import { buildAnimationSceneData } from "@/lib/animation";
+import { IS_DEV_MODE } from "@/lib/env";
 import { Toaster } from "@/components/ui";
 import { ActionPanel } from "@/components/app/ActionPanel";
 import { DslStrip } from "@/components/app/DslStrip";
 import { MazePanel } from "@/components/app/maze/MazePanel";
 import { PathInfo } from "@/components/app/PathInfo";
 import { StartScreen } from "@/components/app/StartScreen";
+import { CelebrationOverlay } from "@/components/app/animation/CelebrationOverlay";
 import { AnimationView } from "@/components/app/animation/AnimationView";
 import { toast } from "sonner";
 
@@ -37,6 +40,13 @@ export default function App() {
   } = usePathSelection(maze, session?.sessionId);
 
   const { shortestPath, getShortestPath } = useShortestPath();
+  const {
+    showCelebrationOverlay,
+    maybeCelebrateForPathLength,
+    dismissCelebrationOverlay,
+  } = usePerfectPathCelebration({
+    shortestPathLength: shortestPath?.length,
+  });
   const shortestPathNodePath = useShortestPathNodePath(
     maze,
     shortestPath?.path,
@@ -55,7 +65,6 @@ export default function App() {
     nodePath: playbackNodePath,
     onComplete: onCompleteAnimation,
   });
-  const isDevMode = import.meta.env.DEV;
 
   const userPathLength = Math.max(0, nodePath.length - 1);
   
@@ -81,6 +90,7 @@ export default function App() {
       const shortestPathRes = await getShortestPath(MAZEID);
       if (shortestPathRes) {
         toast.success("Shortest path loaded.");
+        maybeCelebrateForPathLength(userPathLength, shortestPathRes.length);
       } else {
         toast.error("Failed to compute shortest path.");
       }
@@ -104,12 +114,11 @@ export default function App() {
       toast.error("No path available to animate.");
       return;
     }
-
     toast("Path animation on-going.");
   };
 
   const handleOpenDev3DPreview = () => {
-    if (!isDevMode) return;
+    if (!IS_DEV_MODE) return;
     startPreviewAnimation(getPreferredAnimationNodePath());
   };
 
@@ -123,7 +132,7 @@ export default function App() {
   const hasAnimatablePath =
     nodePath.length > 1 || shortestPathNodePath.length > 1;
   const canShowAnimationButton = isPathSubmitted && hasAnimatablePath;
-  const isPreviewView = isDevMode && animationState.status === "preview";
+  const isPreviewView = IS_DEV_MODE && animationState.status === "preview";
   const previewProgress = Math.max(animationState.nodePath.length - 1, 0);
   const previewSceneData = useMemo(
     () =>
@@ -151,61 +160,73 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen p-6 flex flex-col items-center justify-start md:justify-center">
+    <div
+      className={
+        isAnimationView
+          ? "min-h-[100dvh] w-full bg-[#11151d]"
+          : "min-h-screen p-6 flex flex-col items-center justify-start md:justify-center"
+      }
+    >
       <Toaster />
-      <div className="w-full max-w-[520px] space-y-4">
-        {isAnimationView ? (
-          <AnimationView
-            sceneData={viewSceneData}
-            progress={viewProgress}
-            total={viewTotal}
-            label={isDevMode && isPreviewView ? "3D maze preview (dev only)" : undefined}
-            showPlaybackCamera={!isPreviewView}
-            onClose={isPreviewView ? handleCloseAnimationView : undefined}
-          />
-        ) : (
-          <>
-            {error && <div className="text-red-600">{error}</div>}
-            {submitError && <div className="text-red-600">{submitError}</div>}
-            <DslStrip dsl={dsl} />
-            {maze && (
-              <PathInfo
-                userPathLength={userPathLength}
-                shortestPathLength={shortestPath?.length}
-              />
-            )}
-            {maze && (
-              <MazePanel
-                maze={maze}
-                onNodeClick={selectNode}
-                onUndo={handleUndoNodeSelection}
-                onShowAnimation={handleShowAnimation}
-                onOpen3DPreview={handleOpenDev3DPreview}
-                isPathSubmitted={isPathSubmitted}
-                canShowAnimationButton={canShowAnimationButton}
-                nodePath={nodePath}
-                secondaryHighlightedNodePath={shortestPathNodePath}
-              />
-            )}
-            <ActionPanel
-              maze={maze}
-              pathState={{
-                nodePath,
-                apiRequest,
-                submitting,
-                pathKey,
-                lastSubmittedKey,
-                hasShortestPathDisplayed,
-              }}
-              actions={{
-                onReset: handleResetPath,
-                onSubmit: handleSubmitPath,
-                onShortestPath: handleShortestPath,
-              }}
+      <CelebrationOverlay
+        open={showCelebrationOverlay}
+        onClose={dismissCelebrationOverlay}
+      />
+      {isAnimationView ? (
+        <AnimationView
+          sceneData={viewSceneData}
+          progress={viewProgress}
+          total={viewTotal}
+          label={
+            IS_DEV_MODE && isPreviewView
+              ? "3D maze preview (dev only)"
+              : undefined
+          }
+          showPlaybackCamera={!isPreviewView}
+          onClose={isPreviewView ? handleCloseAnimationView : undefined}
+        />
+      ) : (
+        <div className="w-full max-w-[520px] space-y-4">
+          {error && <div className="text-red-600">{error}</div>}
+          {submitError && <div className="text-red-600">{submitError}</div>}
+          <DslStrip dsl={dsl} />
+          {maze && (
+            <PathInfo
+              userPathLength={userPathLength}
+              shortestPathLength={shortestPath?.length}
             />
-          </>
-        )}
-      </div>
+          )}
+          {maze && (
+            <MazePanel
+              maze={maze}
+              onNodeClick={selectNode}
+              onUndo={handleUndoNodeSelection}
+              onShowAnimation={handleShowAnimation}
+              onOpen3DPreview={handleOpenDev3DPreview}
+              isPathSubmitted={isPathSubmitted}
+              canShowAnimationButton={canShowAnimationButton}
+              nodePath={nodePath}
+              secondaryHighlightedNodePath={shortestPathNodePath}
+            />
+          )}
+          <ActionPanel
+            maze={maze}
+            pathState={{
+              nodePath,
+              apiRequest,
+              submitting,
+              pathKey,
+              lastSubmittedKey,
+              hasShortestPathDisplayed,
+            }}
+            actions={{
+              onReset: handleResetPath,
+              onSubmit: handleSubmitPath,
+              onShortestPath: handleShortestPath,
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }

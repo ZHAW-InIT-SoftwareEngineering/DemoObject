@@ -1,5 +1,6 @@
 import { ActionButton } from "../ActionButton";
 import type { NodePath } from "@/lib/path/transforms";
+import { IS_DEV_MODE } from "@/lib/env";
 
 
 type MazePanelHeaderProps = {
@@ -20,8 +21,6 @@ export function MazePanelHeader({ actions, pathState }: MazePanelHeaderProps) {
 
     const canUndo = pathState.nodePath.length >= 2;
     const { isPathSubmitted, canShowAnimationButton } = pathState;
-    const isDevMode = import.meta.env.DEV;
-
     return (
         <div className="flex items-center justify-between gap-3 text-sm text-gray-700">
           <div className="flex flex-wrap items-center gap-4">
@@ -50,7 +49,7 @@ export function MazePanelHeader({ actions, pathState }: MazePanelHeaderProps) {
                 fullWidth={false}
               />
             )}
-            {isDevMode && (
+            {IS_DEV_MODE && (
               <ActionButton
                 label="Open 3D (dev)"
                 onClick={onOpen3DPreview}
