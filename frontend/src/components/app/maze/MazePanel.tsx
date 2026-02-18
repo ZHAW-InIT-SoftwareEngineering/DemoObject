@@ -5,6 +5,7 @@ import type {
 import { Card, CardContent, Maze, Separator } from "@/components/ui";
 import { MazePanelHeader } from "./MazePanelHeader";
 import type { NodePath } from "@/lib/path/transforms";
+import { PathInfo } from "@/components/app/PathInfo";
 
 
 type MazePanelProps = {
@@ -17,6 +18,8 @@ type MazePanelProps = {
   canShowAnimationButton: boolean;
   nodePath: NodePath;
   secondaryHighlightedNodePath: NodePath;
+  userPathLength: number;
+  shortestPathLength: number | null | undefined;
 };
 
 export function MazePanel({
@@ -29,6 +32,8 @@ export function MazePanel({
   canShowAnimationButton,
   nodePath,
   secondaryHighlightedNodePath,
+  userPathLength,
+  shortestPathLength,
 }: MazePanelProps) {
 
   return (
@@ -43,6 +48,10 @@ export function MazePanel({
           actions={{ onUndo, onShowAnimation, onOpen3DPreview }}
         />
         <Separator />
+        <PathInfo
+          userPathLength={userPathLength}
+          shortestPathLength={shortestPathLength}
+        />
         <div className="w-full aspect-square">
           <Maze
             maze={maze}

@@ -17,7 +17,7 @@ export function PathInfo({ userPathLength, shortestPathLength }: PathInfoProps) 
           <Separator orientation="vertical" className="hidden h-4 sm:block" />
           <div className="flex items-baseline gap-2">
             <span className="font-medium">Shortest path length</span>
-            <span>{shortestPathLength ?? "—"}</span>
+            <span>{shortestPathLength ?? "❓"}</span>
           </div>
         </div>
       </CardContent>

@@ -1,6 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   useAnimationScenePlayback,
+  useAnimationPathSelection,
   useDemo,
   usePathSelection,
   usePerfectPathCelebration,
@@ -9,13 +10,13 @@ import {
   usePathAnimation,
 } from "./hooks/";
 import { buildAnimationSceneData } from "@/lib/animation";
-import { IS_DEV_MODE } from "@/lib/env";
 import { Toaster } from "@/components/ui";
 import { ActionPanel } from "@/components/app/ActionPanel";
 import { DslStrip } from "@/components/app/DslStrip";
 import { MazePanel } from "@/components/app/maze/MazePanel";
-import { PathInfo } from "@/components/app/PathInfo";
 import { StartScreen } from "@/components/app/StartScreen";
+import { StartLoadingScreen } from "@/components/app/StartLoadingScreen";
+import { AnimationPathSelectionOverlay } from "@/components/app/animation/AnimationPathSelectionOverlay";
 import { CelebrationOverlay } from "@/components/app/animation/CelebrationOverlay";
 import { AnimationView } from "@/components/app/animation/AnimationView";
 import { toast } from "sonner";
@@ -60,13 +61,32 @@ export default function App() {
   } = usePathAnimation();
   const playbackNodePath =
     animationState.status === "playing" ? animationState.nodePath : [];
+  const {
+    animationPathSelectionOpen,
+    setAnimationPathSelectionOpen,
+    canUseUserPath,
+    canUseShortestPath,
+    hasAnimatablePath,
+    onShowAnimation,
+    onSelectAnimationPath,
+    onOpen3DPreview,
+  } = useAnimationPathSelection({
+    userNodePath: nodePath,
+    shortestNodePath: shortestPathNodePath,
+    startAnimation,
+    startPreviewAnimation,
+  });
   const { progress, total, sceneData } = useAnimationScenePlayback({
     maze,
     nodePath: playbackNodePath,
     onComplete: onCompleteAnimation,
+    stepMs: 260,
+    settleMs: 5200,
   });
 
   const userPathLength = Math.max(0, nodePath.length - 1);
+  const [lastShortestPathSubmissionKey, setLastShortestPathSubmissionKey] =
+    useState<string | null>(null);
   
   const handleStartAdventure = () => {
     startAdventure(MAZEID);
@@ -79,6 +99,7 @@ export default function App() {
   const handleSubmitPath = async () => {
     const response = await getDSL();
     if (response) {
+      setLastShortestPathSubmissionKey(null);
       toast.success("Path submitted.");
     } else {
       toast.error("Failed to submit path.");
@@ -89,6 +110,9 @@ export default function App() {
     try {
       const shortestPathRes = await getShortestPath(MAZEID);
       if (shortestPathRes) {
+        if (lastSubmittedKey) {
+          setLastShortestPathSubmissionKey(lastSubmittedKey);
+        }
         toast.success("Shortest path loaded.");
         maybeCelebrateForPathLength(userPathLength, shortestPathRes.length);
       } else {
@@ -104,24 +128,6 @@ export default function App() {
     undoNodeSelection();
   };
 
-  const getPreferredAnimationNodePath = () =>
-    shortestPathNodePath.length > 1 ? shortestPathNodePath : nodePath;
-
-  const handleShowAnimation = () => {
-    const animationNodePath = getPreferredAnimationNodePath();
-
-    if (!startAnimation(animationNodePath)) {
-      toast.error("No path available to animate.");
-      return;
-    }
-    toast("Path animation on-going.");
-  };
-
-  const handleOpenDev3DPreview = () => {
-    if (!IS_DEV_MODE) return;
-    startPreviewAnimation(getPreferredAnimationNodePath());
-  };
-
   const handleCloseAnimationView = () => {
     closeAnimationView();
   };
@@ -129,10 +135,15 @@ export default function App() {
   const isPathSubmitted =
     Boolean(lastSubmittedKey) && pathKey === lastSubmittedKey;
   const hasShortestPathDisplayed = shortestPathNodePath.length > 1;
-  const hasAnimatablePath =
-    nodePath.length > 1 || shortestPathNodePath.length > 1;
-  const canShowAnimationButton = isPathSubmitted && hasAnimatablePath;
-  const isPreviewView = IS_DEV_MODE && animationState.status === "preview";
+  const hasShortestPathForCurrentSubmission =
+    hasShortestPathDisplayed &&
+    Boolean(lastSubmittedKey) &&
+    lastSubmittedKey === lastShortestPathSubmissionKey;
+  const canShowAnimationButton =
+    isPathSubmitted &&
+    hasShortestPathForCurrentSubmission &&
+    hasAnimatablePath;
+  const isPreviewView = animationState.status === "preview";
   const previewProgress = Math.max(animationState.nodePath.length - 1, 0);
   const previewSceneData = useMemo(
     () =>
@@ -146,6 +157,15 @@ export default function App() {
   const isStartScreen = !session;
   const isAnimationView =
     animationState.status === "playing" || isPreviewView;
+
+  if (isStartScreen && loading) {
+    return (
+      <>
+        <Toaster />
+        <StartLoadingScreen />
+      </>
+    );
+  }
 
   if (isStartScreen) {
     return (
@@ -172,16 +192,21 @@ export default function App() {
         open={showCelebrationOverlay}
         onClose={dismissCelebrationOverlay}
       />
+      <AnimationPathSelectionOverlay
+        open={animationPathSelectionOpen}
+        onOpenChange={setAnimationPathSelectionOpen}
+        onSelectPath={onSelectAnimationPath}
+        canUseUserPath={canUseUserPath}
+        canUseShortestPath={canUseShortestPath}
+        userPathLength={userPathLength}
+        shortestPathLength={shortestPath?.length}
+      />
       {isAnimationView ? (
         <AnimationView
           sceneData={viewSceneData}
           progress={viewProgress}
           total={viewTotal}
-          label={
-            IS_DEV_MODE && isPreviewView
-              ? "3D maze preview (dev only)"
-              : undefined
-          }
+          label={isPreviewView ? "3D maze preview" : undefined}
           showPlaybackCamera={!isPreviewView}
           onClose={isPreviewView ? handleCloseAnimationView : undefined}
         />
@@ -191,22 +216,18 @@ export default function App() {
           {submitError && <div className="text-red-600">{submitError}</div>}
           <DslStrip dsl={dsl} />
           {maze && (
-            <PathInfo
-              userPathLength={userPathLength}
-              shortestPathLength={shortestPath?.length}
-            />
-          )}
-          {maze && (
             <MazePanel
               maze={maze}
               onNodeClick={selectNode}
               onUndo={handleUndoNodeSelection}
-              onShowAnimation={handleShowAnimation}
-              onOpen3DPreview={handleOpenDev3DPreview}
+              onShowAnimation={onShowAnimation}
+              onOpen3DPreview={onOpen3DPreview}
               isPathSubmitted={isPathSubmitted}
               canShowAnimationButton={canShowAnimationButton}
               nodePath={nodePath}
               secondaryHighlightedNodePath={shortestPathNodePath}
+              userPathLength={userPathLength}
+              shortestPathLength={shortestPath?.length}
             />
           )}
           <ActionPanel
@@ -217,7 +238,7 @@ export default function App() {
               submitting,
               pathKey,
               lastSubmittedKey,
-              hasShortestPathDisplayed,
+              hasShortestPathForCurrentSubmission,
             }}
             actions={{
               onReset: handleResetPath,

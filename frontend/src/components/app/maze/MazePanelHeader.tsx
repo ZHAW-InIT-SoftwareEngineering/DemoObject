@@ -1,6 +1,5 @@
 import { ActionButton } from "../ActionButton";
 import type { NodePath } from "@/lib/path/transforms";
-import { IS_DEV_MODE } from "@/lib/env";
 
 
 type MazePanelHeaderProps = {
@@ -49,14 +48,12 @@ export function MazePanelHeader({ actions, pathState }: MazePanelHeaderProps) {
                 fullWidth={false}
               />
             )}
-            {IS_DEV_MODE && (
-              <ActionButton
-                label="Open 3D (dev)"
-                onClick={onOpen3DPreview}
-                fullWidth={false}
-                variant="outline"
-              />
-            )}
+            <ActionButton
+              label="Show Maze 3D"
+              onClick={onOpen3DPreview}
+              fullWidth={false}
+              variant="secondary"
+            />
           </div>
         </div>
     );

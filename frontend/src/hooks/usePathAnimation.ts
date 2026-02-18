@@ -1,6 +1,5 @@
 import { useCallback, useState } from "react";
 import type { NodePath } from "@/lib/path/transforms";
-import { IS_DEV_MODE } from "@/lib/env";
 
 
 type AnimationStatus = "idle" | "playing" | "preview";
@@ -30,7 +29,6 @@ export function usePathAnimation() {
   }, []);
 
   const startPreviewAnimation = useCallback((nodePath: NodePath) => {
-    if (!IS_DEV_MODE) return;
     setAnimationState(() => ({ status: "preview", nodePath: [...nodePath] }));
   }, []);
 

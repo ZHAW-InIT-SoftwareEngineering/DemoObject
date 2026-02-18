@@ -7,11 +7,13 @@ import {
 } from "lucide-react"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 
+const TOAST_DURATION_MS = 1000
+
 const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       className="toaster group"
-      position="bottom-right"
+      position="top-left"
       offset={16}
       icons={{
         success: <CircleCheckIcon className="size-4" />,
@@ -22,6 +24,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }}
       toastOptions={{
         className: "rounded px-3 py-2 text-sm font-medium shadow",
+        duration: TOAST_DURATION_MS,
       }}
       style={
         {
