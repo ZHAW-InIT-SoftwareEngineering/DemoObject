@@ -26,6 +26,19 @@ export async function connectToDb() {
     return db
 }
 
+export async function isDbHealthy(): Promise<boolean> {
+    if (!client) {
+        return false;
+    }
+
+    try {
+        await client.db("admin").command({ ping: 1 });
+        return true;
+    } catch {
+        return false;
+    }
+}
+
 function getDb(): Db {
     if(!db) {
         throw new Error("Database not initialized. Call connectToDatabase() first.")

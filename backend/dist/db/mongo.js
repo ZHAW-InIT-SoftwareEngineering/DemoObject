@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.connectToDb = connectToDb;
+exports.isDbHealthy = isDbHealthy;
 exports.insertSessionDoc = insertSessionDoc;
 exports.findSessionDoc = findSessionDoc;
 exports.updateSessionDoc = updateSessionDoc;
@@ -28,6 +29,18 @@ async function connectToDb() {
     db = client.db(dbName);
     console.log(`SUCCESSFULLY CONNECTED TO ${dbName}`);
     return db;
+}
+async function isDbHealthy() {
+    if (!client) {
+        return false;
+    }
+    try {
+        await client.db("admin").command({ ping: 1 });
+        return true;
+    }
+    catch {
+        return false;
+    }
 }
 function getDb() {
     if (!db) {

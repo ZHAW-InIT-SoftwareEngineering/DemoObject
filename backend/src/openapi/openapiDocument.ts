@@ -1,6 +1,7 @@
 import { OpenApiGeneratorV3 } from "@asteasolutions/zod-to-openapi";
 import { registry } from "./openapiRegistry";
 
+import "../api/routes/infra.routes";
 import "../api/routes/mazes.routes";
 import "../api/routes/sessions.routes";
 
