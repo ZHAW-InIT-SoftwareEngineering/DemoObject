@@ -105,7 +105,7 @@ jobs:
           provenance: false
           sbom: false
 
-  deploy_backend:
+  deploy_stack:
     name: Deploy Backend to VM
     runs-on: [self-hosted, Linux, X64]
     needs:
