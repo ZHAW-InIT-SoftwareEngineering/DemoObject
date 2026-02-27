@@ -14,7 +14,6 @@ function validateEnvEntry(envVariableName: string): string {
         return variable
 };
 
-// currently db and connection uri is hard wired => however only one Db needed atm
 export async function connectToDb() {
     if (db) return db; 
     const uri = validateEnvEntry("DB_CONN_STRING")
