@@ -65,7 +65,7 @@ jobs:
     permissions:
       contents: read
     env:
-      DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/opt/demoobject' }}
+      DEPLOY_PATH: ${{ vars.DEPLOY_PATH || './demoobject' }}
       BACKEND_IMAGE: ${{ vars.BACKEND_IMAGE || 'ghcr.io/gabc/demoobject-backend' }}
       FRONTEND_IMAGE: ${{ vars.FRONTEND_IMAGE || 'ghcr.io/gabc/demoobject-frontend' }}
       FRONTEND_PORT: ${{ vars.FRONTEND_PORT || '80' }}
