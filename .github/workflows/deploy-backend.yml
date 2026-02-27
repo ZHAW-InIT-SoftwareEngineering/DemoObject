@@ -66,10 +66,10 @@ jobs:
       contents: read
     env:
       DEPLOY_PATH: ${{ vars.DEPLOY_PATH || './demoobject' }}
-      BACKEND_IMAGE: ${{ vars.BACKEND_IMAGE || 'ghcr.io/gabc/demoobject-backend' }}
-      FRONTEND_IMAGE: ${{ vars.FRONTEND_IMAGE || 'ghcr.io/gabc/demoobject-frontend' }}
+      BACKEND_IMAGE: 'ghcr.io/${{ vars.GHCR_USERNAME }}/demoobject-backend'
+      FRONTEND_IMAGE: 'ghcr.io/${{ vars.GHCR_USERNAME }}/demoobject-frontend'
       FRONTEND_PORT: ${{ vars.FRONTEND_PORT || '80' }}
-      GHCR_USERNAME: ${{ vars.GHCR_USERNAME || 'gabc' }}
+      GHCR_USERNAME: ${{ vars.GHCR_USERNAME }}
       MONGO_DATABASE: ${{ vars.MONGO_DATABASE }}
       SESSION_COLLECTION_NAME: ${{ vars.SESSION_COLLECTION_NAME }}
       GHCR_PAT: ${{ secrets.GHCR_PAT }}
