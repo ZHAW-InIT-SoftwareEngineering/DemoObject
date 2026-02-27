@@ -19,7 +19,7 @@ jobs:
       packages: write
     env:
       BACKEND_IMAGE: ${{ vars.BACKEND_IMAGE || 'ghcr.io/gabc/demoobject-backend' }}
-      GHCR_USERNAME: ${{ vars.GHCR_USERNAME || 'gabc' }}
+      GHCR_USERNAME: ${{ vars.GHCR_USERNAME }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
