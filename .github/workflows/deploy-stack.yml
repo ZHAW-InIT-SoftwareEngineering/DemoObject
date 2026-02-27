@@ -106,7 +106,7 @@ jobs:
           sbom: false
 
   deploy_stack:
-    name: Deploy Backend to VM
+    name: Deploy Stack to VM
     runs-on: [self-hosted, Linux, X64]
     needs:
       - build_and_push_backend
