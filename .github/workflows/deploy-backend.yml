@@ -13,7 +13,7 @@ concurrency:
 jobs:
   build_and_push_backend:
     name: Build and Push Backend Image
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64]
     permissions:
       contents: read
       packages: write
@@ -46,14 +46,12 @@ jobs:
 
   deploy_backend:
     name: Deploy Backend to VM
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64]
     needs: build_and_push_backend
     environment: production
     permissions:
       contents: read
     env:
-      VM_HOST: ${{ vars.VM_HOST }}
-      VM_USER: ${{ vars.VM_USER || 'ubuntu' }}
       DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/opt/demoobject' }}
       BACKEND_IMAGE: ${{ vars.BACKEND_IMAGE || 'ghcr.io/gabc/demoobject-backend' }}
       FRONTEND_IMAGE: ${{ vars.FRONTEND_IMAGE || 'ghcr.io/gabc/demoobject-frontend' }}
@@ -72,8 +70,6 @@ jobs:
           set -euo pipefail
 
           required_vars=(
-            VM_HOST
-            VM_USER
             DEPLOY_PATH
             BACKEND_IMAGE
             MONGO_DATABASE
@@ -99,56 +95,41 @@ jobs:
             fi
           done
 
-          if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]; then
-            echo "Missing required GitHub Secret: SSH_PRIVATE_KEY" >&2
-            exit 1
-          fi
-
-      - name: Configure SSH
+      - name: Validate Docker availability
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/demoobject_deploy_key
-          chmod 600 ~/.ssh/demoobject_deploy_key
-          ssh-keyscan -H "$VM_HOST" >> ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
+          docker version
+          docker compose version
 
-      - name: Upload compose file to VM
+      - name: Prepare compose file on host
         shell: bash
         run: |
           set -euo pipefail
-          ssh -i ~/.ssh/demoobject_deploy_key "${VM_USER}@${VM_HOST}" "mkdir -p '${DEPLOY_PATH}'"
-          scp -i ~/.ssh/demoobject_deploy_key deploy/docker-compose.prod.yml "${VM_USER}@${VM_HOST}:${DEPLOY_PATH}/docker-compose.prod.yml"
+          mkdir -p "${DEPLOY_PATH}"
+          cp deploy/docker-compose.prod.yml "${DEPLOY_PATH}/docker-compose.prod.yml"
 
-      - name: Deploy mongo and api services
+      - name: Deploy mongo and api services on self-hosted runner
         shell: bash
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           set -euo pipefail
+          export BACKEND_IMAGE
+          export FRONTEND_IMAGE
+          export FRONTEND_PORT
+          export IMAGE_TAG
+          export MONGO_ROOT_USERNAME
+          export MONGO_ROOT_PASSWORD
+          export MONGO_DATABASE
+          export SESSION_COLLECTION_NAME
 
-          q() { printf '%q' "$1"; }
+          docker compose -f "${DEPLOY_PATH}/docker-compose.prod.yml" pull mongo api
+          docker compose -f "${DEPLOY_PATH}/docker-compose.prod.yml" up -d --remove-orphans mongo api
 
-          remote_script=$(cat <<EOF
-          set -euo pipefail
-
-          export BACKEND_IMAGE=$(q "$BACKEND_IMAGE")
-          export FRONTEND_IMAGE=$(q "$FRONTEND_IMAGE")
-          export FRONTEND_PORT=$(q "$FRONTEND_PORT")
-          export IMAGE_TAG=$(q "$IMAGE_TAG")
-          export MONGO_ROOT_USERNAME=$(q "$MONGO_ROOT_USERNAME")
-          export MONGO_ROOT_PASSWORD=$(q "$MONGO_ROOT_PASSWORD")
-          export MONGO_DATABASE=$(q "$MONGO_DATABASE")
-          export SESSION_COLLECTION_NAME=$(q "$SESSION_COLLECTION_NAME")
-
-          docker compose -f $(q "$DEPLOY_PATH/docker-compose.prod.yml") pull mongo api
-          docker compose -f $(q "$DEPLOY_PATH/docker-compose.prod.yml") up -d --remove-orphans mongo api
-
-          for i in \$(seq 1 30); do
-            status=\$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' demoobject-api 2>/dev/null || true)
-            if [ "\$status" = "healthy" ]; then
+          for i in $(seq 1 30); do
+            status=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' demoobject-api 2>/dev/null || true)
+            if [ "$status" = "healthy" ]; then
               exit 0
             fi
             sleep 2
@@ -158,7 +139,3 @@ jobs:
           docker ps >&2
           docker logs --tail 100 demoobject-api >&2 || true
           exit 1
-          EOF
-          )
-
-          ssh -i ~/.ssh/demoobject_deploy_key "${VM_USER}@${VM_HOST}" "bash -se" <<<"${remote_script}"
