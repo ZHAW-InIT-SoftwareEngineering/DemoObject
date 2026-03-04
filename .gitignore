@@ -27,4 +27,3 @@ replay_pid*
 .env
 .env.docker
 /frontend/docs
-/deploy/certs/

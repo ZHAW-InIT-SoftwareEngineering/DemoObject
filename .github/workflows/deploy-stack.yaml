@@ -117,15 +117,18 @@ jobs:
       DEPLOY_PATH: ${{ vars.DEPLOY_PATH || './demoobject' }}
       BACKEND_IMAGE: 'ghcr.io/${{ vars.GHCR_USERNAME }}/demoobject-backend'
       FRONTEND_IMAGE: 'ghcr.io/${{ vars.GHCR_USERNAME }}/demoobject-frontend'
-      FRONTEND_PORT: ${{ vars.FRONTEND_PORT || '80' }}
-      FRONTEND_TLS_PORT: ${{ vars.FRONTEND_TLS_PORT || '443' }}
-      TLS_CERTS_DIR: ${{ vars.TLS_CERTS_DIR }}
+      FRONTEND_PORT: ${{ vars.APP_UPSTREAM_PORT }}
+      DOMAIN: ${{ vars.DOMAIN }}
+      DUCKDNS_SUBDOMAIN: ${{ vars.DUCKDNS_SUBDOMAIN }}
+      LE_EMAIL: ${{ vars.LE_EMAIL }}
+      APP_UPSTREAM_PORT: ${{ vars.APP_UPSTREAM_PORT }}
       GHCR_USERNAME: ${{ vars.GHCR_USERNAME }}
       MONGO_DATABASE: ${{ vars.MONGO_DATABASE }}
       SESSION_COLLECTION_NAME: ${{ vars.SESSION_COLLECTION_NAME }}
       GHCR_PAT: ${{ secrets.GHCR_PAT }}
       MONGO_ROOT_USERNAME: ${{ secrets.MONGO_ROOT_USERNAME }}
       MONGO_ROOT_PASSWORD: ${{ secrets.MONGO_ROOT_PASSWORD }}
+      DUCKDNS_TOKEN: ${{ secrets.DUCKDNS_TOKEN }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -140,12 +143,17 @@ jobs:
             BACKEND_IMAGE
             MONGO_DATABASE
             SESSION_COLLECTION_NAME
+            DOMAIN
+            DUCKDNS_SUBDOMAIN
+            LE_EMAIL
+            APP_UPSTREAM_PORT
           )
 
           required_secrets=(
             GHCR_PAT
             MONGO_ROOT_USERNAME
             MONGO_ROOT_PASSWORD
+            DUCKDNS_TOKEN
           )
 
           for key in "${required_vars[@]}"; do
@@ -183,23 +191,87 @@ jobs:
           mkdir -p "${DEPLOY_PATH}"
           cp deploy/docker-compose.prod.yaml "${DEPLOY_PATH}/docker-compose.prod.yaml"
 
-      - name: Validate TLS certificate files
+      - name: Configure host reverse proxy and certificate automation
         shell: bash
         run: |
           set -euo pipefail
-          if [ -z "${TLS_CERTS_DIR:-}" ]; then
-            TLS_CERTS_DIR="${DEPLOY_PATH}/certs"
+
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y nginx certbot python3-certbot-nginx curl cron
+          sudo systemctl enable --now nginx
+          sudo systemctl enable --now cron
+
+          sudo install -d -m 755 /opt/duckdns
+
+          sudo tee /etc/default/duckdns >/dev/null <<EOF
+          DUCKDNS_SUBDOMAIN=${DUCKDNS_SUBDOMAIN}
+          DUCKDNS_TOKEN=${DUCKDNS_TOKEN}
+          EOF
+          sudo chmod 600 /etc/default/duckdns
+
+          sudo tee /opt/duckdns/update.sh >/dev/null <<'EOF'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          source /etc/default/duckdns
+          curl -fsS "https://www.duckdns.org/update?domains=${DUCKDNS_SUBDOMAIN}&token=${DUCKDNS_TOKEN}&ip="
+          echo
+          EOF
+          sudo chmod 750 /opt/duckdns/update.sh
+
+          sudo tee /etc/cron.d/duckdns >/dev/null <<'EOF'
+          SHELL=/bin/bash
+          PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+          */5 * * * * root /opt/duckdns/update.sh >> /var/log/duckdns.log 2>&1
+          EOF
+
+          sudo /opt/duckdns/update.sh
+
+          nginx_site="/etc/nginx/sites-available/demoobject"
+          config_needs_update="false"
+
+          if [ ! -f "${nginx_site}" ]; then
+            config_needs_update="true"
+          elif ! sudo grep -q "server_name ${DOMAIN};" "${nginx_site}"; then
+            config_needs_update="true"
+          elif ! sudo grep -q "proxy_pass http://127.0.0.1:${APP_UPSTREAM_PORT};" "${nginx_site}"; then
+            config_needs_update="true"
           fi
 
-          if [ ! -f "${TLS_CERTS_DIR}/fullchain.pem" ]; then
-            echo "Missing TLS certificate file: ${TLS_CERTS_DIR}/fullchain.pem" >&2
-            exit 1
+          if [ "${config_needs_update}" = "true" ]; then
+          sudo tee "${nginx_site}" >/dev/null <<EOF
+          server {
+              listen 80;
+              listen [::]:80;
+              server_name ${DOMAIN};
+
+              location / {
+                  proxy_pass http://127.0.0.1:${APP_UPSTREAM_PORT};
+                  proxy_http_version 1.1;
+                  proxy_set_header Host \$host;
+                  proxy_set_header X-Real-IP \$remote_addr;
+                  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto \$scheme;
+              }
+          }
+          EOF
           fi
 
-          if [ ! -f "${TLS_CERTS_DIR}/privkey.pem" ]; then
-            echo "Missing TLS private key file: ${TLS_CERTS_DIR}/privkey.pem" >&2
-            exit 1
+          sudo ln -sfn /etc/nginx/sites-available/demoobject /etc/nginx/sites-enabled/demoobject
+          sudo rm -f /etc/nginx/sites-enabled/default
+          sudo nginx -t
+          sudo systemctl reload nginx
+
+          if [ ! -f "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" ] || [ ! -f "/etc/letsencrypt/live/${DOMAIN}/privkey.pem" ] || [ "${config_needs_update}" = "true" ]; then
+            sudo certbot --nginx \
+              -d "${DOMAIN}" \
+              --agree-tos \
+              --no-eff-email \
+              -m "${LE_EMAIL}" \
+              --non-interactive \
+              --redirect
           fi
+
+          sudo systemctl enable --now certbot.timer
 
       - name: Deploy mongo, api, and frontend services on self-hosted runner
         shell: bash
@@ -207,15 +279,10 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           set -euo pipefail
-          if [ -z "${TLS_CERTS_DIR:-}" ]; then
-            TLS_CERTS_DIR="${DEPLOY_PATH}/certs"
-          fi
 
           export BACKEND_IMAGE
           export FRONTEND_IMAGE
           export FRONTEND_PORT
-          export FRONTEND_TLS_PORT
-          export TLS_CERTS_DIR
           export IMAGE_TAG
           export MONGO_ROOT_USERNAME
           export MONGO_ROOT_PASSWORD

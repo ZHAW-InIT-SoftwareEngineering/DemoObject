@@ -4,7 +4,7 @@ This document explains the current CI/CD setup in this repository in chunked for
 
 ## Chunk 1: CI/CD Inventory (What Exists)
 
-1. There is one GitHub Actions workflow: `.github/workflows/deploy-stack.yml`.
+1. There is one GitHub Actions workflow: `.github/workflows/deploy-stack.yaml`.
 2. Production deployment uses `deploy/docker-compose.prod.yaml`.
 3. Container images are built from:
    - `backend/Dockerfile`
@@ -72,12 +72,17 @@ This document explains the current CI/CD setup in this repository in chunked for
 6. Logs into GHCR again for pull during deploy.
 7. Ensures deploy directory exists and copies:
    - `deploy/docker-compose.prod.yaml` -> `${DEPLOY_PATH}/docker-compose.prod.yaml`
-8. Exports runtime env vars (including `IMAGE_TAG=${{ github.sha }}`) and runs:
+8. Configures host-level HTTPS prerequisites from GitHub vars/secrets:
+   - DuckDNS updater files and cron
+   - Host Nginx reverse proxy site config
+   - Certbot initial certificate issuance if cert files are missing
+   - `certbot.timer` enablement
+9. Exports runtime env vars (including `IMAGE_TAG=${{ github.sha }}`) and runs:
    - `docker compose -f "${DEPLOY_PATH}/docker-compose.prod.yaml" pull mongo api frontend`
    - `docker compose -f "${DEPLOY_PATH}/docker-compose.prod.yaml" up -d --remove-orphans mongo api frontend`
-9. Health wait loop:
+10. Health wait loop:
    - Polls `demoobject-api` and `demoobject-frontend` up to 30 times, sleeping 2s each (about 60s max).
-10. On timeout:
+11. On timeout:
    - Prints `docker ps`
    - Prints tail logs for API/frontend
    - Exits with failure
@@ -116,12 +121,12 @@ This document explains the current CI/CD setup in this repository in chunked for
 
 1. Image: `${FRONTEND_IMAGE}:${IMAGE_TAG}`
 2. `depends_on` API healthy
-3. Publishes: `${FRONTEND_PORT:-80}:80`
+3. Publishes frontend only on loopback: `127.0.0.1:${FRONTEND_PORT:-8080}:80`
 4. Healthcheck: `wget http://127.0.0.1/healthz`
 
 ### Request path model
 
-1. Browser hits frontend Nginx on port 80 (or configured host port).
+1. Host-level Nginx (outside Docker) should proxy to `127.0.0.1:${FRONTEND_PORT}`.
 2. Frontend Nginx proxies `/api/` to `http://api:3000/`.
 3. Backend routes live at root paths (`/mazes`, `/sessions`, `/healthz`), so proxying `/api/<x>` -> `/<x>` aligns correctly.
 
@@ -131,8 +136,13 @@ This document explains the current CI/CD setup in this repository in chunked for
 | --- | --- | --- |
 | `GHCR_USERNAME` | Variable | Build image names under `ghcr.io/<user>/...` |
 | `GHCR_PAT` | Secret | GHCR login for push and pull |
+| `DUCKDNS_TOKEN` | Secret | DuckDNS token written into host updater config |
 | `DEPLOY_PATH` | Variable | Target path on self-hosted host where compose file is copied |
-| `FRONTEND_PORT` | Variable | Host port mapped to frontend container port 80 |
+| `FRONTEND_PORT` | Runtime env (derived from `APP_UPSTREAM_PORT`) | Loopback host port mapped to frontend container port 80 (`127.0.0.1:<FRONTEND_PORT>`) |
+| `APP_UPSTREAM_PORT` | Variable | Host Nginx upstream loopback port; deploy job derives `FRONTEND_PORT` from this value |
+| `DOMAIN` | Variable | Public domain used for host Nginx `server_name` and certificate |
+| `DUCKDNS_SUBDOMAIN` | Variable | Subdomain value used in DuckDNS update endpoint |
+| `LE_EMAIL` | Variable | Let's Encrypt registration contact email |
 | `MONGO_DATABASE` | Variable | Mongo DB init and backend DB name |
 | `SESSION_COLLECTION_NAME` | Variable | Backend collection name |
 | `MONGO_ROOT_USERNAME` | Secret | Mongo root auth + backend connection string |
@@ -159,12 +169,12 @@ This document explains the current CI/CD setup in this repository in chunked for
 
 ## Chunk 10: Documentation Drift to Be Aware Of
 
-1. Root `README.md` references `.github/workflows/deploy-backend.yml`, but current file is `.github/workflows/deploy-stack.yml`.
+1. Keep README and this file aligned on `.github/workflows/deploy-stack.yaml` naming.
 2. `docs/deployment-strategy.md` is a discussion draft and contains statements that are now outdated (for example, implying workflows were not yet added at that time).
 
 ## Source Files You Should Keep Open While Learning
 
-1. `.github/workflows/deploy-stack.yml`
+1. `.github/workflows/deploy-stack.yaml`
 2. `deploy/docker-compose.prod.yaml`
 3. `backend/Dockerfile`
 4. `frontend/Dockerfile`
