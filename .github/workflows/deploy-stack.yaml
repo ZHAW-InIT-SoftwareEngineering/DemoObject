@@ -118,6 +118,8 @@ jobs:
       BACKEND_IMAGE: 'ghcr.io/${{ vars.GHCR_USERNAME }}/demoobject-backend'
       FRONTEND_IMAGE: 'ghcr.io/${{ vars.GHCR_USERNAME }}/demoobject-frontend'
       FRONTEND_PORT: ${{ vars.FRONTEND_PORT || '80' }}
+      FRONTEND_TLS_PORT: ${{ vars.FRONTEND_TLS_PORT || '443' }}
+      TLS_CERTS_DIR: ${{ vars.TLS_CERTS_DIR }}
       GHCR_USERNAME: ${{ vars.GHCR_USERNAME }}
       MONGO_DATABASE: ${{ vars.MONGO_DATABASE }}
       SESSION_COLLECTION_NAME: ${{ vars.SESSION_COLLECTION_NAME }}
@@ -181,15 +183,39 @@ jobs:
           mkdir -p "${DEPLOY_PATH}"
           cp deploy/docker-compose.prod.yaml "${DEPLOY_PATH}/docker-compose.prod.yaml"
 
+      - name: Validate TLS certificate files
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${TLS_CERTS_DIR:-}" ]; then
+            TLS_CERTS_DIR="${DEPLOY_PATH}/certs"
+          fi
+
+          if [ ! -f "${TLS_CERTS_DIR}/fullchain.pem" ]; then
+            echo "Missing TLS certificate file: ${TLS_CERTS_DIR}/fullchain.pem" >&2
+            exit 1
+          fi
+
+          if [ ! -f "${TLS_CERTS_DIR}/privkey.pem" ]; then
+            echo "Missing TLS private key file: ${TLS_CERTS_DIR}/privkey.pem" >&2
+            exit 1
+          fi
+
       - name: Deploy mongo, api, and frontend services on self-hosted runner
         shell: bash
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           set -euo pipefail
+          if [ -z "${TLS_CERTS_DIR:-}" ]; then
+            TLS_CERTS_DIR="${DEPLOY_PATH}/certs"
+          fi
+
           export BACKEND_IMAGE
           export FRONTEND_IMAGE
           export FRONTEND_PORT
+          export FRONTEND_TLS_PORT
+          export TLS_CERTS_DIR
           export IMAGE_TAG
           export MONGO_ROOT_USERNAME
           export MONGO_ROOT_PASSWORD
