@@ -179,7 +179,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "${DEPLOY_PATH}"
-          cp deploy/docker-compose.prod.yml "${DEPLOY_PATH}/docker-compose.prod.yml"
+          cp deploy/docker-compose.prod.yaml "${DEPLOY_PATH}/docker-compose.prod.yaml"
 
       - name: Deploy mongo, api, and frontend services on self-hosted runner
         shell: bash
@@ -196,8 +196,8 @@ jobs:
           export MONGO_DATABASE
           export SESSION_COLLECTION_NAME
 
-          docker compose -f "${DEPLOY_PATH}/docker-compose.prod.yml" pull mongo api frontend
-          docker compose -f "${DEPLOY_PATH}/docker-compose.prod.yml" up -d --remove-orphans mongo api frontend
+          docker compose -f "${DEPLOY_PATH}/docker-compose.prod.yaml" pull mongo api frontend
+          docker compose -f "${DEPLOY_PATH}/docker-compose.prod.yaml" up -d --remove-orphans mongo api frontend
 
           for i in $(seq 1 30); do
             status=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' demoobject-api 2>/dev/null || true)

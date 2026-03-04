@@ -13,7 +13,7 @@ The workflow `.github/workflows/deploy-backend.yml` expects the following GitHub
 | `SESSION_COLLECTION_NAME` | Variable | Yes | `SessionCollection` | Passed into backend container environment. |
 | `MONGO_ROOT_USERNAME` | Secret | Yes | `demoobject_admin` | MongoDB root user for container auth and backend DB connection string. |
 | `MONGO_ROOT_PASSWORD` | Secret | Yes | `<strong-password>` | MongoDB root password for container auth and backend DB connection string. |
-| `DEPLOY_PATH` | Variable | No | `./demoobject` | Target path on self-hosted runner where `docker-compose.prod.yml` is copied. |
+| `DEPLOY_PATH` | Variable | No | `./demoobject` | Target path on self-hosted runner where `docker-compose.prod.yaml` is copied. |
 | `FRONTEND_PORT` | Variable | No | `80` | Host port mapping for frontend in production compose file. |
 
 Notes:

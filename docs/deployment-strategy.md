@@ -28,7 +28,7 @@ It intentionally does **not** include implementation changes yet.
 Already present:
 
 1. Production compose file:
-   - `deploy/docker-compose.prod.yml`
+   - `deploy/docker-compose.prod.yaml`
    - Services: `mongo`, `api`, `frontend`
    - API is internal-only (`expose`), frontend publishes port 80.
 2. Production-ready Dockerfiles:

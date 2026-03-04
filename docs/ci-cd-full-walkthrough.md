@@ -5,7 +5,7 @@ This document explains the current CI/CD setup in this repository in chunked for
 ## Chunk 1: CI/CD Inventory (What Exists)
 
 1. There is one GitHub Actions workflow: `.github/workflows/deploy-stack.yml`.
-2. Production deployment uses `deploy/docker-compose.prod.yml`.
+2. Production deployment uses `deploy/docker-compose.prod.yaml`.
 3. Container images are built from:
    - `backend/Dockerfile`
    - `frontend/Dockerfile`
@@ -71,10 +71,10 @@ This document explains the current CI/CD setup in this repository in chunked for
 5. Checks Docker and Docker Compose availability.
 6. Logs into GHCR again for pull during deploy.
 7. Ensures deploy directory exists and copies:
-   - `deploy/docker-compose.prod.yml` -> `${DEPLOY_PATH}/docker-compose.prod.yml`
+   - `deploy/docker-compose.prod.yaml` -> `${DEPLOY_PATH}/docker-compose.prod.yaml`
 8. Exports runtime env vars (including `IMAGE_TAG=${{ github.sha }}`) and runs:
-   - `docker compose -f "${DEPLOY_PATH}/docker-compose.prod.yml" pull mongo api frontend`
-   - `docker compose -f "${DEPLOY_PATH}/docker-compose.prod.yml" up -d --remove-orphans mongo api frontend`
+   - `docker compose -f "${DEPLOY_PATH}/docker-compose.prod.yaml" pull mongo api frontend`
+   - `docker compose -f "${DEPLOY_PATH}/docker-compose.prod.yaml" up -d --remove-orphans mongo api frontend`
 9. Health wait loop:
    - Polls `demoobject-api` and `demoobject-frontend` up to 30 times, sleeping 2s each (about 60s max).
 10. On timeout:
@@ -165,7 +165,7 @@ This document explains the current CI/CD setup in this repository in chunked for
 ## Source Files You Should Keep Open While Learning
 
 1. `.github/workflows/deploy-stack.yml`
-2. `deploy/docker-compose.prod.yml`
+2. `deploy/docker-compose.prod.yaml`
 3. `backend/Dockerfile`
 4. `frontend/Dockerfile`
 5. `frontend/nginx/default.conf`
