@@ -18,7 +18,6 @@ function validateEnvEntry(envVariableName) {
     return variable;
 }
 ;
-// currently db and connection uri is hard wired => however only one Db needed atm
 async function connectToDb() {
     if (db)
         return db;
