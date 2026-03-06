@@ -15,6 +15,8 @@ export type AnimationSceneData = {
   wallSegments: WallSegment[];
   routeLine: Vec3[];
   visibleRouteLine: Vec3[];
+  userRouteLine: Vec3[];
+  shortestRouteLine: Vec3[];
   startPoint: Vec3 | null;
   endPoint: Vec3 | null;
   floorSize: [number, number];

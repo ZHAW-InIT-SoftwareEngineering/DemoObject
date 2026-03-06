@@ -7,6 +7,8 @@ const EMPTY_SCENE_DATA: AnimationSceneData = {
   wallSegments: [],
   routeLine: [],
   visibleRouteLine: [],
+  userRouteLine: [],
+  shortestRouteLine: [],
   startPoint: null,
   endPoint: null,
   floorSize: [8, 8],
@@ -16,6 +18,8 @@ export function buildAnimationSceneData(
   maze: MazesMazeIdGet200Response | null,
   nodePath: NodePath,
   progress: number,
+  userNodePath: NodePath = [],
+  shortestNodePath: NodePath = [],
 ): AnimationSceneData {
   if (!maze) return EMPTY_SCENE_DATA;
 
@@ -129,9 +133,14 @@ export function buildAnimationSceneData(
     }
   }
 
-  const routeLine = nodePath
-    .map((id) => nodeWorldById.get(id))
-    .filter((point): point is Vec3 => Boolean(point));
+  const toRouteLine = (path: NodePath): Vec3[] =>
+    path
+      .map((id) => nodeWorldById.get(id))
+      .filter((point): point is Vec3 => Boolean(point));
+
+  const routeLine = toRouteLine(nodePath);
+  const userRouteLine = toRouteLine(userNodePath);
+  const shortestRouteLine = toRouteLine(shortestNodePath);
 
   const visiblePointCount = Math.min(routeLine.length, progress + 1);
   const visibleRouteLine = routeLine.slice(0, visiblePointCount);
@@ -140,6 +149,8 @@ export function buildAnimationSceneData(
     wallSegments,
     routeLine,
     visibleRouteLine,
+    userRouteLine,
+    shortestRouteLine,
     startPoint: nodeWorldById.get(maze.startNodeId) ?? null,
     endPoint: nodeWorldById.get(maze.endNodeId) ?? null,
     floorSize: [

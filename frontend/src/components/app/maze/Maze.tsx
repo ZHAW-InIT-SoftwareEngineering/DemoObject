@@ -3,18 +3,20 @@ import type {
   MazesMazeIdGet200ResponseEdgesInner,
   MazesMazeIdGet200ResponseNodesInner,
 } from "@/api";
+import { useMemo } from "react";
 import {
   nodePathToUndirectedEdgeKeySet,
   undirectedEdgeKey,
   type NodePath,
 } from "@/lib/path/transforms";
 import { SHOW_NODE_COORDS } from "@/lib/env";
+import { useMazePointerDrawing } from "@/hooks/useMazePointerDrawing";
 
 type MazeViewProps = {
   maze: MazesMazeIdGet200Response;
   width?: number;
   height?: number;
-  onNodeClick?: (node: MazesMazeIdGet200ResponseNodesInner) => void;
+  onNodeClick?: (node: MazesMazeIdGet200ResponseNodesInner) => boolean | void;
   selectedNodePath?: NodePath;
   highlightedNodePath?: NodePath;
   secondaryHighlightedNodePath?: NodePath;
@@ -63,19 +65,13 @@ function scalePoint(
 
 function renderEdge(
   edge: MazesMazeIdGet200ResponseEdgesInner,
-  nodeById: Map<number, MazesMazeIdGet200ResponseNodesInner>,
-  bounds: Bounds,
-  width: number,
-  height: number,
+  pointByNodeId: Map<number, { x: number; y: number }>,
   stroke: string,
   strokeWidth: number,
 ) {
-  const from = nodeById.get(edge.from);
-  const to = nodeById.get(edge.to);
-  if (!from || !to) return null;
-
-  const p1 = scalePoint(from.x, from.y, bounds, width, height);
-  const p2 = scalePoint(to.x, to.y, bounds, width, height);
+  const p1 = pointByNodeId.get(edge.from);
+  const p2 = pointByNodeId.get(edge.to);
+  if (!p1 || !p2) return null;
 
   return (
     <line
@@ -106,13 +102,43 @@ export function Maze({
 
   if (nodes.length === 0) return null;
 
-  const bounds = getBounds(nodes);
-  const nodeById = new Map(nodes.map((n) => [n.mazeNodeId, n]));
-  const selected = new Set(selectedNodePath);
+  const bounds = useMemo(() => getBounds(nodes), [nodes]);
+  const adjacencyByNodeId = useMemo(() => {
+    const map = new Map<number, Set<number>>();
+    for (const edge of edges) {
+      const fromNeighbors = map.get(edge.from) ?? new Set<number>();
+      fromNeighbors.add(edge.to);
+      map.set(edge.from, fromNeighbors);
+      const toNeighbors = map.get(edge.to) ?? new Set<number>();
+      toNeighbors.add(edge.from);
+      map.set(edge.to, toNeighbors);
+    }
+    return map;
+  }, [edges]);
+  const selected = useMemo(() => new Set(selectedNodePath), [selectedNodePath]);
   const highlightedEdges = nodePathToUndirectedEdgeKeySet(highlightedNodePath);
   const secondaryHighlightedEdges = nodePathToUndirectedEdgeKeySet(
     secondaryHighlightedNodePath,
   );
+  const pointByNodeId = useMemo(() => {
+    const map = new Map<number, { x: number; y: number }>();
+    for (const node of nodes) {
+      map.set(node.mazeNodeId, scalePoint(node.x, node.y, bounds, width, height));
+    }
+    return map;
+  }, [bounds, height, nodes, width]);
+  const currentEndpointNodeId = selectedNodePath[selectedNodePath.length - 1];
+  const {
+    isPointerDrawing,
+    stopPointerDrawing,
+    onNodePointerDown,
+    onNodePointerEnter,
+    onNodePointerLeave,
+  } = useMazePointerDrawing({
+    currentEndpointNodeId,
+    adjacencyByNodeId,
+    onSelectNode: onNodeClick,
+  });
 
   return (
     <svg
@@ -121,7 +147,10 @@ export function Maze({
       height={height}
       viewBox={`0 0 ${width} ${height}`}
       preserveAspectRatio="xMidYMid meet"
-      style={{ width: "100%", height: "100%" }}
+      style={{ width: "100%", height: "100%", touchAction: "none" }}
+      onPointerUp={stopPointerDrawing}
+      onPointerLeave={stopPointerDrawing}
+      onPointerCancel={stopPointerDrawing}
     >
       <rect
         x="0"
@@ -137,38 +166,54 @@ export function Maze({
         const isHighlighted = highlightedEdges.has(key);
         const isSecondaryHighlighted = secondaryHighlightedEdges.has(key);
         const stroke = isHighlighted
-          ? "#16a34a"
+          ? "#2563eb"
           : isSecondaryHighlighted
-            ? "#f97316"
+            ? "#f59e0b"
             : "#d1d5db";
         const strokeWidth = isHighlighted || isSecondaryHighlighted ? 3 : 2;
         return renderEdge(
           edge,
-          nodeById,
-          bounds,
-          width,
-          height,
+          pointByNodeId,
           stroke,
           strokeWidth,
         );
       })}
 
       {nodes.map((node) => {
-        const p = scalePoint(node.x, node.y, bounds, width, height);
+        const p = pointByNodeId.get(node.mazeNodeId);
+        if (!p) return null;
         const isSelected = selected.has(node.mazeNodeId);
         const isStart = node.mazeNodeId === maze.startNodeId;
         const isEnd = node.mazeNodeId === maze.endNodeId;
-        const fill = isSelected
-          ? "#111827"
-          : isStart
-            ? "#16a34a"
-            : isEnd
-              ? "#dc2626"
-              : "#3b82f6";
-        const strokeColor = isStart ? "#14532d" : isEnd ? "#dd1b1b" : "#ffffff";
+        const fill = isStart
+          ? "#22c55e"
+          : isEnd
+            ? "#ef4444"
+            : isSelected
+              ? "#111827"
+              : "#64748b";
+        const strokeColor = isStart ? "#166534" : isEnd ? "#7f1d1d" : "#ffffff";
         const strokeWidth = isStart || isEnd ? 3 : 2;
+        const selectionRingColor = isStart
+          ? "#166534"
+          : isEnd
+            ? "#991b1b"
+            : "#111827";
+        const selectionRingRadius = isStart || isEnd ? 12 : 10;
         return (
           <g key={node.mazeNodeId}>
+            {isSelected && (
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r={selectionRingRadius}
+                fill="none"
+                stroke={selectionRingColor}
+                strokeWidth={3}
+                opacity={0.6}
+                pointerEvents="none"
+              />
+            )}
             <circle
               cx={p.x}
               cy={p.y}
@@ -176,7 +221,11 @@ export function Maze({
               fill={fill}
               stroke={strokeColor}
               strokeWidth={strokeWidth}
+              pointerEvents={onNodeClick ? "visibleFill" : "none"}
               style={{ cursor: onNodeClick ? "pointer" : "default" }}
+              onPointerDown={(event) => onNodePointerDown(event, node.mazeNodeId)}
+              onPointerEnter={isPointerDrawing ? () => onNodePointerEnter(node) : undefined}
+              onPointerLeave={() => onNodePointerLeave(node.mazeNodeId)}
               onClick={() => onNodeClick?.(node)}
             >
               {SHOW_NODE_COORDS && <title>{`(${node.x},${node.y})`}</title>}
