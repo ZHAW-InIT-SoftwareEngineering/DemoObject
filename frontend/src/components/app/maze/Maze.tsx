@@ -103,6 +103,10 @@ export function Maze({
   if (nodes.length === 0) return null;
 
   const bounds = useMemo(() => getBounds(nodes), [nodes]);
+  const nodeById = useMemo(
+    () => new Map(nodes.map((node) => [node.mazeNodeId, node])),
+    [nodes],
+  );
   const adjacencyByNodeId = useMemo(() => {
     const map = new Map<number, Set<number>>();
     for (const edge of edges) {
@@ -132,11 +136,14 @@ export function Maze({
     isPointerDrawing,
     stopPointerDrawing,
     onNodePointerDown,
+    onMazePointerMove,
     onNodePointerEnter,
     onNodePointerLeave,
   } = useMazePointerDrawing({
     currentEndpointNodeId,
     adjacencyByNodeId,
+    nodeById,
+    pointByNodeId,
     onSelectNode: onNodeClick,
   });
 
@@ -148,6 +155,7 @@ export function Maze({
       viewBox={`0 0 ${width} ${height}`}
       preserveAspectRatio="xMidYMid meet"
       style={{ width: "100%", height: "100%", touchAction: "none" }}
+      onPointerMove={onMazePointerMove}
       onPointerUp={stopPointerDrawing}
       onPointerLeave={stopPointerDrawing}
       onPointerCancel={stopPointerDrawing}
