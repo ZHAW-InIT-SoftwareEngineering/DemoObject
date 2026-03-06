@@ -137,9 +137,9 @@ export function Maze({
         const isHighlighted = highlightedEdges.has(key);
         const isSecondaryHighlighted = secondaryHighlightedEdges.has(key);
         const stroke = isHighlighted
-          ? "#16a34a"
+          ? "#2563eb"
           : isSecondaryHighlighted
-            ? "#f97316"
+            ? "#f59e0b"
             : "#d1d5db";
         const strokeWidth = isHighlighted || isSecondaryHighlighted ? 3 : 2;
         return renderEdge(
@@ -158,17 +158,34 @@ export function Maze({
         const isSelected = selected.has(node.mazeNodeId);
         const isStart = node.mazeNodeId === maze.startNodeId;
         const isEnd = node.mazeNodeId === maze.endNodeId;
-        const fill = isSelected
-          ? "#111827"
-          : isStart
-            ? "#16a34a"
-            : isEnd
-              ? "#dc2626"
-              : "#3b82f6";
-        const strokeColor = isStart ? "#14532d" : isEnd ? "#dd1b1b" : "#ffffff";
+        const fill = isStart
+          ? "#22c55e"
+          : isEnd
+            ? "#ef4444"
+            : isSelected
+              ? "#111827"
+              : "#64748b";
+        const strokeColor = isStart ? "#166534" : isEnd ? "#7f1d1d" : "#ffffff";
         const strokeWidth = isStart || isEnd ? 3 : 2;
+        const selectionRingColor = isStart
+          ? "#166534"
+          : isEnd
+            ? "#991b1b"
+            : "#111827";
+        const selectionRingRadius = isStart || isEnd ? 12 : 10;
         return (
           <g key={node.mazeNodeId}>
+            {isSelected && (
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r={selectionRingRadius}
+                fill="none"
+                stroke={selectionRingColor}
+                strokeWidth={3}
+                opacity={0.6}
+              />
+            )}
             <circle
               cx={p.x}
               cy={p.y}

@@ -7,6 +7,8 @@ import { useEdgePlayback } from "./useEdgePlayback";
 type UseAnimationScenePlaybackOptions = {
   maze: MazesMazeIdGet200Response | null;
   nodePath: NodePath;
+  userNodePath: NodePath;
+  shortestNodePath: NodePath;
   onComplete: () => void;
   stepMs?: number;
   settleMs?: number;
@@ -22,6 +24,8 @@ type UseAnimationScenePlaybackResult = {
 export function useAnimationScenePlayback({
   maze,
   nodePath,
+  userNodePath,
+  shortestNodePath,
   onComplete,
   stepMs = 220,
   settleMs = 450,
@@ -34,8 +38,15 @@ export function useAnimationScenePlayback({
   });
 
   const sceneData = useMemo(
-    () => buildAnimationSceneData(maze, nodePath, progress),
-    [maze, nodePath, progress],
+    () =>
+      buildAnimationSceneData(
+        maze,
+        nodePath,
+        progress,
+        userNodePath,
+        shortestNodePath,
+      ),
+    [maze, nodePath, progress, userNodePath, shortestNodePath],
   );
 
   return {

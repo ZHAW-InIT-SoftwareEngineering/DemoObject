@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { AnimationSceneData } from "@/lib/animation";
+import type { AnimationSceneData, Vec3 } from "@/lib/animation";
 import { Canvas } from "@react-three/fiber";
 import { Line, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
@@ -19,6 +19,18 @@ type AnimationViewProps = {
   showPlaybackCamera?: boolean;
   onClose?: () => void;
 };
+
+function elevateRouteLine(points: Vec3[], yOffset: number): Vec3[] {
+  return points.map(([x, y, z]) => [x, y + yOffset, z]);
+}
+
+function isSameRouteLine(a: Vec3[], b: Vec3[]) {
+  if (a.length !== b.length) return false;
+  return a.every(
+    ([ax, ay, az], index) =>
+      ax === b[index][0] && ay === b[index][1] && az === b[index][2],
+  );
+}
 
 export function AnimationView({
   sceneData,
@@ -41,6 +53,28 @@ export function AnimationView({
   );
   const wallPalette = ["#766851", "#877560", "#695c49", "#8f7e66"] as const;
   const viewLabel = label ?? `Playing animation (${progress}/${total})`;
+  const shortestRouteLine = useMemo(
+    () => elevateRouteLine(sceneData.shortestRouteLine, 0.05),
+    [sceneData.shortestRouteLine],
+  );
+  const userRouteLine = useMemo(
+    () => elevateRouteLine(sceneData.userRouteLine, 0.055),
+    [sceneData.userRouteLine],
+  );
+  const animatedRouteLine = useMemo(
+    () => elevateRouteLine(sceneData.visibleRouteLine, 0.065),
+    [sceneData.visibleRouteLine],
+  );
+  const animatedRouteColor = useMemo(() => {
+    const isUserRoute = isSameRouteLine(sceneData.routeLine, sceneData.userRouteLine);
+    const isShortestRoute = isSameRouteLine(
+      sceneData.routeLine,
+      sceneData.shortestRouteLine,
+    );
+
+    if (isShortestRoute && !isUserRoute) return "#f59e0b";
+    return "#2563eb";
+  }, [sceneData.routeLine, sceneData.shortestRouteLine, sceneData.userRouteLine]);
 
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-[#161a22]">
@@ -171,13 +205,36 @@ export function AnimationView({
           </mesh>
         ))}
 
-        {sceneData.visibleRouteLine.length >= 2 && (
+        {shortestRouteLine.length >= 2 && (
           <Line
-            points={sceneData.visibleRouteLine}
-            color="#8f8574"
-            lineWidth={1.1}
+            points={shortestRouteLine}
+            color="#f59e0b"
+            lineWidth={1.35}
             transparent
-            opacity={0.66}
+            opacity={0.72}
+            depthWrite={false}
+          />
+        )}
+
+        {userRouteLine.length >= 2 && (
+          <Line
+            points={userRouteLine}
+            color="#2563eb"
+            lineWidth={1.35}
+            transparent
+            opacity={0.72}
+            depthWrite={false}
+          />
+        )}
+
+        {animatedRouteLine.length >= 2 && (
+          <Line
+            points={animatedRouteLine}
+            color={animatedRouteColor}
+            lineWidth={2}
+            transparent
+            opacity={0.9}
+            depthWrite={false}
           />
         )}
 

@@ -19,6 +19,7 @@ import { StartLoadingScreen } from "@/components/app/StartLoadingScreen";
 import { AnimationPathSelectionOverlay } from "@/components/app/animation/AnimationPathSelectionOverlay";
 import { CelebrationOverlay } from "@/components/app/animation/CelebrationOverlay";
 import { AnimationView } from "@/components/app/animation/AnimationView";
+import { ResetPathConfirmationOverlay } from "@/components/app/ResetPathConfirmationOverlay";
 import { toast } from "sonner";
 
 export default function App() {
@@ -79,20 +80,29 @@ export default function App() {
   const { progress, total, sceneData } = useAnimationScenePlayback({
     maze,
     nodePath: playbackNodePath,
+    userNodePath: nodePath,
+    shortestNodePath: shortestPathNodePath,
     onComplete: onCompleteAnimation,
     stepMs: 260,
     settleMs: 5200,
   });
 
   const userPathLength = Math.max(0, nodePath.length - 1);
+  const [resetPathConfirmationOpen, setResetPathConfirmationOpen] =
+    useState(false);
   const [lastShortestPathSubmissionKey, setLastShortestPathSubmissionKey] =
     useState<string | null>(null);
-  
+
   const handleStartAdventure = () => {
     startAdventure(MAZEID);
   };
 
   const handleResetPath = () => {
+    setResetPathConfirmationOpen(true);
+  };
+
+  const handleConfirmResetPath = () => {
+    setResetPathConfirmationOpen(false);
     resetPath();
   };
 
@@ -147,8 +157,14 @@ export default function App() {
   const previewProgress = Math.max(animationState.nodePath.length - 1, 0);
   const previewSceneData = useMemo(
     () =>
-      buildAnimationSceneData(maze, animationState.nodePath, previewProgress),
-    [maze, animationState.nodePath, previewProgress],
+      buildAnimationSceneData(
+        maze,
+        animationState.nodePath,
+        previewProgress,
+        nodePath,
+        shortestPathNodePath,
+      ),
+    [maze, animationState.nodePath, previewProgress, nodePath, shortestPathNodePath],
   );
   const viewProgress = isPreviewView ? previewProgress : progress;
   const viewTotal = isPreviewView ? previewProgress : total;
@@ -200,6 +216,11 @@ export default function App() {
         canUseShortestPath={canUseShortestPath}
         userPathLength={userPathLength}
         shortestPathLength={shortestPath?.length}
+      />
+      <ResetPathConfirmationOverlay
+        open={resetPathConfirmationOpen}
+        onOpenChange={setResetPathConfirmationOpen}
+        onConfirmReset={handleConfirmResetPath}
       />
       {isAnimationView ? (
         <AnimationView

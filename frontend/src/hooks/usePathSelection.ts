@@ -124,10 +124,21 @@ export function usePathSelection(
         return canStart;
       }
 
+      const currentNodeId = nodePath[nodePath.length - 1];
+
+      // Re-clicking the current endpoint deselects it and restores the previous endpoint.
+      if (node.mazeNodeId === currentNodeId) {
+        if (nodePath.length > 1) {
+          setNodePath((prev) => prev.slice(0, -1));
+          return true;
+        }
+        return false;
+      }
+
       const canAppend =
         Boolean(
           adjacency
-            .get(nodePath[nodePath.length - 1])
+            .get(currentNodeId)
             ?.has(node.mazeNodeId),
         );
 
