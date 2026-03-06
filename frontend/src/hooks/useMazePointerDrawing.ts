@@ -27,7 +27,6 @@ type UseMazePointerDrawingResult = {
 };
 
 const REHOVER_DESELECT_DELAY_MS = 250;
-const MIN_REENTER_GAP_MS = 120;
 
 export function useMazePointerDrawing({
   currentEndpointNodeId,
@@ -37,7 +36,6 @@ export function useMazePointerDrawing({
   const isPointerDrawingRef = useRef(false);
   const lastInteractedNodeIdRef = useRef<number | null>(null);
   const lastHoveredNodeIdRef = useRef<number | null>(null);
-  const currentEndpointLeaveAtMsRef = useRef<number | null>(null);
   const pendingDeselectNodeIdRef = useRef<number | null>(null);
   const pendingDeselectTimerRef = useRef<number | null>(null);
   const [isPointerDrawing, setIsPointerDrawing] = useState(false);
@@ -57,14 +55,12 @@ export function useMazePointerDrawing({
     isPointerDrawingRef.current = false;
     lastInteractedNodeIdRef.current = null;
     lastHoveredNodeIdRef.current = null;
-    currentEndpointLeaveAtMsRef.current = null;
     setIsPointerDrawing(false);
   }, [clearPendingDeselect]);
 
   useEffect(() => {
     clearPendingDeselect();
     lastHoveredNodeIdRef.current = currentEndpointNodeId ?? null;
-    currentEndpointLeaveAtMsRef.current = null;
   }, [clearPendingDeselect, currentEndpointNodeId]);
 
   useEffect(() => {
@@ -97,7 +93,6 @@ export function useMazePointerDrawing({
       isPointerDrawingRef.current = true;
       lastInteractedNodeIdRef.current = nodeId;
       lastHoveredNodeIdRef.current = nodeId;
-      currentEndpointLeaveAtMsRef.current = null;
       setIsPointerDrawing(true);
     },
     [clearPendingDeselect, currentEndpointNodeId, onSelectNode],
@@ -121,32 +116,21 @@ export function useMazePointerDrawing({
     (node: MazesMazeIdGet200ResponseNodesInner) => {
       if (!isPointerDrawingRef.current) return;
       const nodeId = node.mazeNodeId;
-      const isCurrentEndpointNode = node.mazeNodeId === currentEndpointNodeId;
-      const isReHoverOfSameNode =
-        lastInteractedNodeIdRef.current === node.mazeNodeId;
-      const didReEnterFromDifferentNode =
-        lastHoveredNodeIdRef.current !== node.mazeNodeId;
-      const wasAwayLongEnough =
-        currentEndpointLeaveAtMsRef.current !== null &&
-        performance.now() - currentEndpointLeaveAtMsRef.current >= MIN_REENTER_GAP_MS;
-      lastHoveredNodeIdRef.current = node.mazeNodeId;
+      const endpointNodeId =
+        lastInteractedNodeIdRef.current ?? currentEndpointNodeId;
+      if (endpointNodeId === null || endpointNodeId === undefined) return;
+      const isEndpointNode = nodeId === endpointNodeId;
+      const didReEnterNode = lastHoveredNodeIdRef.current !== nodeId;
+      lastHoveredNodeIdRef.current = nodeId;
 
-      if (
-        isCurrentEndpointNode &&
-        isReHoverOfSameNode &&
-        didReEnterFromDifferentNode &&
-        wasAwayLongEnough
-      ) {
+      if (isEndpointNode && didReEnterNode) {
         scheduleEndpointDeselect(node);
         return;
       }
 
       clearPendingDeselect();
-      if (isCurrentEndpointNode && !isReHoverOfSameNode) return;
-      if (!isCurrentEndpointNode && isReHoverOfSameNode) return;
-      if (currentEndpointNodeId === undefined) return;
-      const canConnect =
-        adjacencyByNodeId.get(currentEndpointNodeId)?.has(nodeId) ?? false;
+      if (isEndpointNode) return;
+      const canConnect = adjacencyByNodeId.get(endpointNodeId)?.has(nodeId) ?? false;
       if (!canConnect) return;
       trySelectNode(node);
     },
@@ -161,16 +145,13 @@ export function useMazePointerDrawing({
 
   const onNodePointerLeave = useCallback(
     (nodeId: number) => {
-      if (nodeId === currentEndpointNodeId) {
-        currentEndpointLeaveAtMsRef.current = performance.now();
-      }
       if (lastHoveredNodeIdRef.current === nodeId) {
         lastHoveredNodeIdRef.current = null;
       }
       if (pendingDeselectNodeIdRef.current !== nodeId) return;
       clearPendingDeselect();
     },
-    [clearPendingDeselect, currentEndpointNodeId],
+    [clearPendingDeselect],
   );
 
   return {

@@ -125,6 +125,8 @@ export function usePathSelection(
       }
 
       const currentNodeId = nodePath[nodePath.length - 1];
+      const previousNodeId =
+        nodePath.length > 1 ? nodePath[nodePath.length - 2] : undefined;
 
       // Re-clicking the current endpoint deselects it and restores the previous endpoint.
       if (node.mazeNodeId === currentNodeId) {
@@ -133,6 +135,12 @@ export function usePathSelection(
           return true;
         }
         return false;
+      }
+
+      // Dragging back to the previous node should undo the latest step.
+      if (previousNodeId !== undefined && node.mazeNodeId === previousNodeId) {
+        setNodePath((prev) => prev.slice(0, -1));
+        return true;
       }
 
       const canAppend =
