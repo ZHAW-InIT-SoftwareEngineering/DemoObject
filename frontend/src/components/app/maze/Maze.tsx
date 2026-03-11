@@ -34,6 +34,15 @@ const DEFAULT_SIZE = 520;
 const PADDING = 20;
 
 function getBounds(nodes: MazesMazeIdGet200ResponseNodesInner[]): Bounds {
+  if (nodes.length === 0) {
+    return {
+      minX: 0,
+      maxX: 0,
+      minY: 0,
+      maxY: 0,
+    };
+  }
+
   const xs = nodes.map((n) => n.x);
   const ys = nodes.map((n) => n.y);
   return {
@@ -97,10 +106,8 @@ export function Maze({
   secondaryHighlightedNodePath = [],
   className,
 }: MazeViewProps) {
-  const nodes = maze.nodes ?? [];
-  const edges = maze.edges ?? [];
-
-  if (nodes.length === 0) return null;
+  const nodes = useMemo(() => maze.nodes ?? [], [maze.nodes]);
+  const edges = useMemo(() => maze.edges ?? [], [maze.edges]);
 
   const bounds = useMemo(() => getBounds(nodes), [nodes]);
   const nodeById = useMemo(
@@ -146,6 +153,8 @@ export function Maze({
     pointByNodeId,
     onSelectNode: onNodeClick,
   });
+
+  if (nodes.length === 0) return null;
 
   return (
     <svg

@@ -1,0 +1,1 @@
+import{j as e,L as t}from"./index-BfQu6WvJ.js";function r(){return e.jsx("div",{className:"min-h-screen w-full bg-white flex items-center justify-center",children:e.jsx(t,{className:"h-10 w-10 animate-spin text-black"})})}export{r as S};

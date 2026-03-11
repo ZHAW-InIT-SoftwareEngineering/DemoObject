@@ -5,6 +5,10 @@ import type {
   MazesMazeIdPathsDslPostRequest,
   SessionsSessionIdPathsGet200Response,
 } from "@/api";
+import {
+  readPersistedDemoDraftPath,
+  writePersistedDemoDraftPath,
+} from "@/lib/demoDraftPathStorage";
 import { sessionsApi } from "../lib/api";
 import { nodePathToCoordPath, type NodePath } from "@/lib/path/transforms";
 
@@ -31,6 +35,7 @@ export function usePathSelection(
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [lastSubmittedKey, setLastSubmittedKey] = useState<string | null>(null);
+  const [hydratedPathScopeKey, setHydratedPathScopeKey] = useState<string | null>(null);
 
   const nodeById = useMemo(() => {
     const nodes = maze?.nodes ?? [];
@@ -51,17 +56,50 @@ export function usePathSelection(
     return map;
   }, [maze?.edges]);
 
+  const pathStorageScopeKey =
+    maze && sessionId ? `${maze.mazeId}:${sessionId}` : null;
+
   useEffect(() => {
-    if (maze?.startNodeId !== undefined && maze?.startNodeId !== null) {
-      setNodePath([maze.startNodeId]);
-    } else {
+    setHydratedPathScopeKey(null);
+
+    const startNodeId = maze?.startNodeId;
+    if (startNodeId === undefined || startNodeId === null) {
       setNodePath([]);
+      return;
     }
-  }, [maze?.mazeId]);
+
+    const fallbackNodePath: NodePath = [startNodeId];
+    if (!maze || !sessionId || !pathStorageScopeKey) {
+      setNodePath(fallbackNodePath);
+      return;
+    }
+
+    const persistedDraftPath = readPersistedDemoDraftPath();
+    if (
+      !persistedDraftPath ||
+      persistedDraftPath.mazeId !== maze.mazeId ||
+      persistedDraftPath.sessionId !== sessionId ||
+      !isRestorableNodePath(persistedDraftPath.nodePath, startNodeId, nodeById, adjacency)
+    ) {
+      setNodePath(fallbackNodePath);
+      setHydratedPathScopeKey(pathStorageScopeKey);
+      return;
+    }
+
+    setNodePath(persistedDraftPath.nodePath);
+    setHydratedPathScopeKey(pathStorageScopeKey);
+  }, [adjacency, maze, nodeById, pathStorageScopeKey, sessionId]);
 
   useEffect(() => {
     setLastSubmittedKey(null);
   }, [sessionId]);
+
+  useEffect(() => {
+    if (!maze || !sessionId || !pathStorageScopeKey) return;
+    if (hydratedPathScopeKey !== pathStorageScopeKey) return;
+
+    writePersistedDemoDraftPath(sessionId, maze.mazeId, nodePath);
+  }, [hydratedPathScopeKey, maze, nodePath, pathStorageScopeKey, sessionId]);
 
   const resetPath = useCallback(() => {
     if (maze?.startNodeId !== undefined && maze?.startNodeId !== null) {
@@ -172,4 +210,28 @@ export function usePathSelection(
     submitting,
     lastSubmittedKey,
   };
+}
+
+function isRestorableNodePath(
+  candidateNodePath: NodePath,
+  startNodeId: number,
+  nodeById: ReadonlyMap<number, MazesMazeIdGet200ResponseNodesInner>,
+  adjacency: ReadonlyMap<number, ReadonlySet<number>>,
+) {
+  if (candidateNodePath.length === 0) return false;
+  if (candidateNodePath[0] !== startNodeId) return false;
+
+  for (let i = 0; i < candidateNodePath.length; i += 1) {
+    const nodeId = candidateNodePath[i];
+    if (!nodeById.has(nodeId)) return false;
+
+    if (i === 0) continue;
+
+    const previousNodeId = candidateNodePath[i - 1];
+    if (!adjacency.get(previousNodeId)?.has(nodeId)) {
+      return false;
+    }
+  }
+
+  return true;
 }
