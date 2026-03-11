@@ -35,7 +35,9 @@ export function usePathSelection(
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [lastSubmittedKey, setLastSubmittedKey] = useState<string | null>(null);
-  const [hydratedPathScopeKey, setHydratedPathScopeKey] = useState<string | null>(null);
+  const [hydratedPathScopeKey, setHydratedPathScopeKey] = useState<
+    string | null
+  >(null);
 
   const nodeById = useMemo(() => {
     const nodes = maze?.nodes ?? [];
@@ -79,7 +81,12 @@ export function usePathSelection(
       !persistedDraftPath ||
       persistedDraftPath.mazeId !== maze.mazeId ||
       persistedDraftPath.sessionId !== sessionId ||
-      !isRestorableNodePath(persistedDraftPath.nodePath, startNodeId, nodeById, adjacency)
+      !isRestorableNodePath(
+        persistedDraftPath.nodePath,
+        startNodeId,
+        nodeById,
+        adjacency,
+      )
     ) {
       setNodePath(fallbackNodePath);
       setHydratedPathScopeKey(pathStorageScopeKey);
@@ -143,7 +150,7 @@ export function usePathSelection(
       setLastSubmittedKey(pathKey);
       return response;
     } catch {
-      setSubmitError("Failed to submit path.");
+      setSubmitError("Senden des Pfads fehlgeschlagen.");
       return null;
     } finally {
       setSubmitting(false);
@@ -181,12 +188,9 @@ export function usePathSelection(
         return true;
       }
 
-      const canAppend =
-        Boolean(
-          adjacency
-            .get(currentNodeId)
-            ?.has(node.mazeNodeId),
-        );
+      const canAppend = Boolean(
+        adjacency.get(currentNodeId)?.has(node.mazeNodeId),
+      );
 
       if (canAppend) {
         setNodePath((prev) => [...prev, node.mazeNodeId]);

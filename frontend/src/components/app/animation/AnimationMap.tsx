@@ -9,7 +9,7 @@ type AnimationMapProps = {
   total: number;
 };
 
-// TODO: this component is unused as for now 
+// TODO: this component is unused as for now
 //        consider to use it as a mini-map during the 3D animation
 export function AnimationMap({
   maze,
@@ -23,7 +23,7 @@ export function AnimationMap({
     <Card className="py-4">
       <CardContent className="px-4 space-y-3">
         <div className="text-sm text-gray-700">
-          Playing animation ({progress}/{total})
+          Animation läuft ({progress}/{total})
         </div>
         <div className="w-full aspect-square">
           <Maze

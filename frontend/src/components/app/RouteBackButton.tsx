@@ -17,7 +17,7 @@ export function RouteBackButton() {
   return (
     <Button variant="outline" size="sm" onClick={handleClick}>
       <ArrowLeft />
-      Back
+      Zurück
     </Button>
   );
 }

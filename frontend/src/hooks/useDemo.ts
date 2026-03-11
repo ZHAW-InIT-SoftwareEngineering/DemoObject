@@ -50,7 +50,10 @@ export function useDemo() {
         setSession(null);
         setMaze(null);
         setError(
-          getErrorMessage(error, "Failed to restore the previous session."),
+          getErrorMessage(
+            error,
+            "Die vorherige Sitzung konnte nicht wiederhergestellt werden.",
+          ),
         );
       } finally {
         if (!cancelled) {
@@ -84,7 +87,7 @@ export function useDemo() {
       clearPersistedDemoSession();
       setSession(null);
       setMaze(null);
-      setError(getErrorMessage(error, "Something went wrong"));
+      setError(getErrorMessage(error, "Etwas ist schiefgelaufen."));
       return false;
     } finally {
       setLoading(false);

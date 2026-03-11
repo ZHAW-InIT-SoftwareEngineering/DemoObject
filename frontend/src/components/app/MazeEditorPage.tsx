@@ -39,6 +39,9 @@ export function MazeEditorPage() {
   const [resetPathConfirmationOpen, setResetPathConfirmationOpen] =
     useState(false);
 
+  const [resetDSLInformation, setDSLInfromationOpen] = 
+    useState(false);
+
   useEffect(() => {
     if (animationState.status !== "playing") return;
     void navigate({ to: "/maze/animation", replace: true });
@@ -54,7 +57,13 @@ export function MazeEditorPage() {
         nodePath,
         shortestPathNodePath,
       ),
-    [maze, animationState.nodePath, nodePath, previewProgress, shortestPathNodePath],
+    [
+      maze,
+      animationState.nodePath,
+      nodePath,
+      previewProgress,
+      shortestPathNodePath,
+    ],
   );
 
   const handleResetPath = () => {
@@ -64,6 +73,14 @@ export function MazeEditorPage() {
   const handleConfirmResetPath = () => {
     setResetPathConfirmationOpen(false);
     resetPath();
+  };
+
+  const handleResetDSLInfo = () => {
+    setDSLInfromationOpen(true);
+  };
+
+  const handleConfirmDSLInfo = () => {
+    setDSLInfromationOpen(false);
   };
 
   if (!maze) {
@@ -76,7 +93,7 @@ export function MazeEditorPage() {
         sceneData={previewSceneData}
         progress={previewProgress}
         total={previewProgress}
-        label="3D maze preview"
+        label="3D-Labyrinthvorschau"
         showPlaybackCamera={false}
         onClose={closeAnimationView}
       />

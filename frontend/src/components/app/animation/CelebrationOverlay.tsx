@@ -28,22 +28,22 @@ export function CelebrationOverlay({ open, onClose }: CelebrationOverlayProps) {
           <div className="flex items-center justify-center gap-2 text-amber-600">
             <Sparkles className="h-5 w-5 animate-pulse" />
             <span className="text-sm font-semibold uppercase tracking-wide">
-              Perfect Path
+              Perfekter Pfad
             </span>
             <Sparkles className="h-5 w-5 animate-pulse" />
           </div>
 
           <DialogHeader className="space-y-2 text-center">
             <DialogTitle className="text-lg font-semibold text-slate-900">
-              You matched the shortest route.
+              Du hast den kürzesten Weg gefunden.
             </DialogTitle>
             <DialogDescription className="text-sm text-slate-600">
-              Nice solution. This run is optimal.
+              Starke Lösung. Dieser Durchlauf ist optimal.
             </DialogDescription>
           </DialogHeader>
 
           <Button type="button" onClick={onClose}>
-            Continue
+            Weiter
           </Button>
         </div>
       </DialogContent>

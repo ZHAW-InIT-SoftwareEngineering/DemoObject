@@ -19,7 +19,7 @@ export function ImpressumPage() {
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-base font-semibold">Developer</h2>
+            <h2 className="text-base font-semibold">Entwickler</h2>
             <div>
               <p>Cyril Gabriele</p>
               <p>E-Mail: gabc@zhaw.ch</p>
@@ -33,9 +33,9 @@ export function ImpressumPage() {
               <div>
                 <p>Sekretariat InIT</p>
                 <p>Obere Krichgasse 2</p>
-              <p>CH-8400 Winterthur</p>
-              <p>Telefon: +41 (0)58 934 69 60</p>
-              <p>E-Mail: info.init@zhaw.ch</p>
+                <p>CH-8400 Winterthur</p>
+                <p>Telefon: +41 (0)58 934 69 60</p>
+                <p>E-Mail: info.init@zhaw.ch</p>
               </div>
             </div>
           </section>

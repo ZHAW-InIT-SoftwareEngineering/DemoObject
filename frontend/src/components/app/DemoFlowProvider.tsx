@@ -65,7 +65,13 @@ type DemoFlowContextValue = {
 const DemoFlowContext = createContext<DemoFlowContextValue | null>(null);
 
 export function DemoFlowProvider({ children }: { children: ReactNode }) {
-  const { loading, session, maze, error, startAdventure: beginAdventure } = useDemo();
+  const {
+    loading,
+    session,
+    maze,
+    error,
+    startAdventure: beginAdventure,
+  } = useDemo();
   const {
     nodePath,
     pathKey,
@@ -87,7 +93,10 @@ export function DemoFlowProvider({ children }: { children: ReactNode }) {
   } = usePerfectPathCelebration({
     shortestPathLength: shortestPath?.length,
   });
-  const shortestPathNodePath = useShortestPathNodePath(maze, shortestPath?.path);
+  const shortestPathNodePath = useShortestPathNodePath(
+    maze,
+    shortestPath?.path,
+  );
   const {
     animationState,
     startAnimation,
@@ -100,7 +109,8 @@ export function DemoFlowProvider({ children }: { children: ReactNode }) {
 
   const hasActiveSession = Boolean(session && maze);
   const userPathLength = Math.max(0, nodePath.length - 1);
-  const isPathSubmitted = Boolean(lastSubmittedKey) && pathKey === lastSubmittedKey;
+  const isPathSubmitted =
+    Boolean(lastSubmittedKey) && pathKey === lastSubmittedKey;
   const hasShortestPathDisplayed = shortestPathNodePath.length > 1;
   const hasShortestPathForCurrentSubmission =
     hasShortestPathDisplayed &&
@@ -124,9 +134,7 @@ export function DemoFlowProvider({ children }: { children: ReactNode }) {
   });
 
   const canShowAnimationButton =
-    isPathSubmitted &&
-    hasShortestPathForCurrentSubmission &&
-    hasAnimatablePath;
+    isPathSubmitted && hasShortestPathForCurrentSubmission && hasAnimatablePath;
 
   const startAdventure = useCallback(async () => {
     return beginAdventure(DEFAULT_MAZE_ID);
@@ -136,29 +144,31 @@ export function DemoFlowProvider({ children }: { children: ReactNode }) {
     const response = await getDSL();
     if (response) {
       setLastShortestPathSubmissionKey(null);
-      toast.success("Path submitted.");
+      toast.success("Pfad gesendet.");
       return;
     }
 
-    toast.error("Failed to submit path.");
+    toast.error("Senden des Pfads fehlgeschlagen.");
   }, [getDSL]);
 
   const requestShortestPath = useCallback(async () => {
     try {
-      const shortestPathResponse = await getShortestPath(maze?.mazeId ?? DEFAULT_MAZE_ID);
+      const shortestPathResponse = await getShortestPath(
+        maze?.mazeId ?? DEFAULT_MAZE_ID,
+      );
       if (!shortestPathResponse) {
-        toast.error("Failed to compute shortest path.");
+        toast.error("Der kürzeste Pfad konnte nicht berechnet werden.");
         return;
       }
 
       if (lastSubmittedKey) {
         setLastShortestPathSubmissionKey(lastSubmittedKey);
       }
-      toast.success("Shortest path loaded.");
+      toast.success("Kürzester Pfad geladen.");
       maybeCelebrateForPathLength(userPathLength, shortestPathResponse.length);
     } catch {
-      console.error("Failed to find a shortest path.");
-      toast.error("Failed to find a shortest path.");
+      console.error("Der kürzeste Pfad konnte nicht gefunden werden.");
+      toast.error("Der kürzeste Pfad konnte nicht gefunden werden.");
     }
   }, [
     getShortestPath,

@@ -18,7 +18,7 @@ export function AnimationHud({ label, onClose }: AnimationHudProps) {
           className="pointer-events-auto border-white/20 bg-black/35 text-white hover:bg-black/55"
           onClick={onClose}
         >
-          Back
+          Zurück
         </Button>
       )}
     </div>

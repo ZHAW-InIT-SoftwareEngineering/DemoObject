@@ -23,9 +23,9 @@ export function ResetPathConfirmationOverlay({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md" showCloseButton={false}>
         <DialogHeader>
-          <DialogTitle>Reset Path</DialogTitle>
+          <DialogTitle>Pfad zurücksetzen</DialogTitle>
           <DialogDescription>
-            Are you sure you want to reset the path?
+            Möchtest du den Pfad wirklich zurücksetzen?
           </DialogDescription>
         </DialogHeader>
 
@@ -35,10 +35,10 @@ export function ResetPathConfirmationOverlay({
             variant="secondary"
             onClick={() => onOpenChange(false)}
           >
-            Cancel
+            Abbrechen
           </Button>
           <Button type="button" variant="destructive" onClick={onConfirmReset}>
-            Confirm
+            Zurücksetzen
           </Button>
         </DialogFooter>
       </DialogContent>
