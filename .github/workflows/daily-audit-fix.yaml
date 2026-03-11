@@ -62,12 +62,47 @@ jobs:
             done
           }
 
+          audit_fix_or_skip_force() {
+            local module="$1"
+            local max_attempts=3
+            local attempt=1
+            local delay=5
+            local audit_output
+
+            while true; do
+              if audit_output="$(npm audit fix 2>&1)"; then
+                printf '%s\n' "${audit_output}"
+                return 0
+              fi
+
+              printf '%s\n' "${audit_output}"
+
+              if grep -Fq 'npm audit fix --force' <<<"${audit_output}"; then
+                echo "Skipping remaining audit fixes in ${module}: npm reports that only force fixes remain."
+                echo "Manual maintainer review required for ${module}."
+                return 0
+              fi
+
+              if [ "${attempt}" -ge "${max_attempts}" ]; then
+                echo "Command failed after ${attempt} attempts: npm audit fix" >&2
+                return 1
+              fi
+
+              echo "Command failed (attempt ${attempt}/${max_attempts}): npm audit fix" >&2
+              echo "Retrying in ${delay}s..." >&2
+              sleep "${delay}"
+
+              attempt=$((attempt + 1))
+              delay=$((delay * 2))
+            done
+          }
+
           for module in backend frontend; do
             echo "Running npm audit fix in ${module}"
             (
               cd "${module}"
               retry 3 npm ci
-              retry 3 npm audit fix
+              audit_fix_or_skip_force "${module}"
             )
           done
 
