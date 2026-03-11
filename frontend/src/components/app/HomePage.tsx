@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { StartLoadingScreen } from "@/components/app/StartLoadingScreen";
 import { StartScreen } from "@/components/app/StartScreen";
-import { useDemoFlow } from "@/components/app/DemoFlowProvider";
+import { useDemoSession } from "@/hooks";
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -11,7 +11,7 @@ export function HomePage() {
     hasActiveSession,
     loading,
     startAdventure,
-  } = useDemoFlow();
+  } = useDemoSession();
 
   useEffect(() => {
     if (!hasActiveSession) return;

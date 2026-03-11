@@ -1,1 +1,0 @@
-import{u as s,a as r,r as n,j as o,O as i}from"./index-DSAFtfMA.js";import{S as u}from"./StartLoadingScreen-ULVA97fl.js";function m(){const a=s(),{hasActiveSession:t,loading:e}=r();return n.useEffect(()=>{e||t||a({to:"/",replace:!0})},[t,e,a]),t?o.jsx(i,{}):e?o.jsx(u,{}):null}export{m as component};

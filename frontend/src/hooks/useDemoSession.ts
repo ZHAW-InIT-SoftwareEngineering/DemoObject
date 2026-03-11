@@ -1,4 +1,13 @@
-import { useCallback, useEffect, useState } from "react";
+import {
+  createContext,
+  createElement,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import type { MazesMazeIdGet200Response, SessionsPost201Response } from "@/api";
 import {
   clearPersistedDemoSession,
@@ -8,6 +17,19 @@ import {
 import { getSessionId } from "../services";
 import { getMazeById } from "../services/maze";
 
+const DEFAULT_MAZE_ID = 0;
+
+type DemoSessionContextValue = {
+  loading: boolean;
+  session: SessionsPost201Response | null;
+  maze: MazesMazeIdGet200Response | null;
+  error: string | null;
+  hasActiveSession: boolean;
+  startAdventure: () => Promise<boolean>;
+};
+
+const DemoSessionContext = createContext<DemoSessionContextValue | null>(null);
+
 function getErrorMessage(error: unknown, fallbackMessage: string) {
   if (error instanceof Error && error.message) {
     return error.message;
@@ -16,7 +38,7 @@ function getErrorMessage(error: unknown, fallbackMessage: string) {
   return fallbackMessage;
 }
 
-export function useDemo() {
+function useDemoSessionState() {
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<SessionsPost201Response | null>(null);
   const [maze, setMaze] = useState<MazesMazeIdGet200Response | null>(null);
@@ -95,4 +117,44 @@ export function useDemo() {
   }, []);
 
   return { loading, session, maze, error, startAdventure };
+}
+
+export function DemoSessionProvider({ children }: { children: ReactNode }) {
+  const {
+    loading,
+    session,
+    maze,
+    error,
+    startAdventure: beginAdventure,
+  } = useDemoSessionState();
+
+  const startAdventure = useCallback(() => {
+    return beginAdventure(DEFAULT_MAZE_ID);
+  }, [beginAdventure]);
+
+  const hasActiveSession = Boolean(session && maze);
+
+  const value = useMemo<DemoSessionContextValue>(
+    () => ({
+      loading,
+      session,
+      maze,
+      error,
+      hasActiveSession,
+      startAdventure,
+    }),
+    [error, hasActiveSession, loading, maze, session, startAdventure],
+  );
+
+  return createElement(DemoSessionContext.Provider, { value }, children);
+}
+
+export function useDemoSession() {
+  const context = useContext(DemoSessionContext);
+
+  if (!context) {
+    throw new Error("useDemoSession must be used within a DemoSessionProvider.");
+  }
+
+  return context;
 }

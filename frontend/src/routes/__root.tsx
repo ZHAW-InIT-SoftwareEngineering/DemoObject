@@ -3,14 +3,17 @@ import { DemoFlowProvider, useDemoFlow } from "@/components/app/DemoFlowProvider
 import { CelebrationOverlay } from "@/components/app/animation/CelebrationOverlay";
 import { AnimationPathSelectionOverlay } from "@/components/app/animation/AnimationPathSelectionOverlay";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { DemoSessionProvider } from "@/hooks";
 import { Toaster } from "@/components/ui";
 import { ImpressumLink } from "@/components/app/ImpressumLink";
 
 function RootLayout() {
   return (
-    <DemoFlowProvider>
-      <RootShell />
-    </DemoFlowProvider>
+    <DemoSessionProvider>
+      <DemoFlowProvider>
+        <RootShell />
+      </DemoFlowProvider>
+    </DemoSessionProvider>
   );
 }
 

@@ -2,14 +2,14 @@ import { useCallback, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimationView } from "@/components/app/animation/AnimationView";
 import { useDemoFlow } from "@/components/app/DemoFlowProvider";
-import { useAnimationScenePlayback } from "@/hooks";
+import { useAnimationScenePlayback, useDemoSession } from "@/hooks";
 
 export function MazeAnimationPage() {
   const navigate = useNavigate();
+  const { maze } = useDemoSession();
   const {
     animationState,
     completeAnimation,
-    maze,
     nodePath,
     shortestPathNodePath,
   } = useDemoFlow();

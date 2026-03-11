@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { StartLoadingScreen } from "@/components/app/StartLoadingScreen";
-import { useDemoFlow } from "@/components/app/DemoFlowProvider";
+import { useDemoSession } from "@/hooks";
 
 export const Route = createFileRoute("/maze")({
   component: MazeLayout,
@@ -9,7 +9,7 @@ export const Route = createFileRoute("/maze")({
 
 function MazeLayout() {
   const navigate = useNavigate();
-  const { hasActiveSession, loading } = useDemoFlow();
+  const { hasActiveSession, loading } = useDemoSession();
 
   useEffect(() => {
     if (loading || hasActiveSession) return;

@@ -7,17 +7,19 @@ import { ResetPathConfirmationOverlay } from "@/components/app/ResetPathConfirma
 import { AnimationView } from "@/components/app/animation/AnimationView";
 import { MazePanel } from "@/components/app/maze/MazePanel";
 import { buildAnimationSceneData } from "@/lib/animation";
+import { DSLInfoOverlay } from "@/components/app/DSLInfoOverlay";
+import { useDemoSession } from "@/hooks";
+
 
 export function MazeEditorPage() {
   const navigate = useNavigate();
+  const { error, maze } = useDemoSession();
   const {
     animationState,
     canShowAnimationButton,
     closeAnimationView,
     dsl,
-    error,
     isPathSubmitted,
-    maze,
     nodePath,
     open3DPreview,
     pathKey,
