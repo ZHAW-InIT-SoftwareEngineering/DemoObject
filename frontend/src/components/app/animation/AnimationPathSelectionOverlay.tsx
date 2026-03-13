@@ -35,9 +35,9 @@ export function AnimationPathSelectionOverlay({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Choose Path Animation</DialogTitle>
+          <DialogTitle>Pfadanimation wählen</DialogTitle>
           <DialogDescription>
-            Select which route you want to animate.
+            Wähle aus, welche Route animiert werden soll.
           </DialogDescription>
         </DialogHeader>
 
@@ -49,8 +49,10 @@ export function AnimationPathSelectionOverlay({
             onClick={() => onSelectPath("user")}
             disabled={!canUseUserPath}
           >
-            <span>User Path</span>
-            <span className="text-xs opacity-80">{userPathLength} steps</span>
+            <span>Dein Pfad</span>
+            <span className="text-xs opacity-80">
+              {userPathLength} Schritte
+            </span>
           </Button>
 
           <Button
@@ -60,11 +62,11 @@ export function AnimationPathSelectionOverlay({
             onClick={() => onSelectPath("shortest")}
             disabled={!canUseShortestPath}
           >
-            <span>Shortest Path</span>
+            <span>Kürzester Pfad</span>
             <span className="text-xs opacity-80">
               {shortestPathLength !== undefined && shortestPathLength !== null
-                ? `${shortestPathLength} steps`
-                : "not loaded"}
+                ? `${shortestPathLength} Schritte`
+                : "nicht geladen"}
             </span>
           </Button>
         </div>

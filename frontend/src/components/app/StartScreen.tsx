@@ -11,11 +11,11 @@ export function StartScreen({ loading, onStart }: StartScreenProps) {
     <div className="w-full max-w-[520px] flex flex-col items-stretch gap-8">
       <img
         src={zhawLogo}
-        alt="ZHAW"
+        alt="Logo der ZHAW"
         className="h-40 w-auto self-center"
       />
       <Button onClick={onStart} disabled={loading}>
-        {loading ? "Starting..." : "Start Adventure"}
+        {loading ? "Wird gestartet..." : "Abenteuer starten"}
       </Button>
     </div>
   );

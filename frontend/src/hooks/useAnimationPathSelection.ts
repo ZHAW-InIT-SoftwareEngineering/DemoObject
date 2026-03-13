@@ -42,7 +42,7 @@ export function useAnimationPathSelection({
 
   const onShowAnimation = useCallback(() => {
     if (!hasAnimatablePath) {
-      toast.error("No path available to animate.");
+      toast.error("Kein Pfad zum Animieren verfügbar.");
       return;
     }
 
@@ -55,12 +55,12 @@ export function useAnimationPathSelection({
         choice === "shortest" ? shortestNodePath : userNodePath;
 
       if (!startAnimation(animationNodePath)) {
-        toast.error("No path available to animate.");
+        toast.error("Kein Pfad zum Animieren verfügbar.");
         return;
       }
 
       setAnimationPathSelectionOpen(false);
-      toast("Path animation on-going.");
+      toast("Pfadanimation läuft.");
     },
     [shortestNodePath, startAnimation, userNodePath],
   );

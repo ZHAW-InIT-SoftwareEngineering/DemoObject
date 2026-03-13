@@ -10,6 +10,8 @@ import type { MazesMazeIdGet200ResponseNodesInner } from "@/api";
 type UseMazePointerDrawingOptions = {
   currentEndpointNodeId: number | undefined;
   adjacencyByNodeId: Map<number, Set<number>>;
+  nodeById: Map<number, MazesMazeIdGet200ResponseNodesInner>;
+  pointByNodeId: Map<number, { x: number; y: number }>;
   onSelectNode?: (
     node: MazesMazeIdGet200ResponseNodesInner,
   ) => boolean | void;
@@ -22,18 +24,23 @@ type UseMazePointerDrawingResult = {
     event: PointerEvent<SVGCircleElement>,
     nodeId: number,
   ) => void;
+  onMazePointerMove: (event: PointerEvent<SVGSVGElement>) => void;
   onNodePointerEnter: (node: MazesMazeIdGet200ResponseNodesInner) => void;
   onNodePointerLeave: (nodeId: number) => void;
 };
 
 const REHOVER_DESELECT_DELAY_MS = 250;
+const POINTER_HIT_RADIUS = 16;
 
 export function useMazePointerDrawing({
   currentEndpointNodeId,
   adjacencyByNodeId,
+  nodeById,
+  pointByNodeId,
   onSelectNode,
 }: UseMazePointerDrawingOptions): UseMazePointerDrawingResult {
   const isPointerDrawingRef = useRef(false);
+  const activePointerIdRef = useRef<number | null>(null);
   const lastInteractedNodeIdRef = useRef<number | null>(null);
   const lastHoveredNodeIdRef = useRef<number | null>(null);
   const pendingDeselectNodeIdRef = useRef<number | null>(null);
@@ -53,6 +60,7 @@ export function useMazePointerDrawing({
     if (!isPointerDrawingRef.current) return;
     clearPendingDeselect();
     isPointerDrawingRef.current = false;
+    activePointerIdRef.current = null;
     lastInteractedNodeIdRef.current = null;
     lastHoveredNodeIdRef.current = null;
     setIsPointerDrawing(false);
@@ -89,8 +97,16 @@ export function useMazePointerDrawing({
       if (event.pointerType === "mouse" && event.button !== 0) return;
       if (nodeId !== currentEndpointNodeId) return;
 
+      event.preventDefault();
+      try {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      } catch {
+        // Some mobile browsers can throw if capture is unavailable.
+      }
+
       clearPendingDeselect();
       isPointerDrawingRef.current = true;
+      activePointerIdRef.current = event.pointerId;
       lastInteractedNodeIdRef.current = nodeId;
       lastHoveredNodeIdRef.current = nodeId;
       setIsPointerDrawing(true);
@@ -112,7 +128,7 @@ export function useMazePointerDrawing({
     [clearPendingDeselect, trySelectNode],
   );
 
-  const onNodePointerEnter = useCallback(
+  const handleHoveredNode = useCallback(
     (node: MazesMazeIdGet200ResponseNodesInner) => {
       if (!isPointerDrawingRef.current) return;
       const nodeId = node.mazeNodeId;
@@ -143,6 +159,68 @@ export function useMazePointerDrawing({
     ],
   );
 
+  const onNodePointerEnter = useCallback(
+    (node: MazesMazeIdGet200ResponseNodesInner) => {
+      handleHoveredNode(node);
+    },
+    [handleHoveredNode],
+  );
+
+  const findNodeAtPointer = useCallback(
+    (x: number, y: number) => {
+      let closestNodeId: number | null = null;
+      let closestDistanceSq = POINTER_HIT_RADIUS * POINTER_HIT_RADIUS;
+
+      for (const [nodeId, point] of pointByNodeId) {
+        const dx = point.x - x;
+        const dy = point.y - y;
+        const distanceSq = dx * dx + dy * dy;
+        if (distanceSq > closestDistanceSq) continue;
+        closestDistanceSq = distanceSq;
+        closestNodeId = nodeId;
+      }
+
+      return closestNodeId;
+    },
+    [pointByNodeId],
+  );
+
+  const onMazePointerMove = useCallback(
+    (event: PointerEvent<SVGSVGElement>) => {
+      if (!isPointerDrawingRef.current) return;
+      if (
+        activePointerIdRef.current !== null &&
+        event.pointerId !== activePointerIdRef.current
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+
+      const svg = event.currentTarget;
+      const rect = svg.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+
+      const viewBox = svg.viewBox.baseVal;
+      const x = ((event.clientX - rect.left) / rect.width) * viewBox.width + viewBox.x;
+      const y = ((event.clientY - rect.top) / rect.height) * viewBox.height + viewBox.y;
+      const hoveredNodeId = findNodeAtPointer(x, y);
+
+      if (hoveredNodeId === null) {
+        if (lastHoveredNodeIdRef.current !== null) {
+          lastHoveredNodeIdRef.current = null;
+        }
+        clearPendingDeselect();
+        return;
+      }
+
+      const hoveredNode = nodeById.get(hoveredNodeId);
+      if (!hoveredNode) return;
+      handleHoveredNode(hoveredNode);
+    },
+    [clearPendingDeselect, findNodeAtPointer, handleHoveredNode, nodeById],
+  );
+
   const onNodePointerLeave = useCallback(
     (nodeId: number) => {
       if (lastHoveredNodeIdRef.current === nodeId) {
@@ -158,6 +236,7 @@ export function useMazePointerDrawing({
     isPointerDrawing,
     stopPointerDrawing,
     onNodePointerDown,
+    onMazePointerMove,
     onNodePointerEnter,
     onNodePointerLeave,
   };

@@ -40,7 +40,10 @@ export function AnimationView({
   showPlaybackCamera = true,
   onClose,
 }: AnimationViewProps) {
-  const maxFloorDimension = Math.max(sceneData.floorSize[0], sceneData.floorSize[1]);
+  const maxFloorDimension = Math.max(
+    sceneData.floorSize[0],
+    sceneData.floorSize[1],
+  );
   const previewDistance = Math.max(maxFloorDimension * 0.9, 10);
   const minPreviewDistance = Math.max(maxFloorDimension * 0.25, 3);
   const floorInset = 0.16;
@@ -52,7 +55,7 @@ export function AnimationView({
     [sceneData.floorSize],
   );
   const wallPalette = ["#766851", "#877560", "#695c49", "#8f7e66"] as const;
-  const viewLabel = label ?? `Playing animation (${progress}/${total})`;
+  const viewLabel = label ?? `Animation läuft (${progress}/${total})`;
   const shortestRouteLine = useMemo(
     () => elevateRouteLine(sceneData.shortestRouteLine, 0.05),
     [sceneData.shortestRouteLine],
@@ -66,7 +69,10 @@ export function AnimationView({
     [sceneData.visibleRouteLine],
   );
   const animatedRouteColor = useMemo(() => {
-    const isUserRoute = isSameRouteLine(sceneData.routeLine, sceneData.userRouteLine);
+    const isUserRoute = isSameRouteLine(
+      sceneData.routeLine,
+      sceneData.userRouteLine,
+    );
     const isShortestRoute = isSameRouteLine(
       sceneData.routeLine,
       sceneData.shortestRouteLine,
@@ -74,7 +80,11 @@ export function AnimationView({
 
     if (isShortestRoute && !isUserRoute) return "#f59e0b";
     return "#2563eb";
-  }, [sceneData.routeLine, sceneData.shortestRouteLine, sceneData.userRouteLine]);
+  }, [
+    sceneData.routeLine,
+    sceneData.shortestRouteLine,
+    sceneData.userRouteLine,
+  ]);
 
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-[#161a22]">
@@ -101,11 +111,13 @@ export function AnimationView({
           args={["#1b2029", maxFloorDimension * 1.9, maxFloorDimension * 6]}
         />
         <ambientLight intensity={0.48} color="#a08969" />
-        <hemisphereLight
-          args={["#aab7cf", "#2c2219", 0.72]}
-        />
+        <hemisphereLight args={["#aab7cf", "#2c2219", 0.72]} />
         <directionalLight
-          position={[maxFloorDimension * 0.48, maxFloorDimension * 1.25, maxFloorDimension * 0.36]}
+          position={[
+            maxFloorDimension * 0.48,
+            maxFloorDimension * 1.25,
+            maxFloorDimension * 0.36,
+          ]}
           intensity={1.35}
           color="#d8e2f4"
           castShadow
@@ -120,7 +132,11 @@ export function AnimationView({
           shadow-bias={-0.00035}
         />
         <directionalLight
-          position={[-maxFloorDimension * 0.32, maxFloorDimension * 0.9, -maxFloorDimension * 0.5]}
+          position={[
+            -maxFloorDimension * 0.32,
+            maxFloorDimension * 0.9,
+            -maxFloorDimension * 0.5,
+          ]}
           intensity={0.6}
           color="#f2d2a7"
         />
@@ -155,10 +171,18 @@ export function AnimationView({
           <boxGeometry
             args={[sceneData.floorSize[0] + 4, 0.8, sceneData.floorSize[1] + 4]}
           />
-          <meshStandardMaterial color="#201d26" roughness={1} metalness={0.03} />
+          <meshStandardMaterial
+            color="#201d26"
+            roughness={1}
+            metalness={0.03}
+          />
         </mesh>
 
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.06, 0]} receiveShadow>
+        <mesh
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[0, -0.06, 0]}
+          receiveShadow
+        >
           <planeGeometry args={sceneData.floorSize} />
           <meshStandardMaterial
             color="#4a3d2d"
@@ -167,10 +191,7 @@ export function AnimationView({
           />
         </mesh>
 
-        <mesh
-          rotation={[-Math.PI / 2, 0, 0]}
-          position={[0, -0.057, 0]}
-        >
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.057, 0]}>
           <ringGeometry
             args={[maxFloorDimension * 0.12, maxFloorDimension * 0.49, 64]}
           />

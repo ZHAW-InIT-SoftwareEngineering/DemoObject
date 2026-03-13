@@ -52,7 +52,7 @@ export function MazePanel({
           userPathLength={userPathLength}
           shortestPathLength={shortestPathLength}
         />
-        <div className="w-full aspect-square">
+        <div className="w-full aspect-square touch-none overscroll-contain">
           <Maze
             maze={maze}
             className="h-full w-full border rounded bg-white"

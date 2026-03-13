@@ -53,18 +53,18 @@ export function ActionPanel({ maze, pathState, actions }: ActionPanelProps) {
       <CardContent className="px-4">
         <div className="flex flex-col items-stretch gap-2">
           <ActionButton
-            label="Reset Path"
+            label="Pfad zurücksetzen"
             onClick={onReset}
             disabled={isResetDisabled}
             variant="secondary"
           />
           <ActionButton
-            label={submitting ? "Submitting..." : "Submit Path"}
+            label={submitting ? "Wird gesendet..." : "Pfad senden"}
             onClick={onSubmit}
             disabled={isSubmitDisabled}
           />
           <ActionButton
-            label="Shortest Path"
+            label="Kürzester Pfad"
             onClick={onShortestPath}
             disabled={isShortestDisabled}
           />

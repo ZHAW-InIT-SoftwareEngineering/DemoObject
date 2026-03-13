@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import type {
   MazesMazeIdGet200Response,
   MazesMazeIdGet200ResponseNodesInner,
   MazesMazeIdPathsDslPostRequest,
   SessionsSessionIdPathsGet200Response,
 } from "@/api";
-import { sessionsApi } from "../lib/api";
-import { nodePathToCoordPath, type NodePath } from "@/lib/path/transforms";
+import type { NodePath } from "@/lib/path/transforms";
+import { useMazePathDraft } from "./useMazePathDraft";
+import { usePathSubmission } from "./usePathSubmission";
 
 type PathSelection = {
   nodePath: NodePath;
@@ -26,150 +27,58 @@ export function usePathSelection(
   maze: MazesMazeIdGet200Response | null,
   sessionId?: string | null,
 ): PathSelection {
-  const [nodePath, setNodePath] = useState<NodePath>([]);
-  const [dsl, setDsl] = useState<string[] | null>(null);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [lastSubmittedKey, setLastSubmittedKey] = useState<string | null>(null);
-
-  const nodeById = useMemo(() => {
-    const nodes = maze?.nodes ?? [];
-    return new Map(nodes.map((n) => [n.mazeNodeId, n]));
-  }, [maze?.nodes]);
-
-  const adjacency = useMemo(() => {
-    const edges = maze?.edges ?? [];
-    const map = new Map<number, Set<number>>();
-    for (const edge of edges) {
-      const fromSet = map.get(edge.from) ?? new Set<number>();
-      fromSet.add(edge.to);
-      map.set(edge.from, fromSet);
-      const toSet = map.get(edge.to) ?? new Set<number>();
-      toSet.add(edge.from);
-      map.set(edge.to, toSet);
-    }
-    return map;
-  }, [maze?.edges]);
-
-  useEffect(() => {
-    if (maze?.startNodeId !== undefined && maze?.startNodeId !== null) {
-      setNodePath([maze.startNodeId]);
-    } else {
-      setNodePath([]);
-    }
-  }, [maze?.mazeId]);
-
-  useEffect(() => {
-    setLastSubmittedKey(null);
-  }, [sessionId]);
-
-  const resetPath = useCallback(() => {
-    if (maze?.startNodeId !== undefined && maze?.startNodeId !== null) {
-      setNodePath([maze.startNodeId]);
-    } else {
-      setNodePath([]);
-    }
-    setDsl(null);
-    setSubmitError(null);
-    setLastSubmittedKey(null);
-  }, [maze?.startNodeId]);
-
-  const pathKey = useMemo(() => nodePath.join(","), [nodePath]);
-
-  const apiRequest = useMemo(() => {
-    if (!maze || nodePath.length === 0) return null;
-    const path = nodePathToCoordPath(nodePath, nodeById);
-    if (path.length !== nodePath.length) return null;
-    return { path };
-  }, [maze, nodeById, nodePath]);
-
-  useEffect(() => {
-    setDsl(null);
-    setSubmitError(null);
-  }, [pathKey, sessionId]);
-
-  const undoNodeSelection = useCallback(() => {
-    setNodePath((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
-  }, []);
-
-  const getDSL = useCallback(async () => {
-    if (!sessionId || !apiRequest) return null;
-    setSubmitting(true);
-    setSubmitError(null);
-    try {
-      const response = await sessionsApi.sessionsSessionIdPathsPut({
-        sessionId,
-        mazesMazeIdPathsDslPostRequest: apiRequest,
-      });
-      setDsl(response.dsl ?? null);
-      setLastSubmittedKey(pathKey);
-      return response;
-    } catch {
-      setSubmitError("Failed to submit path.");
-      return null;
-    } finally {
-      setSubmitting(false);
-    }
-  }, [apiRequest, pathKey, sessionId]);
-
-  const selectNode = useCallback(
-    (node: MazesMazeIdGet200ResponseNodesInner) => {
-      if (!maze) return false;
-
-      if (nodePath.length === 0) {
-        const canStart = node.mazeNodeId === maze.startNodeId;
-        if (canStart) {
-          setNodePath([node.mazeNodeId]);
-        }
-        return canStart;
-      }
-
-      const currentNodeId = nodePath[nodePath.length - 1];
-      const previousNodeId =
-        nodePath.length > 1 ? nodePath[nodePath.length - 2] : undefined;
-
-      // Re-clicking the current endpoint deselects it and restores the previous endpoint.
-      if (node.mazeNodeId === currentNodeId) {
-        if (nodePath.length > 1) {
-          setNodePath((prev) => prev.slice(0, -1));
-          return true;
-        }
-        return false;
-      }
-
-      // Dragging back to the previous node should undo the latest step.
-      if (previousNodeId !== undefined && node.mazeNodeId === previousNodeId) {
-        setNodePath((prev) => prev.slice(0, -1));
-        return true;
-      }
-
-      const canAppend =
-        Boolean(
-          adjacency
-            .get(currentNodeId)
-            ?.has(node.mazeNodeId),
-        );
-
-      if (canAppend) {
-        setNodePath((prev) => [...prev, node.mazeNodeId]);
-      }
-
-      return canAppend;
-    },
-    [adjacency, maze, nodePath],
-  );
-
-  return {
+  const {
     nodePath,
     pathKey,
     apiRequest,
     selectNode,
-    resetPath,
-    getDSL,
+    resetPath: resetDraftPath,
     undoNodeSelection,
+  } = useMazePathDraft(maze, sessionId);
+  const {
     dsl,
     submitError,
     submitting,
     lastSubmittedKey,
-  };
+    submitPath,
+    resetSubmission,
+  } = usePathSubmission({
+    apiRequest,
+    pathKey,
+    sessionId,
+  });
+
+  const resetPath = useCallback(() => {
+    resetDraftPath();
+    resetSubmission();
+  }, [resetDraftPath, resetSubmission]);
+
+  return useMemo(
+    () => ({
+      nodePath,
+      pathKey,
+      apiRequest,
+      selectNode,
+      resetPath,
+      getDSL: submitPath as () => Promise<SessionsSessionIdPathsGet200Response | null>,
+      undoNodeSelection,
+      dsl,
+      submitError,
+      submitting,
+      lastSubmittedKey,
+    }),
+    [
+      apiRequest,
+      dsl,
+      lastSubmittedKey,
+      nodePath,
+      pathKey,
+      resetPath,
+      selectNode,
+      submitError,
+      submitPath,
+      submitting,
+      undoNodeSelection,
+    ],
+  );
 }

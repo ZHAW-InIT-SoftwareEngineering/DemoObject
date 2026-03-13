@@ -34,6 +34,15 @@ const DEFAULT_SIZE = 520;
 const PADDING = 20;
 
 function getBounds(nodes: MazesMazeIdGet200ResponseNodesInner[]): Bounds {
+  if (nodes.length === 0) {
+    return {
+      minX: 0,
+      maxX: 0,
+      minY: 0,
+      maxY: 0,
+    };
+  }
+
   const xs = nodes.map((n) => n.x);
   const ys = nodes.map((n) => n.y);
   return {
@@ -97,12 +106,14 @@ export function Maze({
   secondaryHighlightedNodePath = [],
   className,
 }: MazeViewProps) {
-  const nodes = maze.nodes ?? [];
-  const edges = maze.edges ?? [];
-
-  if (nodes.length === 0) return null;
+  const nodes = useMemo(() => maze.nodes ?? [], [maze.nodes]);
+  const edges = useMemo(() => maze.edges ?? [], [maze.edges]);
 
   const bounds = useMemo(() => getBounds(nodes), [nodes]);
+  const nodeById = useMemo(
+    () => new Map(nodes.map((node) => [node.mazeNodeId, node])),
+    [nodes],
+  );
   const adjacencyByNodeId = useMemo(() => {
     const map = new Map<number, Set<number>>();
     for (const edge of edges) {
@@ -132,13 +143,18 @@ export function Maze({
     isPointerDrawing,
     stopPointerDrawing,
     onNodePointerDown,
+    onMazePointerMove,
     onNodePointerEnter,
     onNodePointerLeave,
   } = useMazePointerDrawing({
     currentEndpointNodeId,
     adjacencyByNodeId,
+    nodeById,
+    pointByNodeId,
     onSelectNode: onNodeClick,
   });
+
+  if (nodes.length === 0) return null;
 
   return (
     <svg
@@ -148,6 +164,7 @@ export function Maze({
       viewBox={`0 0 ${width} ${height}`}
       preserveAspectRatio="xMidYMid meet"
       style={{ width: "100%", height: "100%", touchAction: "none" }}
+      onPointerMove={onMazePointerMove}
       onPointerUp={stopPointerDrawing}
       onPointerLeave={stopPointerDrawing}
       onPointerCancel={stopPointerDrawing}
