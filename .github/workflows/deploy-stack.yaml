@@ -105,19 +105,68 @@ jobs:
           provenance: false
           sbom: false
 
+  build_and_push_caddy:
+    name: Build and Push Caddy Image
+    runs-on: [self-hosted, Linux, X64]
+    permissions:
+      contents: read
+      packages: write
+    env:
+      CADDY_IMAGE: 'ghcr.io/${{ vars.GHCR_USERNAME }}/demoobject-caddy'
+      GHCR_USERNAME: ${{ vars.GHCR_USERNAME }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Validate GHCR credentials are present
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${{ secrets.GHCR_PAT }}" ]; then
+            echo "Missing required GitHub Secret: GHCR_PAT" >&2
+            exit 1
+          fi
+          if [ -z "${GHCR_USERNAME}" ]; then
+            echo "Missing required GitHub Variable: GHCR_USERNAME" >&2
+            exit 1
+          fi
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ env.GHCR_USERNAME }}
+          password: ${{ secrets.GHCR_PAT }}
+
+      - name: Push caddy image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./caddy
+          file: ./caddy/Dockerfile
+          push: true
+          tags: |
+            ${{ env.CADDY_IMAGE }}:${{ github.sha }}
+          provenance: false
+          sbom: false
+
+
   deploy_stack:
     name: Deploy Stack to VM
     runs-on: [self-hosted, Linux, X64]
     needs:
       - build_and_push_backend
       - build_and_push_frontend
+      - build_and_push_caddy
     permissions:
       contents: read
     env:
       DEPLOY_PATH: ${{ vars.DEPLOY_PATH || './demoobject' }}
       BACKEND_IMAGE: 'ghcr.io/${{ vars.GHCR_USERNAME }}/demoobject-backend'
       FRONTEND_IMAGE: 'ghcr.io/${{ vars.GHCR_USERNAME }}/demoobject-frontend'
-      FRONTEND_PORT: ${{ vars.FRONTEND_PORT || '80' }}
+      CADDY_IMAGE: 'ghcr.io/${{ vars.GHCR_USERNAME }}/demoobject-caddy'
       GHCR_USERNAME: ${{ vars.GHCR_USERNAME }}
       MONGO_DATABASE: ${{ vars.MONGO_DATABASE }}
       SESSION_COLLECTION_NAME: ${{ vars.SESSION_COLLECTION_NAME }}
@@ -136,6 +185,8 @@ jobs:
           required_vars=(
             DEPLOY_PATH
             BACKEND_IMAGE
+            FRONTEND_IMAGE
+            CADDY_IMAGE
             MONGO_DATABASE
             SESSION_COLLECTION_NAME
           )
@@ -181,7 +232,7 @@ jobs:
           mkdir -p "${DEPLOY_PATH}"
           cp deploy/docker-compose.prod.yaml "${DEPLOY_PATH}/docker-compose.prod.yaml"
 
-      - name: Deploy mongo, api, and frontend services on self-hosted runner
+      - name: Deploy mongo, api, frontend and caddy services on self-hosted runner
         shell: bash
         env:
           IMAGE_TAG: ${{ github.sha }}
@@ -189,15 +240,15 @@ jobs:
           set -euo pipefail
           export BACKEND_IMAGE
           export FRONTEND_IMAGE
-          export FRONTEND_PORT
+          export CADDY_IMAGE
           export IMAGE_TAG
           export MONGO_ROOT_USERNAME
           export MONGO_ROOT_PASSWORD
           export MONGO_DATABASE
           export SESSION_COLLECTION_NAME
 
-          docker compose -f "${DEPLOY_PATH}/docker-compose.prod.yaml" pull mongo api frontend
-          docker compose -f "${DEPLOY_PATH}/docker-compose.prod.yaml" up -d --remove-orphans mongo api frontend
+          docker compose -f "${DEPLOY_PATH}/docker-compose.prod.yaml" pull mongo api frontend caddy
+          docker compose -f "${DEPLOY_PATH}/docker-compose.prod.yaml" up -d --remove-orphans mongo api frontend caddy
 
           for i in $(seq 1 30); do
             status=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' demoobject-api 2>/dev/null || true)
@@ -213,3 +264,42 @@ jobs:
           docker logs --tail 100 demoobject-api >&2 || true
           docker logs --tail 100 demoobject-frontend >&2 || true
           exit 1
+          
+      - name: Validate caddy and HTTPS reachability
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for i in $(seq 1 30); do
+            caddy_status=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' demoobject-caddy 2>/dev/null || true)
+            if [ "$caddy_status" = "running" ] || [ "$caddy_status" = "healthy" ]; then
+              break
+            fi
+            sleep 2
+          done
+
+          caddy_status=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' demoobject-caddy 2>/dev/null || true)
+          if [ "$caddy_status" != "running" ] && [ "$caddy_status" != "healthy" ]; then
+            echo "Caddy container is not running." >&2
+            docker ps >&2
+            docker logs demoobject-caddy >&2 || true
+            exit 1
+          fi
+
+          http_headers=$(curl -I --connect-timeout 10 --retry 10 --retry-delay 3 http://demo.init.zhaw.ch 2>&1 || true)
+          echo "$http_headers"
+          if ! printf '%s\n' "$http_headers" | grep -Eq 'HTTP/[0-9.]+ 30[128]'; then
+            echo "HTTP endpoint did not return a redirect." >&2
+            exit 1
+          fi
+          if ! printf '%s\n' "$http_headers" | grep -qi '^location: https://demo\.init\.zhaw\.ch'; then
+            echo "HTTP endpoint did not redirect to HTTPS." >&2
+            exit 1
+          fi
+
+          https_headers=$(curl -I --connect-timeout 10 --retry 10 --retry-delay 3 https://demo.init.zhaw.ch 2>&1 || true)
+          echo "$https_headers"
+          if ! printf '%s\n' "$https_headers" | grep -Eq 'HTTP/[0-9.]+ 200|HTTP/[0-9.]+ 304'; then
+            echo "HTTPS endpoint is not reachable successfully." >&2
+            exit 1
+          fi
