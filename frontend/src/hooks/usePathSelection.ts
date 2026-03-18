@@ -44,6 +44,8 @@ export function usePathSelection(
     resetSubmission,
   } = usePathSubmission({
     apiRequest,
+    mazeId: maze?.mazeId,
+    nodePath,
     pathKey,
     sessionId,
   });

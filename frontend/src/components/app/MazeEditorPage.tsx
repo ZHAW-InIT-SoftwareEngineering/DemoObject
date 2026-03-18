@@ -27,6 +27,7 @@ export function MazeEditorPage() {
     resetPath,
     selectNode,
     shortestPath,
+    displayedShortestPathNodePath,
     shortestPathNodePath,
     showAnimationPathSelection,
     submitError,
@@ -113,19 +114,19 @@ export function MazeEditorPage() {
         {error && <div className="text-red-600">{error}</div>}
         {submitError && <div className="text-red-600">{submitError}</div>}
         <DslStrip dsl={dsl} />
-        <MazePanel
-          maze={maze}
-          onNodeClick={selectNode}
+          <MazePanel
+            maze={maze}
+            onNodeClick={selectNode}
           onUndo={undoNodeSelection}
           onShowAnimation={showAnimationPathSelection}
           onOpen3DPreview={open3DPreview}
           isPathSubmitted={isPathSubmitted}
-          canShowAnimationButton={canShowAnimationButton}
-          nodePath={nodePath}
-          secondaryHighlightedNodePath={shortestPathNodePath}
-          userPathLength={userPathLength}
-          shortestPathLength={shortestPath?.length}
-        />
+            canShowAnimationButton={canShowAnimationButton}
+            nodePath={nodePath}
+            secondaryHighlightedNodePath={displayedShortestPathNodePath}
+            userPathLength={userPathLength}
+            shortestPathLength={shortestPath?.length}
+          />
         <ActionPanel
           maze={maze}
           pathState={{

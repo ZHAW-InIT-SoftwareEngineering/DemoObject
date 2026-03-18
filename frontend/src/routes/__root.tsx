@@ -1,11 +1,10 @@
-import { createRootRoute, Outlet, useRouterState } from "@tanstack/react-router";
+import { createRootRoute, Outlet } from "@tanstack/react-router";
 import { DemoFlowProvider, useDemoFlow } from "@/components/app/DemoFlowProvider";
 import { CelebrationOverlay } from "@/components/app/animation/CelebrationOverlay";
 import { AnimationPathSelectionOverlay } from "@/components/app/animation/AnimationPathSelectionOverlay";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { DemoSessionProvider } from "@/hooks";
 import { Toaster } from "@/components/ui";
-import { ImpressumLink } from "@/components/app/ImpressumLink";
 
 function RootLayout() {
   return (
@@ -30,12 +29,6 @@ function RootShell() {
     showCelebrationOverlay,
     userPathLength,
   } = useDemoFlow();
-  const pathname = useRouterState({
-    select: (state) => state.location.pathname,
-  });
-  const showImpressumLink =
-    pathname !== "/maze/animation" && animationState.status !== "preview";
-
   return (
     <>
       <Toaster />
@@ -53,7 +46,6 @@ function RootShell() {
         shortestPathLength={shortestPath?.length}
       />
       <Outlet />
-      {showImpressumLink ? <ImpressumLink /> : null}
       {import.meta.env.DEV ? <TanStackRouterDevtools /> : null}
     </>
   );

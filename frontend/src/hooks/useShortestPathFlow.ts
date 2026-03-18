@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import type { MazesMazeIdGet200Response } from "@/api";
+import { useEdgePlayback } from "./useEdgePlayback";
 import { usePerfectPathCelebration } from "./usePerfectPathCelebration";
 import { useShortestPath } from "./useShortestPath";
 import { useShortestPathNodePath } from "./useShortestPathNodePath";
@@ -31,6 +32,13 @@ export function useShortestPathFlow({
     maze,
     shortestPath?.path,
   );
+  const handleShortestPathPlaybackComplete = useCallback(() => {}, []);
+  const { visibleNodePath: displayedShortestPathNodePath } = useEdgePlayback({
+    nodePath: shortestPathNodePath,
+    onComplete: handleShortestPathPlaybackComplete,
+    stepMs: 320,
+    settleMs: 0,
+  });
   const [lastShortestPathSubmissionKey, setLastShortestPathSubmissionKey] =
     useState<string | null>(null);
 
@@ -74,6 +82,7 @@ export function useShortestPathFlow({
     () => ({
       shortestPath,
       shortestPathNodePath,
+      displayedShortestPathNodePath,
       requestShortestPath: requestShortestPath as () => Promise<ShortestPathRequestResult>,
       showCelebrationOverlay,
       dismissCelebrationOverlay,
@@ -86,6 +95,7 @@ export function useShortestPathFlow({
       hasShortestPathForCurrentSubmission,
       requestShortestPath,
       shortestPath,
+      displayedShortestPathNodePath,
       shortestPathNodePath,
       showCelebrationOverlay,
     ],

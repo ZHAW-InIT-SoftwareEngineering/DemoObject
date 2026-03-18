@@ -29,6 +29,7 @@ type DemoFlowContextValue = {
   submitPath: () => Promise<void>;
   shortestPath: ReturnType<typeof useShortestPathFlow>["shortestPath"];
   shortestPathNodePath: NodePath;
+  displayedShortestPathNodePath: NodePath;
   requestShortestPath: () => Promise<void>;
   showCelebrationOverlay: boolean;
   dismissCelebrationOverlay: () => void;
@@ -56,6 +57,8 @@ export function DemoFlowProvider({ children }: { children: ReactNode }) {
   const mazePathDraft = useMazePathDraft(maze, session?.sessionId);
   const pathSubmission = usePathSubmission({
     apiRequest: mazePathDraft.apiRequest,
+    mazeId: maze?.mazeId,
+    nodePath: mazePathDraft.nodePath,
     pathKey: mazePathDraft.pathKey,
     sessionId: session?.sessionId,
   });
@@ -119,6 +122,8 @@ export function DemoFlowProvider({ children }: { children: ReactNode }) {
       submitPath,
       shortestPath: shortestPathFlow.shortestPath,
       shortestPathNodePath: shortestPathFlow.shortestPathNodePath,
+      displayedShortestPathNodePath:
+        shortestPathFlow.displayedShortestPathNodePath,
       requestShortestPath,
       showCelebrationOverlay: shortestPathFlow.showCelebrationOverlay,
       dismissCelebrationOverlay: shortestPathFlow.dismissCelebrationOverlay,

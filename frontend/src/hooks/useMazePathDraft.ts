@@ -84,7 +84,22 @@ export function useMazePathDraft(
     if (!maze || !sessionId || !pathStorageScopeKey) return;
     if (hydratedPathScopeKey !== pathStorageScopeKey) return;
 
-    writePersistedDemoDraftPath(sessionId, maze.mazeId, nodePath);
+    const persistedDraftPath = readPersistedDemoDraftPath();
+    const currentPathKey = nodePath.join(",");
+    const persistedPathMatchesCurrent =
+      persistedDraftPath?.mazeId === maze.mazeId &&
+      persistedDraftPath.sessionId === sessionId &&
+      persistedDraftPath.nodePath.join(",") === currentPathKey;
+
+    writePersistedDemoDraftPath(
+      sessionId,
+      maze.mazeId,
+      nodePath,
+      persistedPathMatchesCurrent ? persistedDraftPath.dsl : null,
+      persistedPathMatchesCurrent
+        ? persistedDraftPath.lastSubmittedPathKey
+        : null,
+    );
   }, [hydratedPathScopeKey, maze, nodePath, pathStorageScopeKey, sessionId]);
 
   const resetPath = useCallback(() => {

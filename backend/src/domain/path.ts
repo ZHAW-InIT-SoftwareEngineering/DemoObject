@@ -9,6 +9,8 @@ export const Point = z.object({
 
 export const Path = z.array(Point).min(2);
 export type Path = z.infer<typeof Path>
+export const PathReconstructionStep = z.array(Point).min(1);
+export type PathReconstructionStep = z.infer<typeof PathReconstructionStep>;
 
 export function pathToDsl(path: Array<{ x: number; y: number }>) {
     const dslBlocks: string[] = [];
@@ -78,9 +80,18 @@ export function findPathBFS(maze: Maze) {
 
   // Reconstruct path (node ids -> coordinates)
   const nodePath: number[] = [];
+  const reconstructionSteps: PathReconstructionStep[] = [];
   let cur = endNodeId;
   while (cur !== undefined) {
     nodePath.push(cur);
+    const currentStep = [...nodePath]
+      .reverse()
+      .map((id) => {
+        const node = nodes.find((n) => n.mazeNodeId === id);
+        return { x: node!.x, y: node!.y };
+      });
+    reconstructionSteps.push(currentStep);
+
     const p = parent.get(cur);
     if (p === undefined) break;
     cur = p;
@@ -92,5 +103,5 @@ export function findPathBFS(maze: Maze) {
     return { x: node!.x, y: node!.y };
   });
 
-  return { path, length: path.length - 1 };
+  return { path, length: path.length - 1, reconstructionSteps };
 };

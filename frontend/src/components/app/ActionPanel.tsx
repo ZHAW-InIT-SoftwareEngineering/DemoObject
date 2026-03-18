@@ -4,6 +4,7 @@ import type {
 } from "@/api";
 import { Card, CardContent } from "@/components/ui";
 import { ActionButton } from "./ActionButton";
+import { ImpressumLink } from "./ImpressumLink";
 import type { NodePath } from "@/lib/path/transforms";
 
 type ActionPanelProps = {
@@ -49,27 +50,30 @@ export function ActionPanel({ maze, pathState, actions }: ActionPanelProps) {
     !canRequestShortestPath || hasShortestPathForCurrentSubmission;
 
   return (
-    <Card className="py-4">
-      <CardContent className="px-4">
-        <div className="flex flex-col items-stretch gap-2">
-          <ActionButton
-            label="Pfad zurücksetzen"
-            onClick={onReset}
-            disabled={isResetDisabled}
-            variant="secondary"
-          />
-          <ActionButton
-            label={submitting ? "Wird gesendet..." : "Pfad senden"}
-            onClick={onSubmit}
-            disabled={isSubmitDisabled}
-          />
-          <ActionButton
-            label="Kürzester Pfad"
-            onClick={onShortestPath}
-            disabled={isShortestDisabled}
-          />
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <Card className="py-4">
+        <CardContent className="px-4">
+          <div className="flex flex-col items-stretch gap-2">
+            <ActionButton
+              label="Pfad zurücksetzen"
+              onClick={onReset}
+              disabled={isResetDisabled}
+              variant="secondary"
+            />
+            <ActionButton
+              label={submitting ? "Wird gesendet..." : "Pfad senden"}
+              onClick={onSubmit}
+              disabled={isSubmitDisabled}
+            />
+            <ActionButton
+              label="Kürzester Pfad"
+              onClick={onShortestPath}
+              disabled={isShortestDisabled}
+            />
+          </div>
+        </CardContent>
+      </Card>
+      <ImpressumLink />
+    </div>
   );
 }
