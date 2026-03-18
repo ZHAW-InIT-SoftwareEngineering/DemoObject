@@ -22,7 +22,8 @@ export function ImpressumPage() {
             <h2 className="text-base font-semibold">Entwickler</h2>
             <div>
               <p>Cyril Gabriele</p>
-              <p>E-Mail: gabc@zhaw.ch</p>
+              <p>E-Mail: <a href="mailto:gabc@zhaw.ch">send me a letter</a></p>
+              <p>GitHub: <a href="github.com/cyrilgabriele">check my other projects</a></p>
             </div>
           </section>
 
