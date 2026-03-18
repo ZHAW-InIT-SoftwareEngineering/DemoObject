@@ -1,1 +1,0 @@
-import{u as o,a as r,r as n,j as a,O as i}from"./index-JzgDBVqL.js";import{S as u}from"./StartLoadingScreen-C5QTlvNK.js";function m(){const s=o(),{hasActiveSession:t,loading:e}=r();return n.useEffect(()=>{e||t||s({to:"/",replace:!0})},[t,e,s]),t?a.jsx(i,{}):e?a.jsx(u,{}):null}export{m as component};
