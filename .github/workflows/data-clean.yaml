@@ -1,0 +1,71 @@
+name: Delete Mongo Data
+
+on:
+  schedule:
+    - cron: "0 1 1 * *"
+  workflow_dispatch:
+
+concurrency:
+  group: monthly-mongo-clean
+  cancel-in-progress: true
+
+jobs:
+  drop-session-collection:
+    name: Drop session collection
+    runs-on: [self-hosted, Linux, X64]
+    env:
+      MONGO_DATABASE: ${{ vars.MONGO_DATABASE }}
+      SESSION_COLLECTION_NAME: ${{ vars.SESSION_COLLECTION_NAME }}
+      MONGO_ROOT_USERNAME: ${{ secrets.MONGO_ROOT_USERNAME }}
+      MONGO_ROOT_PASSWORD: ${{ secrets.MONGO_ROOT_PASSWORD }}
+    steps:
+      - name: Validate required configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          required_vars=(
+            MONGO_DATABASE
+            SESSION_COLLECTION_NAME
+          )
+
+          required_secrets=(
+            MONGO_ROOT_USERNAME
+            MONGO_ROOT_PASSWORD
+          )
+
+          for key in "${required_vars[@]}"; do
+            if [ -z "${!key:-}" ]; then
+              echo "Missing required GitHub Variable: ${key}" >&2
+              exit 1
+            fi
+          done
+
+          for key in "${required_secrets[@]}"; do
+            if [ -z "${!key:-}" ]; then
+              echo "Missing required GitHub Secret: ${key}" >&2
+              exit 1
+            fi
+          done
+
+      - name: Validate Mongo container availability
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker ps --format '{{.Names}}' | grep -Fx 'demoobject-mongo' >/dev/null
+
+      - name: Drop session collection
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          docker exec \
+            -e SESSION_COLLECTION_NAME="${SESSION_COLLECTION_NAME}" \
+            demoobject-mongo \
+            mongosh \
+            --quiet \
+            --username "${MONGO_ROOT_USERNAME}" \
+            --password "${MONGO_ROOT_PASSWORD}" \
+            --authenticationDatabase admin \
+            "${MONGO_DATABASE}" \
+            --eval 'db.getCollection(process.env.SESSION_COLLECTION_NAME).drop()'
