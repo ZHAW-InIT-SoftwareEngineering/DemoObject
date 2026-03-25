@@ -20,10 +20,28 @@ export function ImpressumPage() {
 
           <section className="space-y-2">
             <h2 className="text-base font-semibold">Entwickler</h2>
-            <div>
+            <div className="space-y-1">
               <p>Cyril Gabriele</p>
-              <p>E-Mail: <a href="mailto:gabc@zhaw.ch">send me a letter</a></p>
-              <p>GitHub: <a href="github.com/cyrilgabriele">check my other projects</a></p>
+              <p>
+                E-Mail:{" "}
+                <a
+                  href="mailto:gabc@zhaw.ch"
+                  className="text-[#2563eb] underline decoration-[#2563eb] underline-offset-2 hover:opacity-80"
+                >
+                  Send me a letter
+                </a>
+              </p>
+              <p>
+                GitHub:{" "}
+                <a
+                  href="https://github.com/cyrilgabriele"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#2563eb] underline decoration-[#2563eb] underline-offset-2 hover:opacity-80"
+                >
+                  Check my other projects
+                </a>
+              </p>
             </div>
           </section>
 

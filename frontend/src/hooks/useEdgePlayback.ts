@@ -6,6 +6,7 @@ type UseEdgePlaybackOptions = {
   onComplete: () => void;
   stepMs?: number;
   settleMs?: number;
+  restartKey?: number | string;
 };
 
 type UseEdgePlaybackResult = {
@@ -19,6 +20,7 @@ export function useEdgePlayback({
   onComplete,
   stepMs = 220,
   settleMs = 450,
+  restartKey,
 }: UseEdgePlaybackOptions): UseEdgePlaybackResult {
   const [visibleSegmentCount, setVisibleSegmentCount] = useState(0);
   const totalSegments = Math.max(nodePath.length - 1, 0);
@@ -31,7 +33,7 @@ export function useEdgePlayback({
 
   useEffect(() => {
     setVisibleSegmentCount(0);
-  }, [nodePath]);
+  }, [nodePath, restartKey]);
 
   useEffect(() => {
     if (totalSegments === 0) {

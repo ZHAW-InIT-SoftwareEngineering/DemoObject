@@ -9,8 +9,12 @@ export const Point = z.object({
 
 export const Path = z.array(Point).min(2);
 export type Path = z.infer<typeof Path>
-export const PathReconstructionStep = z.array(Point).min(1);
-export type PathReconstructionStep = z.infer<typeof PathReconstructionStep>;
+export const PathExplorationStep = z.object({
+    from: Point,
+    to: Point,
+    discovered: z.boolean(),
+});
+export type PathExplorationStep = z.infer<typeof PathExplorationStep>;
 
 export function pathToDsl(path: Array<{ x: number; y: number }>) {
     const dslBlocks: string[] = [];
@@ -58,40 +62,51 @@ export function findPathBFS(maze: Maze) {
   const queue: number[] = [];
   const visited = new Set<number>();
   const parent = new Map<number, number>();
+  const explorationSteps: PathExplorationStep[] = [];
 
   queue.push(startNodeId);
   visited.add(startNodeId);
 
+  let found = startNodeId === endNodeId;
   while (queue.length) {
     const current = queue.shift()!;
-    if (current === endNodeId) break;
+    if (current === endNodeId) {
+      found = true;
+      break;
+    }
 
     const neighbors = adj.get(current) ?? [];
     for (const next of neighbors) {
+      const currentNode = nodes.find((n) => n.mazeNodeId === current)!;
+      const nextNode = nodes.find((n) => n.mazeNodeId === next)!;
+      const discovered = !visited.has(next);
+      explorationSteps.push({
+        from: { x: currentNode.x, y: currentNode.y },
+        to: { x: nextNode.x, y: nextNode.y },
+        discovered,
+      });
+
       if (!visited.has(next)) {
         visited.add(next);
         parent.set(next, current);
         queue.push(next);
+        if (next === endNodeId) {
+          found = true;
+          break;
+        }
       }
     }
+
+    if (found) break;
   }
 
   if (!visited.has(endNodeId)) return undefined;
 
   // Reconstruct path (node ids -> coordinates)
   const nodePath: number[] = [];
-  const reconstructionSteps: PathReconstructionStep[] = [];
   let cur = endNodeId;
   while (cur !== undefined) {
     nodePath.push(cur);
-    const currentStep = [...nodePath]
-      .reverse()
-      .map((id) => {
-        const node = nodes.find((n) => n.mazeNodeId === id);
-        return { x: node!.x, y: node!.y };
-      });
-    reconstructionSteps.push(currentStep);
-
     const p = parent.get(cur);
     if (p === undefined) break;
     cur = p;
@@ -103,5 +118,5 @@ export function findPathBFS(maze: Maze) {
     return { x: node!.x, y: node!.y };
   });
 
-  return { path, length: path.length - 1, reconstructionSteps };
+  return { path, length: path.length - 1, explorationSteps };
 };

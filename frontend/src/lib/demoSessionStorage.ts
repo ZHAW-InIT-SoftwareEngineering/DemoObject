@@ -6,10 +6,8 @@ import {
 } from "@/lib/sessionStorage";
 
 const STORAGE_KEY = "demo-object.active-session";
-const STORAGE_VERSION = 1;
 
 export type PersistedDemoSession = {
-  version: typeof STORAGE_VERSION;
   mazeId: number;
   createdAt: string;
   session: SessionsPost201Response;
@@ -22,7 +20,6 @@ function isPersistedDemoSession(value: unknown): value is PersistedDemoSession {
   const session = record.session as Partial<SessionsPost201Response> | undefined;
 
   return (
-    record.version === STORAGE_VERSION &&
     typeof record.mazeId === "number" &&
     typeof record.createdAt === "string" &&
     !!session &&
@@ -42,7 +39,6 @@ export function writePersistedDemoSession(
   if (typeof window === "undefined") return;
 
   const record: PersistedDemoSession = {
-    version: STORAGE_VERSION,
     mazeId,
     createdAt: new Date().toISOString(),
     session,

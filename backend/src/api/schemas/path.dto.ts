@@ -1,12 +1,16 @@
 import { Path, Point, DSL, Session, Maze } from "../../domain/index";
 import { z } from "zod";
 
-const PathReconstructionStep = z.array(Point).min(1);
+const PathExplorationStep = z.object({
+    from: Point,
+    to: Point,
+    discovered: z.boolean(),
+});
 
 export const ShortestPathResponse = z.object({
     path: Path,
     length: z.number().int().nonnegative(),
-    reconstructionSteps: z.array(PathReconstructionStep),
+    explorationSteps: z.array(PathExplorationStep),
 });
 
 export const CompilePathRequest = z.object({

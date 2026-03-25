@@ -1,4 +1,4 @@
-import { Card, CardContent, Separator } from "@/components/ui";
+import { Card, CardContent } from "@/components/ui";
 
 type PathInfoProps = {
   userPathLength: number;
@@ -12,20 +12,18 @@ export function PathInfo({
   return (
     <Card className="py-4">
       <CardContent className="px-4">
-        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-700">
-          <div className="flex items-baseline gap-2">
-            <span className="font-medium underline decoration-2 underline-offset-4 decoration-[#2563eb]">
-              Länge deines Pfads
-            </span>
-            <span>{userPathLength}</span>
-          </div>
-          <Separator orientation="vertical" className="hidden h-4 sm:block" />
-          <div className="flex items-baseline gap-2">
-            <span className="font-medium underline decoration-2 underline-offset-4 decoration-[#f59e0b]">
-              Länge des kürzesten Pfads
-            </span>
-            <span>{shortestPathLength ?? "❓"}</span>
-          </div>
+        <div className="grid grid-cols-[1fr_auto] items-baseline gap-x-4 gap-y-2 text-sm text-gray-700">
+          <span className="font-medium underline decoration-2 underline-offset-4 decoration-[#2563eb]">
+            Länge deines Pfads
+          </span>
+          <span className="text-right tabular-nums">{userPathLength}</span>
+
+          <span className="font-medium underline decoration-2 underline-offset-4 decoration-[#f59e0b]">
+            Länge des kürzesten Pfads
+          </span>
+          <span className="text-right tabular-nums">
+            {shortestPathLength ?? "❓"}
+          </span>
         </div>
       </CardContent>
     </Card>

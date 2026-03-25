@@ -20,18 +20,8 @@ export function MazePanelHeader({ actions, pathState }: MazePanelHeaderProps) {
   const canUndo = pathState.nodePath.length >= 2;
   const { isPathSubmitted, canShowAnimationButton } = pathState;
   return (
-    <div className="flex items-center justify-between gap-3 text-sm text-gray-700">
-      <div className="flex flex-wrap items-center gap-4">
-        <div className="flex items-center gap-2">
-          <span className="h-3 w-3 rounded-full bg-green-600 ring-2 ring-green-900" />
-          <span>Start</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="h-3 w-3 rounded-full bg-red-600 ring-2 ring-red-900" />
-          <span>Ziel</span>
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
+    <div className="flex justify-center">
+      <div className="flex flex-wrap items-center justify-center gap-2">
         {isPathSubmitted ? (
           <ActionButton
             label="Animation anzeigen"
