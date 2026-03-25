@@ -34,11 +34,16 @@ export function ActionPanel({ maze, pathState, actions }: ActionPanelProps) {
     hasShortestPathForCurrentSubmission,
   } = pathState;
   const { onReset, onSubmit, onShortestPath } = actions;
+  const endsAtGoal =
+    maze !== null &&
+    nodePath.length > 0 &&
+    nodePath[nodePath.length - 1] === maze.endNodeId;
 
   const canSubmit =
     Boolean(apiRequest) &&
     !submitting &&
     nodePath.length >= 2 &&
+    endsAtGoal &&
     pathKey !== lastSubmittedKey &&
     maze !== null;
 

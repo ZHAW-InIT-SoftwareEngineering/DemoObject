@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { useMazeFlow } from "@/components/app/MazeFlowProvider";
 import { AnimationView } from "@/components/app/animation/AnimationView";
-import { useDemoFlow } from "@/components/app/DemoFlowProvider";
 import { useAnimationScenePlayback, useDemoSession } from "@/hooks";
 
 export function MazeAnimationPage() {
@@ -10,9 +10,8 @@ export function MazeAnimationPage() {
   const {
     animationState,
     completeAnimation,
-    nodePath,
-    shortestPathNodePath,
-  } = useDemoFlow();
+    closePlayback,
+  } = useMazeFlow();
 
   useEffect(() => {
     if (animationState.status === "playing") return;
@@ -26,8 +25,8 @@ export function MazeAnimationPage() {
   const { progress, total, sceneData } = useAnimationScenePlayback({
     maze,
     nodePath: animationState.status === "playing" ? animationState.nodePath : [],
-    userNodePath: nodePath,
-    shortestNodePath: shortestPathNodePath,
+    userNodePath: animationState.userNodePath,
+    shortestNodePath: animationState.shortestNodePath,
     onComplete: handleAnimationComplete,
     stepMs: 260,
     settleMs: 5200,
@@ -42,7 +41,7 @@ export function MazeAnimationPage() {
       sceneData={sceneData}
       progress={progress}
       total={total}
-      onClose={handleAnimationComplete}
+      onClose={closePlayback}
     />
   );
 }

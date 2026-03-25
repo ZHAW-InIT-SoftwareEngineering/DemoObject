@@ -10,7 +10,7 @@ export function DslStrip({ dsl }: DslStripProps) {
   return (
     <Card className="py-4 gap-3">
       <CardHeader className="px-4">
-        <CardTitle className="text-sm text-center">DSL</CardTitle>
+        <CardTitle className="text-sm text-center">Domain Specific Language (DSL)</CardTitle>
       </CardHeader>
       <CardContent className="px-4">
         <div className="flex items-center gap-2 overflow-x-auto pb-2">

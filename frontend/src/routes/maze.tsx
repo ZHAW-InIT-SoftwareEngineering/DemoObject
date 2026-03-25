@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { MazeFlowProvider } from "@/components/app/MazeFlowProvider";
 import { StartLoadingScreen } from "@/components/app/StartLoadingScreen";
 import { useDemoSession } from "@/hooks";
 
@@ -20,5 +21,9 @@ function MazeLayout() {
     return loading ? <StartLoadingScreen /> : null;
   }
 
-  return <Outlet />;
+  return (
+    <MazeFlowProvider>
+      <Outlet />
+    </MazeFlowProvider>
+  );
 }

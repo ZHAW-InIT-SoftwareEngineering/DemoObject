@@ -20,6 +20,10 @@ type MazeViewProps = {
   selectedNodePath?: NodePath;
   highlightedNodePath?: NodePath;
   secondaryHighlightedNodePath?: NodePath;
+  explorationDiscoveredEdgeKeys?: readonly string[];
+  explorationSeenEdgeKeys?: readonly string[];
+  currentExplorationEdgeKey?: string | null;
+  currentExplorationEdgeDiscovered?: boolean;
   className?: string;
 };
 
@@ -104,6 +108,10 @@ export function Maze({
   selectedNodePath = [],
   highlightedNodePath = [],
   secondaryHighlightedNodePath = [],
+  explorationDiscoveredEdgeKeys = [],
+  explorationSeenEdgeKeys = [],
+  currentExplorationEdgeKey = null,
+  currentExplorationEdgeDiscovered = false,
   className,
 }: MazeViewProps) {
   const nodes = useMemo(() => maze.nodes ?? [], [maze.nodes]);
@@ -130,6 +138,14 @@ export function Maze({
   const highlightedEdges = nodePathToUndirectedEdgeKeySet(highlightedNodePath);
   const secondaryHighlightedEdges = nodePathToUndirectedEdgeKeySet(
     secondaryHighlightedNodePath,
+  );
+  const explorationDiscoveredEdges = useMemo(
+    () => new Set(explorationDiscoveredEdgeKeys),
+    [explorationDiscoveredEdgeKeys],
+  );
+  const explorationSeenEdges = useMemo(
+    () => new Set(explorationSeenEdgeKeys),
+    [explorationSeenEdgeKeys],
   );
   const pointByNodeId = useMemo(() => {
     const map = new Map<number, { x: number; y: number }>();
@@ -194,6 +210,39 @@ export function Maze({
           stroke,
           strokeWidth,
         );
+      })}
+
+      {edges.map((edge) => {
+        const key = undirectedEdgeKey(edge.from, edge.to);
+
+        if (currentExplorationEdgeKey === key) {
+          return renderEdge(
+            edge,
+            pointByNodeId,
+            currentExplorationEdgeDiscovered ? "#ff2d95" : "#7c3aed",
+            6,
+          );
+        }
+
+        if (explorationSeenEdges.has(key)) {
+          return renderEdge(
+            edge,
+            pointByNodeId,
+            "#a3e635",
+            4,
+          );
+        }
+
+        if (explorationDiscoveredEdges.has(key)) {
+          return renderEdge(
+            edge,
+            pointByNodeId,
+            "#fff200",
+            4,
+          );
+        }
+
+        return null;
       })}
 
       {nodes.map((node) => {

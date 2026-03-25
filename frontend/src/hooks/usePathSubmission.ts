@@ -1,19 +1,17 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   MazesMazeIdPathsDslPostRequest,
   SessionsSessionIdPathsGet200Response,
 } from "@/api";
 import {
-  readPersistedDemoDraftPath,
-  writePersistedDemoDraftPath,
-} from "@/lib/demoDraftPathStorage";
-import type { NodePath } from "@/lib/path/transforms";
+  readPersistedDemoPathSubmission,
+  writePersistedDemoPathSubmissionDsl,
+} from "@/lib/demoPathSubmissionStorage";
 import { sessionsApi } from "../lib/api";
 
 type UsePathSubmissionOptions = {
   apiRequest: MazesMazeIdPathsDslPostRequest | null;
   mazeId?: number | null;
-  nodePath: NodePath;
   pathKey: string;
   sessionId?: string | null;
 };
@@ -21,7 +19,6 @@ type UsePathSubmissionOptions = {
 export function usePathSubmission({
   apiRequest,
   mazeId,
-  nodePath,
   pathKey,
   sessionId,
 }: UsePathSubmissionOptions) {
@@ -29,25 +26,32 @@ export function usePathSubmission({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [lastSubmittedKey, setLastSubmittedKey] = useState<string | null>(null);
+  const submissionScopeKey =
+    mazeId !== null && mazeId !== undefined && sessionId
+      ? `${mazeId}:${sessionId}:${pathKey}`
+      : null;
+  const currentSubmissionScopeKeyRef = useRef<string | null>(submissionScopeKey);
+
+  currentSubmissionScopeKeyRef.current = submissionScopeKey;
 
   useEffect(() => {
+    setDsl(null);
+    setSubmitError(null);
     setLastSubmittedKey(null);
   }, [sessionId]);
 
   useEffect(() => {
-    const persistedDraftPath =
+    const persistedSubmission =
       mazeId !== null && mazeId !== undefined && sessionId
-        ? readPersistedDemoDraftPath()
+        ? readPersistedDemoPathSubmission(sessionId, mazeId, pathKey)
         : null;
-    const canRestoreDsl =
-      !!persistedDraftPath &&
-      persistedDraftPath.mazeId === mazeId &&
-      persistedDraftPath.sessionId === sessionId &&
-      persistedDraftPath.lastSubmittedPathKey === pathKey &&
-      Array.isArray(persistedDraftPath.dsl);
+    const hasPersistedSubmission =
+      !!persistedSubmission &&
+      (persistedSubmission.dsl !== null ||
+        persistedSubmission.shortestPath !== null);
 
-    setDsl(canRestoreDsl ? persistedDraftPath.dsl : null);
-    setLastSubmittedKey(canRestoreDsl ? pathKey : null);
+    setDsl(persistedSubmission?.dsl ?? null);
+    setLastSubmittedKey(hasPersistedSubmission ? pathKey : null);
     setSubmitError(null);
   }, [mazeId, pathKey, sessionId]);
 
@@ -55,14 +59,13 @@ export function usePathSubmission({
     setDsl(null);
     setSubmitError(null);
     setLastSubmittedKey(null);
-
-    if (mazeId === null || mazeId === undefined || !sessionId) return;
-
-    writePersistedDemoDraftPath(sessionId, mazeId, nodePath, null, null);
-  }, [mazeId, nodePath, sessionId]);
+  }, []);
 
   const submitPath = useCallback(async () => {
     if (!sessionId || !apiRequest || mazeId === null || mazeId === undefined) {
+      return null;
+    }
+    if (!submissionScopeKey) {
       return null;
     }
 
@@ -77,24 +80,23 @@ export function usePathSubmission({
 
       const nextDsl = response.dsl ?? null;
 
-      setDsl(nextDsl);
-      setLastSubmittedKey(pathKey);
-      writePersistedDemoDraftPath(
-        sessionId,
-        mazeId,
-        nodePath,
-        nextDsl,
-        pathKey,
-      );
+      writePersistedDemoPathSubmissionDsl(sessionId, mazeId, pathKey, nextDsl);
+
+      if (currentSubmissionScopeKeyRef.current === submissionScopeKey) {
+        setDsl(nextDsl);
+        setLastSubmittedKey(pathKey);
+      }
 
       return response;
     } catch {
-      setSubmitError("Senden des Pfads fehlgeschlagen.");
+      if (currentSubmissionScopeKeyRef.current === submissionScopeKey) {
+        setSubmitError("Senden des Pfads fehlgeschlagen.");
+      }
       return null;
     } finally {
       setSubmitting(false);
     }
-  }, [apiRequest, mazeId, nodePath, pathKey, sessionId]);
+  }, [apiRequest, mazeId, pathKey, sessionId, submissionScopeKey]);
 
   const isPathSubmitted =
     Boolean(lastSubmittedKey) && pathKey === lastSubmittedKey;
