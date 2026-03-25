@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { StartLoadingScreen } from "@/components/app/StartLoadingScreen";
-import { StartScreen } from "@/components/app/StartScreen";
+import { StartLoadingScreen } from "@/components/app/index/StartLoadingScreen";
+import { StartScreen } from "@/components/app/index/StartScreen";
 import { useDemoSession } from "@/hooks";
 
 export function HomePage() {

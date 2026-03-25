@@ -31,7 +31,6 @@ type UseMazePointerDrawingResult = {
 
 const REHOVER_DESELECT_DELAY_MS = 250;
 const POINTER_HIT_RADIUS = 16;
-const TOUCH_ADJACENT_POINTER_HIT_RADIUS = 24;
 
 export function useMazePointerDrawing({
   currentEndpointNodeId,
@@ -42,7 +41,6 @@ export function useMazePointerDrawing({
 }: UseMazePointerDrawingOptions): UseMazePointerDrawingResult {
   const isPointerDrawingRef = useRef(false);
   const activePointerIdRef = useRef<number | null>(null);
-  const activePointerTypeRef = useRef<string | null>(null);
   const lastInteractedNodeIdRef = useRef<number | null>(null);
   const lastHoveredNodeIdRef = useRef<number | null>(null);
   const pendingDeselectNodeIdRef = useRef<number | null>(null);
@@ -63,7 +61,6 @@ export function useMazePointerDrawing({
     clearPendingDeselect();
     isPointerDrawingRef.current = false;
     activePointerIdRef.current = null;
-    activePointerTypeRef.current = null;
     lastInteractedNodeIdRef.current = null;
     lastHoveredNodeIdRef.current = null;
     setIsPointerDrawing(false);
@@ -110,7 +107,6 @@ export function useMazePointerDrawing({
       clearPendingDeselect();
       isPointerDrawingRef.current = true;
       activePointerIdRef.current = event.pointerId;
-      activePointerTypeRef.current = event.pointerType;
       lastInteractedNodeIdRef.current = nodeId;
       lastHoveredNodeIdRef.current = nodeId;
       setIsPointerDrawing(true);
@@ -170,52 +166,23 @@ export function useMazePointerDrawing({
     [handleHoveredNode],
   );
 
-  const getSearchableNodeIds = useCallback(
-    (endpointNodeId: number) => {
-      const searchableNodeIds = new Set<number>([endpointNodeId]);
-      const adjacentNodeIds = adjacencyByNodeId.get(endpointNodeId);
-      if (!adjacentNodeIds) return searchableNodeIds;
-
-      for (const nodeId of adjacentNodeIds) {
-        searchableNodeIds.add(nodeId);
-      }
-
-      return searchableNodeIds;
-    },
-    [adjacencyByNodeId],
-  );
-
   const findNodeAtPointer = useCallback(
     (x: number, y: number) => {
-      const endpointNodeId =
-        lastInteractedNodeIdRef.current ?? currentEndpointNodeId;
-      if (endpointNodeId === null || endpointNodeId === undefined) {
-        return null;
-      }
-
       let closestNodeId: number | null = null;
-      let closestDistanceSq = Number.POSITIVE_INFINITY;
+      let closestDistanceSq = POINTER_HIT_RADIUS * POINTER_HIT_RADIUS;
 
-      for (const nodeId of getSearchableNodeIds(endpointNodeId)) {
-        const point = pointByNodeId.get(nodeId);
-        if (!point) continue;
-
-        const hitRadius =
-          activePointerTypeRef.current === "touch" && nodeId !== endpointNodeId
-            ? TOUCH_ADJACENT_POINTER_HIT_RADIUS
-            : POINTER_HIT_RADIUS;
+      for (const [nodeId, point] of pointByNodeId) {
         const dx = point.x - x;
         const dy = point.y - y;
         const distanceSq = dx * dx + dy * dy;
-        if (distanceSq > hitRadius * hitRadius) continue;
-        if (distanceSq >= closestDistanceSq) continue;
+        if (distanceSq > closestDistanceSq) continue;
         closestDistanceSq = distanceSq;
         closestNodeId = nodeId;
       }
 
       return closestNodeId;
     },
-    [currentEndpointNodeId, getSearchableNodeIds, pointByNodeId],
+    [pointByNodeId],
   );
 
   const onMazePointerMove = useCallback(

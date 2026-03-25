@@ -3,8 +3,8 @@ import type {
   MazesMazeIdPathsDslPostRequest,
 } from "@/api";
 import { Card, CardContent } from "@/components/ui";
-import { ActionButton } from "./ActionButton";
-import { ImpressumLink } from "./ImpressumLink";
+import { ActionButton } from "../../ui/ActionButton";
+import { ImpressumLink } from "../impressum/ImpressumLink";
 import type { NodePath } from "@/lib/path/transforms";
 
 type ActionPanelProps = {

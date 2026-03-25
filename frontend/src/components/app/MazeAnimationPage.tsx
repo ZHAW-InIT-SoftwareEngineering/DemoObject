@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useMazeFlow } from "@/components/app/MazeFlowProvider";
-import { AnimationView } from "@/components/app/animation/AnimationView";
+import { AnimationView } from "@/components/app/AnimationView";
 import { useAnimationScenePlayback, useDemoSession } from "@/hooks";
 
 export function MazeAnimationPage() {

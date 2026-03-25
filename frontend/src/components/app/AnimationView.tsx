@@ -3,13 +3,13 @@ import type { AnimationSceneData, Vec3 } from "@/lib/animation";
 import { Canvas } from "@react-three/fiber";
 import { Line, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
-import { AnimationCameraRig } from "./AnimationCameraRig";
-import { FlickerTorch } from "./scene/FlickerTorch";
-import { EmergingSun } from "./scene/EmergingSun";
-import { JourneyLighting } from "./scene/JourneyLighting";
-import { StormAtmosphere } from "./scene/StormAtmosphere";
-import { FlowerFountain } from "./scene/FlowerFountain";
-import { AnimationHud } from "./controll/AnimationHud";
+import { AnimationCameraRig } from "./maze.animation/AnimationCameraRig";
+import { FlickerTorch } from "./maze.animation/scene/FlickerTorch";
+import { EmergingSun } from "./maze.animation/scene/EmergingSun";
+import { JourneyLighting } from "./maze.animation/scene/JourneyLighting";
+import { StormAtmosphere } from "./maze.animation/scene/StormAtmosphere";
+import { FlowerFountain } from "./maze.animation/scene/FlowerFountain";
+import { AnimationHud } from "./maze.animation/controll/AnimationHud";
 
 type AnimationViewProps = {
   sceneData: AnimationSceneData;

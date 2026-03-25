@@ -1,17 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { ActionPanel } from "@/components/app/ActionPanel";
+import { ActionPanel } from "@/components/app/maze/ActionPanel";
 import { useMazeFlow } from "@/components/app/MazeFlowProvider";
-import { DslStrip } from "@/components/app/DslStrip";
-import { ResetPathConfirmationOverlay } from "@/components/app/ResetPathConfirmationOverlay";
+import { DslStrip } from "@/components/app/maze/DslStrip";
+import { ResetPathConfirmationOverlay } from "@/components/app/maze/ResetPathConfirmationOverlay";
 import {
   AnimationPathSelectionOverlay,
   type AnimationPathChoice,
-} from "@/components/app/animation/AnimationPathSelectionOverlay";
-import { AnimationView } from "@/components/app/animation/AnimationView";
-import { CelebrationOverlay } from "@/components/app/animation/CelebrationOverlay";
-import { MazePanel } from "@/components/app/maze/MazePanel";
+} from "@/components/app/maze.animation/AnimationPathSelectionOverlay";
+import { AnimationView } from "@/components/app/AnimationView";
+import { CelebrationOverlay } from "@/components/app/maze/CelebrationOverlay";
+import { MazePanel } from "@/components/app/maze/mazePanel/MazePanel";
 import { buildAnimationSceneData } from "@/lib/animation";
 import {
   useDemoSession,
