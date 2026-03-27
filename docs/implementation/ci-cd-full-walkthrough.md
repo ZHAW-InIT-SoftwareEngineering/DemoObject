@@ -1,94 +1,104 @@
 # DemoObject CI/CD Full Walkthrough
 
-This document explains the current CI/CD setup in this repository in chunked form, from top-level pipeline design down to exact runtime behavior.
+This document explains the current CI/CD setup in this repository, including the GitHub-hosted runner model and the SSH-based production deployment path.
 
 ## Chunk 1: CI/CD Inventory (What Exists)
 
-1. There is one GitHub Actions workflow: `.github/workflows/deploy-stack.yml`.
+1. There are three GitHub Actions workflows:
+   - `.github/workflows/deploy-stack.yaml`
+   - `.github/workflows/daily-audit-fix.yaml`
+   - `.github/workflows/data-clean.yaml`
 2. Production deployment uses `deploy/docker-compose.prod.yaml`.
 3. Container images are built from:
    - `backend/Dockerfile`
    - `frontend/Dockerfile`
-4. Frontend runtime routing and health endpoint are configured in:
-   - `frontend/nginx/default.conf`
+   - `caddy/Dockerfile`
+4. Frontend runtime routing is configured in `frontend/nginx/default.conf`.
+5. Edge TLS and public ingress are handled by `caddy/Caddyfile`.
 
-## Chunk 2: Pipeline Topology
+## Chunk 2: Deploy Workflow Topology
 
-1. Triggers:
+1. `.github/workflows/deploy-stack.yaml` triggers on:
    - `push` to `main`
-   - `workflow_dispatch` (manual trigger)
-2. Concurrency:
+   - `workflow_dispatch`
+2. Concurrency is:
    - `group: production-stack-deploy`
    - `cancel-in-progress: true`
 3. Jobs:
    - `build_and_push_backend`
    - `build_and_push_frontend`
+   - `build_and_push_caddy`
    - `deploy_stack`
-4. Job dependencies:
-   - `deploy_stack` waits for both build jobs (`needs`).
+4. `deploy_stack` waits for all three image build jobs.
+5. Every job in this workflow runs on `ubuntu-latest`.
 
-## Chunk 3: Build-and-Push Backend Job
+## Chunk 3: Build-and-Push Jobs
 
-1. Runs on self-hosted runner labels: `[self-hosted, Linux, X64]`.
-2. Uses permissions:
+1. Backend, frontend, and caddy image builds follow the same pattern.
+2. Each job uses:
    - `contents: read`
    - `packages: write`
-3. Validates required registry config:
+3. Each job validates:
    - Secret `GHCR_PAT`
    - Variable `GHCR_USERNAME`
-4. Logs into GHCR with `docker/login-action@v3`.
-5. Builds and pushes backend image with:
-   - Context: `./backend`
-   - Dockerfile: `./backend/Dockerfile`
-   - Tag: `ghcr.io/<GHCR_USERNAME>/demoobject-backend:${{ github.sha }}`
-6. Uses immutable commit SHA tags.
-7. Sets:
+4. Each job logs into GHCR with `docker/login-action@v3`.
+5. Each job builds with `docker/build-push-action@v6`.
+6. Images are tagged immutably with `${{ github.sha }}`.
+7. Published image names are:
+   - `ghcr.io/<GHCR_USERNAME>/demoobject-backend`
+   - `ghcr.io/<GHCR_USERNAME>/demoobject-frontend`
+   - `ghcr.io/<GHCR_USERNAME>/demoobject-caddy`
+8. Image metadata generation is disabled with:
    - `provenance: false`
    - `sbom: false`
 
-## Chunk 4: Build-and-Push Frontend Job
+## Chunk 4: Deploy Job Step-by-Step
 
-1. Same runner, permission, and GHCR auth pattern as backend.
-2. Builds and pushes:
-   - `ghcr.io/<GHCR_USERNAME>/demoobject-frontend:${{ github.sha }}`
-3. Frontend image internals:
-   - Build stage compiles static assets (`npm run build`).
-   - Runtime stage serves them with Nginx.
-
-## Chunk 5: Deploy Job Step-by-Step
-
-1. Runs on self-hosted runner labels: `[self-hosted, Linux, X64]`.
-2. Requires both build jobs to pass first.
-3. Validates required non-secret variables:
+1. `deploy_stack` runs on `ubuntu-latest`, not on the production VM.
+2. It validates required GitHub variables:
+   - `VM_HOST`
+   - `VM_USER`
    - `DEPLOY_PATH`
-   - `BACKEND_IMAGE`
+   - `GHCR_USERNAME`
    - `MONGO_DATABASE`
    - `MONGO_COLLECTION_NAME`
-4. Validates required secrets:
+3. It validates required GitHub secrets:
+   - `SSH_PRIVATE_KEY`
    - `GHCR_PAT`
    - `MONGO_ROOT_USERNAME`
    - `MONGO_ROOT_PASSWORD`
-5. Checks Docker and Docker Compose availability.
-6. Logs into GHCR again for pull during deploy.
-7. Ensures deploy directory exists and copies:
-   - `deploy/docker-compose.prod.yaml` -> `${DEPLOY_PATH}/docker-compose.prod.yaml`
-8. Exports runtime env vars (including `IMAGE_TAG=${{ github.sha }}`) and runs:
-   - `docker compose -f "${DEPLOY_PATH}/docker-compose.prod.yaml" pull mongo api frontend`
-   - `docker compose -f "${DEPLOY_PATH}/docker-compose.prod.yaml" up -d --remove-orphans mongo api frontend`
-9. Health wait loop:
-   - Polls `demoobject-api` and `demoobject-frontend` up to 30 times, sleeping 2s each (about 60s max).
-10. On timeout:
-   - Prints `docker ps`
-   - Prints tail logs for API/frontend
-   - Exits with failure
+4. It writes the private key to the runner, adds the VM host key with `ssh-keyscan`, and enables strict host-key checking for SSH connections.
+5. It connects to `${VM_USER}@${VM_HOST}` and validates:
+   - `docker version`
+   - `docker compose version`
+6. It uploads `deploy/docker-compose.prod.yaml` to `${DEPLOY_PATH}/docker-compose.prod.yaml` on the VM.
+7. It then opens an SSH session to the VM and:
+   - Logs in to GHCR on the VM using `GHCR_PAT`
+   - Exports runtime variables including `IMAGE_TAG=${{ github.sha }}`
+   - Runs `docker compose pull mongo api frontend caddy`
+   - Runs `docker compose up -d --remove-orphans mongo api frontend caddy`
+8. It waits up to about 60 seconds for:
+   - `demoobject-api`
+   - `demoobject-frontend`
+   to report healthy status.
+9. If the API or frontend never become healthy, it prints:
+   - `docker ps`
+   - Tail logs for `demoobject-api`
+   - Tail logs for `demoobject-frontend`
+10. After the deploy step, it validates `demoobject-caddy` on the VM.
+11. It then verifies public reachability from the GitHub-hosted runner by checking:
+   - `http://demo.init.zhaw.ch` returns an HTTP redirect
+   - the redirect points to `https://demo.init.zhaw.ch`
+   - `https://demo.init.zhaw.ch` returns `200` or `304`
 
-## Chunk 6: Runtime Stack Behavior (Compose)
+## Chunk 5: Runtime Stack Behavior (Compose)
 
 ### Services
 
 1. `mongo`
 2. `api`
 3. `frontend`
+4. `caddy`
 
 ### mongo
 
@@ -116,60 +126,90 @@ This document explains the current CI/CD setup in this repository in chunked for
 
 1. Image: `${FRONTEND_IMAGE}:${IMAGE_TAG}`
 2. `depends_on` API healthy
-3. Publishes: `${FRONTEND_PORT:-80}:80`
-4. Healthcheck: `wget http://127.0.0.1/healthz`
+3. Healthcheck: `wget http://127.0.0.1/healthz`
+
+### caddy
+
+1. Image: `${CADDY_IMAGE}:${IMAGE_TAG}`
+2. Publishes:
+   - `80:80`
+   - `443:443`
+   - `443:443/udp`
+3. Depends on healthy `frontend`
+4. Healthcheck probes localhost HTTP with `Host: demo.init.zhaw.ch`
 
 ### Request path model
 
-1. Browser hits frontend Nginx on port 80 (or configured host port).
-2. Frontend Nginx proxies `/api/` to `http://api:3000/`.
-3. Backend routes live at root paths (`/mazes`, `/sessions`, `/healthz`), so proxying `/api/<x>` -> `/<x>` aligns correctly.
+1. Browser traffic reaches Caddy on ports `80` and `443`.
+2. Caddy forwards application traffic to `frontend`.
+3. Frontend Nginx proxies `/api/` to `http://api:3000/`.
+4. Backend routes live at root paths such as `/mazes`, `/sessions`, and `/healthz`.
 
-## Chunk 7: Variables and Secrets Flow
+## Chunk 6: Data-Clean Workflow
+
+1. `.github/workflows/data-clean.yaml` runs on:
+   - a monthly schedule
+   - `workflow_dispatch`
+2. The job runs on `ubuntu-latest`.
+3. It validates:
+   - `VM_HOST`
+   - `VM_USER`
+   - `MONGO_DATABASE`
+   - `MONGO_COLLECTION_NAME`
+   - `SSH_PRIVATE_KEY`
+   - `MONGO_ROOT_USERNAME`
+   - `MONGO_ROOT_PASSWORD`
+4. It connects to the VM over SSH, confirms `demoobject-mongo` is running, and then executes `mongosh` inside the container with `docker exec`.
+5. The workflow does not require a self-hosted runner anymore.
+
+## Chunk 7: Daily Audit Workflow
+
+1. `.github/workflows/daily-audit-fix.yaml` runs on:
+   - a daily schedule
+   - `workflow_dispatch`
+2. The job runs on `ubuntu-latest`.
+3. It sets up Node.js `22` with npm caching for backend and frontend lockfiles.
+4. It runs `npm ci` and `npm audit fix` in:
+   - `backend`
+   - `frontend`
+5. If dependency changes are produced, it creates or updates a pull request with `peter-evans/create-pull-request@v7`.
+
+## Chunk 8: Variables and Secrets Flow
 
 | Name | Type | Used For |
 | --- | --- | --- |
-| `GHCR_USERNAME` | Variable | Build image names under `ghcr.io/<user>/...` |
-| `GHCR_PAT` | Secret | GHCR login for push and pull |
-| `DEPLOY_PATH` | Variable | Target path on self-hosted host where compose file is copied |
-| `FRONTEND_PORT` | Variable | Host port mapped to frontend container port 80 |
-| `MONGO_DATABASE` | Variable | Mongo DB init and backend DB name |
+| `VM_HOST` | Variable | SSH host of the production VM |
+| `VM_USER` | Variable | SSH user for remote Docker commands |
+| `GHCR_USERNAME` | Variable | Base image namespace under `ghcr.io/<user>/...` |
+| `DEPLOY_PATH` | Variable | Remote VM path that receives `docker-compose.prod.yaml` |
+| `MONGO_DATABASE` | Variable | Mongo init DB name and backend DB name |
 | `MONGO_COLLECTION_NAME` | Variable | Backend collection name |
-| `MONGO_ROOT_USERNAME` | Secret | Mongo root auth + backend connection string |
-| `MONGO_ROOT_PASSWORD` | Secret | Mongo root auth + backend connection string |
+| `SSH_PRIVATE_KEY` | Secret | Private key used by GitHub Actions to SSH to the VM |
+| `GHCR_PAT` | Secret | GHCR login for pushing images and pulling them on the VM |
+| `MONGO_ROOT_USERNAME` | Secret | Mongo root auth and backend connection string input |
+| `MONGO_ROOT_PASSWORD` | Secret | Mongo root auth and backend connection string input |
 | `IMAGE_TAG` | Runtime env | Set during deploy to `${{ github.sha }}` |
-
-## Chunk 8: What This Setup Is and Is Not
-
-1. It is a combined build/publish/deploy workflow for `main`.
-2. It is not yet a full CI quality-gate pipeline.
-3. There are no workflow-level lint/test/typecheck gates before deployment.
-4. There is no automatic rollback step.
-5. Deployment strategy is in-place container replacement on a single host.
 
 ## Chunk 9: Operational Details and Risks
 
-1. Runner selection uses generic labels (`self-hosted`, `Linux`, `X64`).
-   - If multiple runners match, target host selection can be ambiguous.
-2. `mongo:7` is a moving major tag.
-   - Patch-level changes may be pulled over time.
-3. Secrets are not committed, but they are present in job runtime environment.
-4. Pipeline verifies API/frontend health after deployment.
-5. Concurrency cancellation means a new push can cancel a previous in-progress deploy.
+1. Deployments now target a specific host through `VM_HOST` instead of relying on self-hosted runner labels.
+2. The VM must already have Docker and the Docker Compose plugin installed.
+3. `VM_USER` must be allowed to run `docker` on the VM.
+4. The workflow currently records the VM host key at runtime with `ssh-keyscan`.
+5. `mongo:7` remains a moving major tag, so patch releases can change over time.
+6. Deployment is still an in-place replacement on a single VM.
+7. There is still no automatic rollback step.
+8. Concurrency cancellation means a newer push to `main` can cancel an in-progress deploy.
 
-## Chunk 10: Documentation Drift to Be Aware Of
+## Chunk 10: Source Files To Keep Open
 
-1. Root `README.md` references `.github/workflows/deploy-backend.yml`, but current file is `.github/workflows/deploy-stack.yml`.
-2. `docs/deployment-strategy.md` is a discussion draft and contains statements that are now outdated (for example, implying workflows were not yet added at that time).
-
-## Source Files You Should Keep Open While Learning
-
-1. `.github/workflows/deploy-stack.yml`
-2. `deploy/docker-compose.prod.yaml`
-3. `backend/Dockerfile`
-4. `frontend/Dockerfile`
-5. `frontend/nginx/default.conf`
-6. `backend/src/api/routes/infra.routes.ts`
-7. `backend/src/db/mongo.ts`
-8. `README.md`
-9. `docs/deployment-strategy.md`
+1. `.github/workflows/deploy-stack.yaml`
+2. `.github/workflows/daily-audit-fix.yaml`
+3. `.github/workflows/data-clean.yaml`
+4. `deploy/docker-compose.prod.yaml`
+5. `backend/Dockerfile`
+6. `frontend/Dockerfile`
+7. `caddy/Dockerfile`
+8. `frontend/nginx/default.conf`
+9. `caddy/Caddyfile`
+10. `README.md`

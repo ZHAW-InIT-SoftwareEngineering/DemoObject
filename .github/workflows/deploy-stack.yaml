@@ -13,7 +13,7 @@ concurrency:
 jobs:
   build_and_push_backend:
     name: Build and Push Backend Image
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
@@ -60,7 +60,7 @@ jobs:
 
   build_and_push_frontend:
     name: Build and Push Frontend Image
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
@@ -107,7 +107,7 @@ jobs:
 
   build_and_push_caddy:
     name: Build and Push Caddy Image
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
@@ -155,7 +155,7 @@ jobs:
 
   deploy_stack:
     name: Deploy Stack to VM
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: ubuntu-latest
     needs:
       - build_and_push_backend
       - build_and_push_frontend
@@ -163,6 +163,8 @@ jobs:
     permissions:
       contents: read
     env:
+      VM_HOST: ${{ vars.VM_HOST }}
+      VM_USER: ${{ vars.VM_USER || 'ubuntu' }}
       DEPLOY_PATH: ${{ vars.DEPLOY_PATH || './demoobject' }}
       BACKEND_IMAGE: 'ghcr.io/${{ vars.GHCR_USERNAME }}/demoobject-backend'
       FRONTEND_IMAGE: 'ghcr.io/${{ vars.GHCR_USERNAME }}/demoobject-frontend'
@@ -170,6 +172,7 @@ jobs:
       GHCR_USERNAME: ${{ vars.GHCR_USERNAME }}
       MONGO_DATABASE: ${{ vars.MONGO_DATABASE }}
       MONGO_COLLECTION_NAME: ${{ vars.MONGO_COLLECTION_NAME }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       GHCR_PAT: ${{ secrets.GHCR_PAT }}
       MONGO_ROOT_USERNAME: ${{ secrets.MONGO_ROOT_USERNAME }}
       MONGO_ROOT_PASSWORD: ${{ secrets.MONGO_ROOT_PASSWORD }}
@@ -183,15 +186,19 @@ jobs:
           set -euo pipefail
 
           required_vars=(
+            VM_HOST
+            VM_USER
             DEPLOY_PATH
             BACKEND_IMAGE
             FRONTEND_IMAGE
             CADDY_IMAGE
+            GHCR_USERNAME
             MONGO_DATABASE
             MONGO_COLLECTION_NAME
           )
 
           required_secrets=(
+            SSH_PRIVATE_KEY
             GHCR_PAT
             MONGO_ROOT_USERNAME
             MONGO_ROOT_PASSWORD
@@ -211,33 +218,59 @@ jobs:
             fi
           done
 
-      - name: Validate Docker availability
+      - name: Configure SSH access to VM
         shell: bash
         run: |
           set -euo pipefail
-          docker version
-          docker compose version
+          mkdir -p "${HOME}/.ssh"
+          chmod 700 "${HOME}/.ssh"
+          printf '%s\n' "${SSH_PRIVATE_KEY}" > "${HOME}/.ssh/demoobject_deploy_key"
+          chmod 600 "${HOME}/.ssh/demoobject_deploy_key"
+          ssh-keyscan -H "${VM_HOST}" >> "${HOME}/.ssh/known_hosts"
+          chmod 644 "${HOME}/.ssh/known_hosts"
 
-      - name: Log in to GHCR for deploy pull
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ env.GHCR_USERNAME }}
-          password: ${{ secrets.GHCR_PAT }}
-
-      - name: Prepare compose file on host
+      - name: Validate Docker availability on VM
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "${DEPLOY_PATH}"
-          cp deploy/docker-compose.prod.yaml "${DEPLOY_PATH}/docker-compose.prod.yaml"
+          ssh -i "${HOME}/.ssh/demoobject_deploy_key" -o StrictHostKeyChecking=yes "${VM_USER}@${VM_HOST}" '
+            set -euo pipefail
+            docker version
+            docker compose version
+          '
 
-      - name: Deploy mongo, api, frontend and caddy services on self-hosted runner
+      - name: Prepare compose file on VM
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh -i "${HOME}/.ssh/demoobject_deploy_key" -o StrictHostKeyChecking=yes "${VM_USER}@${VM_HOST}" "set -euo pipefail; mkdir -p $(printf '%q' "${DEPLOY_PATH}")"
+          ssh -i "${HOME}/.ssh/demoobject_deploy_key" -o StrictHostKeyChecking=yes "${VM_USER}@${VM_HOST}" "set -euo pipefail; cat > $(printf '%q' "${DEPLOY_PATH}/docker-compose.prod.yaml")" < deploy/docker-compose.prod.yaml
+
+      - name: Deploy mongo, api, frontend and caddy services on VM
         shell: bash
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           set -euo pipefail
+          ssh -i "${HOME}/.ssh/demoobject_deploy_key" -o StrictHostKeyChecking=yes "${VM_USER}@${VM_HOST}" 'bash -s' <<EOF
+          set -euo pipefail
+          BACKEND_IMAGE=$(printf '%q' "${BACKEND_IMAGE}")
+          FRONTEND_IMAGE=$(printf '%q' "${FRONTEND_IMAGE}")
+          CADDY_IMAGE=$(printf '%q' "${CADDY_IMAGE}")
+          IMAGE_TAG=$(printf '%q' "${IMAGE_TAG}")
+          GHCR_USERNAME=$(printf '%q' "${GHCR_USERNAME}")
+          GHCR_PAT=$(printf '%q' "${GHCR_PAT}")
+          DEPLOY_PATH=$(printf '%q' "${DEPLOY_PATH}")
+          MONGO_ROOT_USERNAME=$(printf '%q' "${MONGO_ROOT_USERNAME}")
+          MONGO_ROOT_PASSWORD=$(printf '%q' "${MONGO_ROOT_PASSWORD}")
+          MONGO_DATABASE=$(printf '%q' "${MONGO_DATABASE}")
+          MONGO_COLLECTION_NAME=$(printf '%q' "${MONGO_COLLECTION_NAME}")
+
+          cleanup() {
+            docker logout ghcr.io >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
           export BACKEND_IMAGE
           export FRONTEND_IMAGE
           export CADDY_IMAGE
@@ -247,13 +280,15 @@ jobs:
           export MONGO_DATABASE
           export MONGO_COLLECTION_NAME
 
-          docker compose -f "${DEPLOY_PATH}/docker-compose.prod.yaml" pull mongo api frontend caddy
-          docker compose -f "${DEPLOY_PATH}/docker-compose.prod.yaml" up -d --remove-orphans mongo api frontend caddy
+          echo "\${GHCR_PAT}" | docker login ghcr.io --username "\${GHCR_USERNAME}" --password-stdin
 
-          for i in $(seq 1 30); do
-            status=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' demoobject-api 2>/dev/null || true)
-            frontend_status=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' demoobject-frontend 2>/dev/null || true)
-            if [ "$status" = "healthy" ] && [ "$frontend_status" = "healthy" ]; then
+          docker compose -f "\${DEPLOY_PATH}/docker-compose.prod.yaml" pull mongo api frontend caddy
+          docker compose -f "\${DEPLOY_PATH}/docker-compose.prod.yaml" up -d --remove-orphans mongo api frontend caddy
+
+          for i in \$(seq 1 30); do
+            status=\$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' demoobject-api 2>/dev/null || true)
+            frontend_status=\$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' demoobject-frontend 2>/dev/null || true)
+            if [ "\${status}" = "healthy" ] && [ "\${frontend_status}" = "healthy" ]; then
               exit 0
             fi
             sleep 2
@@ -264,27 +299,32 @@ jobs:
           docker logs --tail 100 demoobject-api >&2 || true
           docker logs --tail 100 demoobject-frontend >&2 || true
           exit 1
+          EOF
           
       - name: Validate caddy and HTTPS reachability
         shell: bash
         run: |
           set -euo pipefail
 
+          ssh -i "${HOME}/.ssh/demoobject_deploy_key" -o StrictHostKeyChecking=yes "${VM_USER}@${VM_HOST}" 'bash -s' <<'EOF'
+          set -euo pipefail
+
           for i in $(seq 1 30); do
             caddy_status=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' demoobject-caddy 2>/dev/null || true)
-            if [ "$caddy_status" = "running" ] || [ "$caddy_status" = "healthy" ]; then
-              break
+            if [ "${caddy_status}" = "running" ] || [ "${caddy_status}" = "healthy" ]; then
+              exit 0
             fi
             sleep 2
           done
 
           caddy_status=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' demoobject-caddy 2>/dev/null || true)
-          if [ "$caddy_status" != "running" ] && [ "$caddy_status" != "healthy" ]; then
+          if [ "${caddy_status}" != "running" ] && [ "${caddy_status}" != "healthy" ]; then
             echo "Caddy container is not running." >&2
             docker ps >&2
             docker logs demoobject-caddy >&2 || true
             exit 1
           fi
+          EOF
 
           http_headers=$(curl -I --connect-timeout 10 --retry 10 --retry-delay 3 http://demo.init.zhaw.ch 2>&1 || true)
           echo "$http_headers"

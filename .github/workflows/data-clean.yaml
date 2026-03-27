@@ -12,10 +12,13 @@ concurrency:
 jobs:
   drop-session-collection:
     name: Drop session collection
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: ubuntu-latest
     env:
+      VM_HOST: ${{ vars.VM_HOST }}
+      VM_USER: ${{ vars.VM_USER || 'ubuntu' }}
       MONGO_DATABASE: ${{ vars.MONGO_DATABASE }}
       MONGO_COLLECTION_NAME: ${{ vars.MONGO_COLLECTION_NAME }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       MONGO_ROOT_USERNAME: ${{ secrets.MONGO_ROOT_USERNAME }}
       MONGO_ROOT_PASSWORD: ${{ secrets.MONGO_ROOT_PASSWORD }}
     steps:
@@ -25,11 +28,14 @@ jobs:
           set -euo pipefail
 
           required_vars=(
+            VM_HOST
+            VM_USER
             MONGO_DATABASE
             MONGO_COLLECTION_NAME
           )
 
           required_secrets=(
+            SSH_PRIVATE_KEY
             MONGO_ROOT_USERNAME
             MONGO_ROOT_PASSWORD
           )
@@ -48,24 +54,46 @@ jobs:
             fi
           done
 
-      - name: Validate Mongo container availability
+      - name: Configure SSH access to VM
         shell: bash
         run: |
           set -euo pipefail
-          docker ps --format '{{.Names}}' | grep -Fx 'demoobject-mongo' >/dev/null
+          mkdir -p "${HOME}/.ssh"
+          chmod 700 "${HOME}/.ssh"
+          printf '%s\n' "${SSH_PRIVATE_KEY}" > "${HOME}/.ssh/demoobject_deploy_key"
+          chmod 600 "${HOME}/.ssh/demoobject_deploy_key"
+          ssh-keyscan -H "${VM_HOST}" >> "${HOME}/.ssh/known_hosts"
+          chmod 644 "${HOME}/.ssh/known_hosts"
+
+      - name: Validate Mongo container availability on VM
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh -i "${HOME}/.ssh/demoobject_deploy_key" -o StrictHostKeyChecking=yes "${VM_USER}@${VM_HOST}" '
+            set -euo pipefail
+            docker ps --format "{{.Names}}" | grep -Fx "demoobject-mongo" >/dev/null
+          '
 
       - name: Drop session collection
         shell: bash
         run: |
           set -euo pipefail
 
+          ssh -i "${HOME}/.ssh/demoobject_deploy_key" -o StrictHostKeyChecking=yes "${VM_USER}@${VM_HOST}" 'bash -s' <<EOF
+          set -euo pipefail
+          MONGO_DATABASE=$(printf '%q' "${MONGO_DATABASE}")
+          MONGO_COLLECTION_NAME=$(printf '%q' "${MONGO_COLLECTION_NAME}")
+          MONGO_ROOT_USERNAME=$(printf '%q' "${MONGO_ROOT_USERNAME}")
+          MONGO_ROOT_PASSWORD=$(printf '%q' "${MONGO_ROOT_PASSWORD}")
+
           docker exec \
-            -e MONGO_COLLECTION_NAME="${MONGO_COLLECTION_NAME}" \
+            -e MONGO_COLLECTION_NAME="\${MONGO_COLLECTION_NAME}" \
             demoobject-mongo \
             mongosh \
             --quiet \
-            --username "${MONGO_ROOT_USERNAME}" \
-            --password "${MONGO_ROOT_PASSWORD}" \
+            --username "\${MONGO_ROOT_USERNAME}" \
+            --password "\${MONGO_ROOT_PASSWORD}" \
             --authenticationDatabase admin \
-            "${MONGO_DATABASE}" \
+            "\${MONGO_DATABASE}" \
             --eval 'db.getCollection(process.env.MONGO_COLLECTION_NAME).drop()'
+          EOF
