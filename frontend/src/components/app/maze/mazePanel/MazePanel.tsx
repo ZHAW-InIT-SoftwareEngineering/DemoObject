@@ -5,7 +5,7 @@ import type {
 import { Card, CardContent, Maze, Separator } from "@/components/ui";
 import { MazePanelHeader } from "./MazePanelHeader";
 import type { NodePath } from "@/lib/path/transforms";
-import { PathInfo } from "@/components/app/PathInfo";
+import { PathInfo } from "@/components/app/maze/PathInfo";
 
 
 type MazePanelProps = {

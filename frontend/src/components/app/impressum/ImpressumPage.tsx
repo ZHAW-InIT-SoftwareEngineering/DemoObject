@@ -1,4 +1,4 @@
-import { RouteBackButton } from "@/components/app/RouteBackButton";
+import { RouteBackButton } from "@/components/ui/RouteBackButton";
 
 export function ImpressumPage() {
   return (
