@@ -10,13 +10,12 @@ const server = http.createServer(app);
 
 async function start() {
   await connectToDb();
+  server.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
 }
 
 start().catch((err) => {
-  console.error("Failed to start MongoDB:", err);
+  console.error("Failed to start application:", err);
   process.exit(1);
-});
-
-server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
 });

@@ -18,10 +18,12 @@ export async function connectToDb() {
     if (db) return db; 
     const uri = validateEnvEntry("DB_CONN_STRING")
     const dbName = validateEnvEntry("DB_NAME")
+    const collectionName = validateEnvEntry("MONGO_COLLECTION_NAME")
     client = new MongoClient(uri)
     await client.connect()
     db = client.db(dbName)
-    console.log(`SUCCESSFULLY CONNECTED TO ${dbName}`)
+    await db.command({ ping: 1 });
+    console.log(`SUCCESSFULLY CONNECTED TO ${dbName}.${collectionName}`)
     return db
 }
 
@@ -40,7 +42,7 @@ export async function isDbHealthy(): Promise<boolean> {
 
 function getDb(): Db {
     if(!db) {
-        throw new Error("Database not initialized. Call connectToDatabase() first.")
+        throw new Error("Database not initialized. Call connectToDb() first.")
     } else{
         return db
     } 
@@ -51,7 +53,7 @@ function getDbCollection<T = any>(dbCollectionName: string): Collection<T> {
 }
 
 function getCollectionName(): string {
-    const name = process.env.MONGO_COLLECTION_NAME;
+    const name = validateEnvEntry("MONGO_COLLECTION_NAME");
     if (!name) throw new Error("MONGO_COLLECTION_NAME is not set in the environment");
     return name;
 };
