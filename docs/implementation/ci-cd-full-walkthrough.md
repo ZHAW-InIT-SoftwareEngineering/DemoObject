@@ -63,7 +63,7 @@ This document explains the current CI/CD setup in this repository in chunked for
    - `DEPLOY_PATH`
    - `BACKEND_IMAGE`
    - `MONGO_DATABASE`
-   - `SESSION_COLLECTION_NAME`
+   - `MONGO_COLLECTION_NAME`
 4. Validates required secrets:
    - `GHCR_PAT`
    - `MONGO_ROOT_USERNAME`
@@ -108,7 +108,7 @@ This document explains the current CI/CD setup in this repository in chunked for
    - `PORT=3000`
    - `DB_CONN_STRING=mongodb://<rootuser>:<rootpass>@mongo:27017/<db>?authSource=admin`
    - `DB_NAME=<db>`
-   - `SESSION_COLLECTION_NAME=<collection>`
+   - `MONGO_COLLECTION_NAME=<collection>`
 3. `depends_on` mongo with `condition: service_healthy`
 4. Healthcheck: `wget http://127.0.0.1:3000/healthz`
 
@@ -134,7 +134,7 @@ This document explains the current CI/CD setup in this repository in chunked for
 | `DEPLOY_PATH` | Variable | Target path on self-hosted host where compose file is copied |
 | `FRONTEND_PORT` | Variable | Host port mapped to frontend container port 80 |
 | `MONGO_DATABASE` | Variable | Mongo DB init and backend DB name |
-| `SESSION_COLLECTION_NAME` | Variable | Backend collection name |
+| `MONGO_COLLECTION_NAME` | Variable | Backend collection name |
 | `MONGO_ROOT_USERNAME` | Secret | Mongo root auth + backend connection string |
 | `MONGO_ROOT_PASSWORD` | Secret | Mongo root auth + backend connection string |
 | `IMAGE_TAG` | Runtime env | Set during deploy to `${{ github.sha }}` |

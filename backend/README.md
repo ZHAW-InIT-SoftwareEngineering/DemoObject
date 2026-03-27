@@ -37,7 +37,7 @@ Used by `npm run dev`.
 PORT=3000
 DB_CONN_STRING="mongodb://localhost:27017/DemoObject"
 DB_NAME=DemoObjectDB
-SESSION_COLLECTION_NAME=SessionCollection
+MONGO_COLLECTION_NAME=SessionCollection
 ```
 
 ### `.env.docker` (container-to-container)
@@ -47,7 +47,7 @@ Used by the `api` service in Docker Compose.
 PORT=3000
 DB_CONN_STRING=mongodb://mongo:27017/DemoObject
 DB_NAME=DemoObjectDB
-SESSION_COLLECTION_NAME=SessionCollection
+MONGO_COLLECTION_NAME=SessionCollection
 ```
 
 ## Notes

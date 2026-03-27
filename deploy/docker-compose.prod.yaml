@@ -29,7 +29,7 @@ services:
       PORT: "3000"
       DB_CONN_STRING: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo:27017/${MONGO_DATABASE}?authSource=admin
       DB_NAME: ${MONGO_DATABASE}
-      SESSION_COLLECTION_NAME: ${SESSION_COLLECTION_NAME}
+      MONGO_COLLECTION_NAME: ${MONGO_COLLECTION_NAME}
     expose:
       - "3000"
     depends_on:

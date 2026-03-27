@@ -169,7 +169,7 @@ jobs:
       CADDY_IMAGE: 'ghcr.io/${{ vars.GHCR_USERNAME }}/demoobject-caddy'
       GHCR_USERNAME: ${{ vars.GHCR_USERNAME }}
       MONGO_DATABASE: ${{ vars.MONGO_DATABASE }}
-      SESSION_COLLECTION_NAME: ${{ vars.SESSION_COLLECTION_NAME }}
+      MONGO_COLLECTION_NAME: ${{ vars.MONGO_COLLECTION_NAME }}
       GHCR_PAT: ${{ secrets.GHCR_PAT }}
       MONGO_ROOT_USERNAME: ${{ secrets.MONGO_ROOT_USERNAME }}
       MONGO_ROOT_PASSWORD: ${{ secrets.MONGO_ROOT_PASSWORD }}
@@ -188,7 +188,7 @@ jobs:
             FRONTEND_IMAGE
             CADDY_IMAGE
             MONGO_DATABASE
-            SESSION_COLLECTION_NAME
+            MONGO_COLLECTION_NAME
           )
 
           required_secrets=(
@@ -245,7 +245,7 @@ jobs:
           export MONGO_ROOT_USERNAME
           export MONGO_ROOT_PASSWORD
           export MONGO_DATABASE
-          export SESSION_COLLECTION_NAME
+          export MONGO_COLLECTION_NAME
 
           docker compose -f "${DEPLOY_PATH}/docker-compose.prod.yaml" pull mongo api frontend caddy
           docker compose -f "${DEPLOY_PATH}/docker-compose.prod.yaml" up -d --remove-orphans mongo api frontend caddy

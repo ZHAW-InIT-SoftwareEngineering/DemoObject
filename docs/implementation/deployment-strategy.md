@@ -103,7 +103,7 @@ Use **Environment-scoped** secrets/variables (e.g., `production`) so deployments
 5. `BACKEND_IMAGE=ghcr.io/gabc/demoobject-backend`
 6. `FRONTEND_IMAGE=ghcr.io/gabc/demoobject-frontend`
 7. `MONGO_DATABASE=DemoObjectDB`
-8. `SESSION_COLLECTION_NAME=SessionCollection`
+8. `MONGO_COLLECTION_NAME=SessionCollection`
 
 ### Suggested GitHub Secrets (sensitive)
 

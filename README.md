@@ -10,7 +10,7 @@ The workflow `.github/workflows/deploy-backend.yml` expects the following GitHub
 | `GHCR_USERNAME` | Variable | Yes | `gabc` | Must be the `github.com` username that owns the PAT used in `GHCR_PAT`. |
 | `GHCR_PAT` | Secret | Yes | `ghp_...` | Classic PAT created on `github.com` with `read:packages` and `write:packages`. |
 | `MONGO_DATABASE` | Variable | Yes | `DemoObjectDB` | Passed into deploy compose as database name. |
-| `SESSION_COLLECTION_NAME` | Variable | Yes | `SessionCollection` | Passed into backend container environment. |
+| `MONGO_COLLECTION_NAME` | Variable | Yes | `SessionCollection` | Passed into backend container environment. |
 | `MONGO_ROOT_USERNAME` | Secret | Yes | `demoobject_admin` | MongoDB root user for container auth and backend DB connection string. |
 | `MONGO_ROOT_PASSWORD` | Secret | Yes | `<strong-password>` | MongoDB root password for container auth and backend DB connection string. |
 | `DEPLOY_PATH` | Variable | No | `./demoobject` | Target path on self-hosted runner where `docker-compose.prod.yaml` is copied. |

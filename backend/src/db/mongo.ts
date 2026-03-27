@@ -51,8 +51,8 @@ function getDbCollection<T = any>(dbCollectionName: string): Collection<T> {
 }
 
 function getCollectionName(): string {
-    const name = process.env.SESSION_COLLECTION_NAME;
-    if (!name) throw new Error("SESSION_COLLECTION_NAME is not set in the environment");
+    const name = process.env.MONGO_COLLECTION_NAME;
+    if (!name) throw new Error("MONGO_COLLECTION_NAME is not set in the environment");
     return name;
 };
 
