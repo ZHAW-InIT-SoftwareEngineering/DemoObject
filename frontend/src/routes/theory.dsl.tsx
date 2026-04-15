@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { TheoryDslPage } from "@/components/app/theory/TheoryDslPage";
+import { TheoryDslPage } from "@/components/app/theory/dsl/TheoryDslPage";
 import { useDemoSession, useMazeTheoryProgress } from "@/hooks";
 
 export const Route = createFileRoute("/theory/dsl")({

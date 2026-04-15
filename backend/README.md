@@ -70,12 +70,21 @@ MONGO_COLLECTION_NAME=SessionCollection
 
 ## Editing Maze Walls
 
-The maze definition is in [src/domain/maze.ts](./src/domain/maze.ts).
+The shared maze schema lives in [src/domain/maze.ts](./src/domain/maze.ts).
+The runtime maze definitions live in:
+
+- [src/domain/mazes/maze0.ts](./src/domain/mazes/maze0.ts)
+- [src/domain/mazes/maze1.ts](./src/domain/mazes/maze1.ts)
+
+Both use the shared grid builder in [src/domain/mazes/buildGridMaze.ts](./src/domain/mazes/buildGridMaze.ts).
 
 Do not add entries directly to the generated `walls` array inside `buildMaze()`.
 That array is derived automatically from the `blockedWalls` list above it.
 
-The active maze is `10x10`.
+The current runtime mazes are:
+
+- `maze 0`: `10x10`
+- `maze 1`: `6x6`
 
 Node ids are assigned row-by-row:
 
@@ -116,4 +125,4 @@ Rules:
 - `wall(...)` normalizes the order automatically, so `wall(19, 18)` is equivalent.
 
 Current layout note:
-- `blockedWalls` is the single source of truth for the maze layout in `src/domain/maze.ts`.
+- In each maze file, `blockedWalls` is the single source of truth for the layout.

@@ -38,6 +38,7 @@ registry.registerPath({
             },
             content: { "application/json": { schema: CreateSessionResponse } },
         },
+        404: { description: "Maze not found" },
     },
 });
 
@@ -99,6 +100,7 @@ sessionRouter.post("/", async (req, res) => {
     const { mazeId } = parsed.data;
     
     const sessionId = await(createSessionService(mazeId))
+    if (!sessionId) return res.status(404).json({ error: "Maze not found" });
     
     const qrPayload = `session:${sessionId}`;
     const location =  req.protocol + '://' + req.get('host') + '/sessions/' + sessionId

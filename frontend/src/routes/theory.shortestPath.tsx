@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { TheoryShortestPathPage } from "@/components/app/theory/TheoryShortestPathPage";
+import { TheoryShortestPathPage } from "@/components/app/theory/shortestPath/TheoryShortestPathPage";
 import { useDemoSession, useMazeTheoryProgress } from "@/hooks";
 
 export const Route = createFileRoute("/theory/shortestPath")({

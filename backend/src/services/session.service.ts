@@ -1,21 +1,21 @@
 import { randomUUID } from "crypto";
-import { createSession, getSession, updateSession } from "../repositories";
 import type { Session } from "../domain/session";
-
+import { createSession, getSession, updateSession } from "../repositories";
+import { getMazeById } from "./maze.service";
 
 export async function createSessionService(mazeId: number) {
-    console.log(`This is the mazeId: ${mazeId}}`)
-    const sessionId = randomUUID()
-    const doc = await createSession(sessionId, mazeId)
-    console.log(`in mongodb created doc:\n ${(JSON.stringify(doc))}`)
-    return doc.sessionId
-};
+  if (!getMazeById(mazeId)) return null;
+
+  const sessionId = randomUUID();
+  const doc = await createSession(sessionId, mazeId);
+  return doc.sessionId;
+}
 
 export function updateSessionService(sessionId: string, data: Partial<Session>) {
-    return updateSession(sessionId, data)
-};
+  return updateSession(sessionId, data);
+}
 
 export async function retrieveSessionService(sessionId: string) {
-    const doc = await(getSession(sessionId))
-    return doc
-};
+  const doc = await getSession(sessionId);
+  return doc;
+}

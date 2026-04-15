@@ -32,18 +32,18 @@ export function MazeIntroOverlay({
   return (
     <Dialog open={open} onOpenChange={() => undefined}>
       <DialogContent
-        className="overflow-hidden rounded-2xl border-slate-200 bg-white p-8 sm:max-w-md"
+        className="max-h-[calc(100dvh-1rem)] overflow-y-auto rounded-xl border-slate-200 bg-white p-4 sm:max-w-md sm:rounded-2xl sm:p-8"
         showCloseButton={false}
         onEscapeKeyDown={(event) => event.preventDefault()}
         onPointerDownOutside={(event) => event.preventDefault()}
       >
-        <div className="relative space-y-6">
+        <div className="relative space-y-4 sm:space-y-6">
           <div className="flex items-center justify-center gap-3">
-            <div className="flex size-14 items-center justify-center rounded-full border border-orange-200 bg-orange-100 text-orange-700 shadow-sm">
-              <IceCreamCone className="size-9" />
+            <div className="flex size-12 items-center justify-center rounded-full border border-orange-200 bg-orange-100 text-orange-700 shadow-sm sm:size-14">
+              <IceCreamCone className="size-8 sm:size-9" />
             </div>
-            <div className="flex size-14 items-center justify-center rounded-full bg-slate-900 text-white shadow-sm">
-              <Timer className="size-7" />
+            <div className="flex size-12 items-center justify-center rounded-full bg-slate-900 text-white shadow-sm sm:size-14">
+              <Timer className="size-6 sm:size-7" />
             </div>
           </div>
 
@@ -51,10 +51,10 @@ export function MazeIntroOverlay({
             <div className="text-sm font-semibold uppercase tracking-[0.2em] text-orange-700">
               Deine Mission
             </div>
-            <DialogTitle className="text-2xl font-semibold text-slate-900">
+            <DialogTitle className="text-xl font-semibold text-slate-900 sm:text-2xl">
               Das Eis schmilzt
             </DialogTitle>
-            <DialogDescription className="space-y-3 text-center text-base leading-6 text-slate-700 sm:text-center">
+            <DialogDescription className="space-y-3 text-center text-sm leading-5 text-slate-700 sm:text-center sm:text-base sm:leading-6">
               <p>
                 Am Ende des Labyrinths wartet ein Eis auf dich, aber nicht mehr
                 lange.
@@ -72,12 +72,12 @@ export function MazeIntroOverlay({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+          <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/80 p-3 sm:p-4">
             <p className="text-center text-sm font-medium text-slate-800">
               Lies zuerst beide Theorie-Seiten.
             </p>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Badge
                 variant="outline"
                 className={`min-w-20 h-8 px-3 ${getTheoryStatusClasses(visitedDsl)}`}
@@ -88,13 +88,13 @@ export function MazeIntroOverlay({
                 asChild
                 variant="secondary"
                 size="sm"
-                className="flex-1 bg-slate-900 text-white hover:bg-slate-800"
+                className="min-w-0 flex-1 bg-slate-900 text-white hover:bg-slate-800"
               >
                 <Link to="/theory/dsl">Theorie: DSL</Link>
               </Button>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Badge
                 variant="outline"
                 className={`min-w-20 h-8 px-3 ${getTheoryStatusClasses(visitedShortestPath)}`}
@@ -105,7 +105,7 @@ export function MazeIntroOverlay({
                 asChild
                 variant="secondary"
                 size="sm"
-                className="flex-1 bg-slate-900 text-white hover:bg-slate-800"
+                className="min-w-0 flex-1 bg-slate-900 text-white hover:bg-slate-800"
               >
                 <Link to="/theory/shortestPath">
                   Theorie: kürzester Pfad

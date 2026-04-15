@@ -41,6 +41,7 @@ registry.registerPath({
             content: {"application/json": {schema: CompilePathResponse}}
         },
         400: { description: "Invalid request"},
+        404: { description: "Maze not found" },
         412: { description: "Invalid path"}
     },
 });
@@ -83,7 +84,10 @@ mazeRouter.post("/:mazeId/paths/dsl", (req, res) => {
     if (!params.success) return res.status(400).json({ error: params.error.issues })
     const mazeId = params.data.mazeId
 
-    if (isValidPath(mazeId, path)){
+    const maze = getMazeById(mazeId)
+    if (!maze) return res.status(404).json({ error: "Maze not found" });
+
+    if (isValidPath(maze, path)){
         const dsl = computeDSLFromPath(path);
         return res.json(CompilePathResponse.parse({ dsl }));
     } else {
