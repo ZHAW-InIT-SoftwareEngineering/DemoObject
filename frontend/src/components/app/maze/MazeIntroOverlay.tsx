@@ -126,7 +126,7 @@ export function MazeIntroOverlay({
           {!canStart ? (
             <p className="text-center text-sm text-slate-600">
               Los geht&apos;s wird freigeschaltet, sobald du beide Theorie-Seiten
-              geöffnet hast.
+              bearbeitet hast.
             </p>
           ) : null}
         </div>

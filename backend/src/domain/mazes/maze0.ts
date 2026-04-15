@@ -11,7 +11,8 @@ const { wall, buildMaze } = createGridMazeFactory(WIDTH, HEIGHT);
 const blockedWalls = [
   // Barrier between columns 0 and 1.
   wall(10, 11),
-
+  wall(50, 51),
+  wall(60, 61),
   // Barrier between columns 1 and 2.
   wall(11, 12),
   wall(41, 42),
@@ -29,11 +30,12 @@ const blockedWalls = [
   // Barrier between columns 3 and 4.
   wall(13, 14),
   wall(33, 34),
+  wall(73, 74),
+  wall(93, 94),
 
   // Barrier between columns 4 and 5.
   wall(44, 45),
   wall(74, 75),
-  wall(84, 85),
 
   // Barrier between columns 5 and 6.
   wall(15, 16),
@@ -65,7 +67,9 @@ const blockedWalls = [
 
   // Barrier between rows 0 and 1.
   wall(1, 11),
+  wall(4, 14),
   wall(5, 15),
+  wall(6, 16),
 
   // Barrier between rows 1 and 2.
   wall(17, 27),
@@ -89,8 +93,8 @@ const blockedWalls = [
   wall(49, 59),
 
   // Barrier between rows 5 and 6.
+  wall(50, 60),
   wall(51, 61),
-  wall(52, 62),
   wall(53, 63),
   wall(54, 64),
   wall(57, 67),
@@ -99,6 +103,7 @@ const blockedWalls = [
   // Barrier between rows 6 and 7.
   wall(65, 75),
   wall(69, 79),
+  wall(66, 67),
 
   // Barrier between rows 7 and 8.
   wall(70, 80),
