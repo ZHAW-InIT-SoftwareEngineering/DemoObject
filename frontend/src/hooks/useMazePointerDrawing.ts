@@ -7,11 +7,18 @@ import {
 } from "react";
 import type { MazesMazeIdGet200ResponseNodesInner } from "@/api";
 
+type CellBounds = {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+};
+
 type UseMazePointerDrawingOptions = {
   currentEndpointNodeId: number | undefined;
   adjacencyByNodeId: Map<number, Set<number>>;
   nodeById: Map<number, MazesMazeIdGet200ResponseNodesInner>;
-  pointByNodeId: Map<number, { x: number; y: number }>;
+  cellBoundsByNodeId: Map<number, CellBounds>;
   onSelectNode?: (
     node: MazesMazeIdGet200ResponseNodesInner,
   ) => boolean | void;
@@ -21,7 +28,7 @@ type UseMazePointerDrawingResult = {
   isPointerDrawing: boolean;
   stopPointerDrawing: () => void;
   onNodePointerDown: (
-    event: PointerEvent<SVGCircleElement>,
+    event: PointerEvent<SVGElement>,
     nodeId: number,
   ) => void;
   onMazePointerMove: (event: PointerEvent<SVGSVGElement>) => void;
@@ -30,13 +37,12 @@ type UseMazePointerDrawingResult = {
 };
 
 const REHOVER_DESELECT_DELAY_MS = 250;
-const POINTER_HIT_RADIUS = 16;
 
 export function useMazePointerDrawing({
   currentEndpointNodeId,
   adjacencyByNodeId,
   nodeById,
-  pointByNodeId,
+  cellBoundsByNodeId,
   onSelectNode,
 }: UseMazePointerDrawingOptions): UseMazePointerDrawingResult {
   const isPointerDrawingRef = useRef(false);
@@ -92,7 +98,7 @@ export function useMazePointerDrawing({
   );
 
   const onNodePointerDown = useCallback(
-    (event: PointerEvent<SVGCircleElement>, nodeId: number) => {
+    (event: PointerEvent<SVGElement>, nodeId: number) => {
       if (!onSelectNode) return;
       if (event.pointerType === "mouse" && event.button !== 0) return;
       if (nodeId !== currentEndpointNodeId) return;
@@ -168,21 +174,20 @@ export function useMazePointerDrawing({
 
   const findNodeAtPointer = useCallback(
     (x: number, y: number) => {
-      let closestNodeId: number | null = null;
-      let closestDistanceSq = POINTER_HIT_RADIUS * POINTER_HIT_RADIUS;
-
-      for (const [nodeId, point] of pointByNodeId) {
-        const dx = point.x - x;
-        const dy = point.y - y;
-        const distanceSq = dx * dx + dy * dy;
-        if (distanceSq > closestDistanceSq) continue;
-        closestDistanceSq = distanceSq;
-        closestNodeId = nodeId;
+      for (const [nodeId, bounds] of cellBoundsByNodeId) {
+        if (
+          x >= bounds.left &&
+          x <= bounds.right &&
+          y >= bounds.top &&
+          y <= bounds.bottom
+        ) {
+          return nodeId;
+        }
       }
 
-      return closestNodeId;
+      return null;
     },
-    [pointByNodeId],
+    [cellBoundsByNodeId],
   );
 
   const onMazePointerMove = useCallback(

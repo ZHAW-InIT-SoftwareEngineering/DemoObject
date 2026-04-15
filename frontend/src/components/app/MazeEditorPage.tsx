@@ -5,6 +5,7 @@ import { ActionPanel } from "@/components/app/maze/ActionPanel";
 import { useMazeFlow } from "@/components/app/MazeFlowProvider";
 import { DslStrip } from "@/components/app/maze/DslStrip";
 import { ResetPathConfirmationOverlay } from "@/components/app/maze/ResetPathConfirmationOverlay";
+import { MazeIntroOverlay } from "@/components/app/maze/MazeIntroOverlay";
 import {
   AnimationPathSelectionOverlay,
   type AnimationPathChoice,
@@ -16,6 +17,8 @@ import { buildAnimationSceneData } from "@/lib/animation";
 import {
   useDemoSession,
   useMazePathDraft,
+  useMazeTheoryProgress,
+  useMazeTimer,
   usePathSubmission,
   useShortestPathFlow,
 } from "@/hooks";
@@ -27,6 +30,14 @@ export function MazeEditorPage() {
   const { error, maze, session } = useDemoSession();
   const { animationState, startAnimation } = useMazeFlow();
   const mazePathDraft = useMazePathDraft(maze, session?.sessionId);
+  const mazeTimer = useMazeTimer({
+    mazeId: maze?.mazeId,
+    sessionId: session?.sessionId,
+  });
+  const theoryProgress = useMazeTheoryProgress({
+    mazeId: maze?.mazeId,
+    sessionId: session?.sessionId,
+  });
   const pathSubmission = usePathSubmission({
     apiRequest: mazePathDraft.apiRequest,
     mazeId: maze?.mazeId,
@@ -77,17 +88,8 @@ export function MazeEditorPage() {
   const [animationPathSelectionOpen, setAnimationPathSelectionOpen] =
     useState(false);
   const [previewNodePath, setPreviewNodePath] = useState<NodePath>([]);
-  const [revealedDslPathKeys, setRevealedDslPathKeys] = useState<Set<string>>(
-    () => new Set(),
-  );
-
-  const currentDslPathKey = `${session?.sessionId ?? "no-session"}:${
-    maze?.mazeId ?? "no-maze"
-  }:${pathKey}`;
-
-  useEffect(() => {
-    setRevealedDslPathKeys(new Set());
-  }, [maze?.mazeId, session?.sessionId]);
+  const showIntroOverlay = mazeTimer.hydrated && !mazeTimer.hasStarted;
+  const canStartMaze = theoryProgress.hydrated && theoryProgress.hasVisitedBoth;
 
   useEffect(() => {
     if (animationState.status !== "playing") return;
@@ -99,7 +101,6 @@ export function MazeEditorPage() {
   const hasAnimatablePath = canUseUserPath || canUseShortestPath;
   const canShowAnimationButton =
     isPathSubmitted && hasShortestPathForCurrentSubmission && hasAnimatablePath;
-  const shouldShowDsl = revealedDslPathKeys.has(currentDslPathKey);
 
   const previewProgress = Math.max(previewNodePath.length - 1, 0);
   const previewSceneData = useMemo(
@@ -124,6 +125,14 @@ export function MazeEditorPage() {
     setResetPathConfirmationOpen(true);
   };
 
+  const handleStartMaze = () => {
+    if (!canStartMaze) {
+      return;
+    }
+
+    mazeTimer.start();
+  };
+
   const handleConfirmResetPath = () => {
     setResetPathConfirmationOpen(false);
     resetPath();
@@ -136,17 +145,15 @@ export function MazeEditorPage() {
       return;
     }
 
+    mazeTimer.beginSubmission();
     const response = await submitPath();
     if (response) {
-      setRevealedDslPathKeys((previousPathKeys) => {
-        const nextPathKeys = new Set(previousPathKeys);
-        nextPathKeys.add(currentDslPathKey);
-        return nextPathKeys;
-      });
+      mazeTimer.completeSubmission();
       toast.success("Pfad gesendet.");
       return;
     }
 
+    mazeTimer.cancelSubmission();
     toast.error("Senden des Pfads fehlgeschlagen.");
   };
 
@@ -227,6 +234,13 @@ export function MazeEditorPage() {
 
   return (
     <div className="min-h-screen p-6 flex flex-col items-center justify-start md:justify-center">
+      <MazeIntroOverlay
+        open={showIntroOverlay}
+        visitedDsl={theoryProgress.visitedDsl}
+        visitedShortestPath={theoryProgress.visitedShortestPath}
+        canStart={canStartMaze}
+        onStart={handleStartMaze}
+      />
       <CelebrationOverlay
         open={showCelebrationOverlay}
         onClose={dismissCelebrationOverlay}
@@ -248,7 +262,7 @@ export function MazeEditorPage() {
       <div className="w-full max-w-[520px] space-y-4">
         {error && <div className="text-red-600">{error}</div>}
         {submitError && <div className="text-red-600">{submitError}</div>}
-        <DslStrip dsl={shouldShowDsl ? dsl : null} />
+        <DslStrip dsl={isPathSubmitted ? dsl : null} />
         <MazePanel
           maze={maze}
           onNodeClick={selectNode}
@@ -266,6 +280,7 @@ export function MazeEditorPage() {
           showExplorationLegend={isExplorationAnimating}
           userPathLength={userPathLength}
           shortestPathLength={shortestPath?.length}
+          timerElapsedMs={mazeTimer.elapsedMs}
         />
         <ActionPanel
           maze={maze}

@@ -2,7 +2,13 @@ import { useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui";
 
-export function RouteBackButton() {
+type RouteBackButtonProps = {
+  fallbackTo?: string;
+};
+
+export function RouteBackButton({
+  fallbackTo = "/",
+}: RouteBackButtonProps) {
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -11,7 +17,7 @@ export function RouteBackButton() {
       return;
     }
 
-    void navigate({ to: "/" });
+    void navigate({ to: fallbackTo as never });
   };
 
   return (

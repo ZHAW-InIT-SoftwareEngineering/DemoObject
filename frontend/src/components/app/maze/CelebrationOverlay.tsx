@@ -20,7 +20,7 @@ export function CelebrationOverlay({ open, onClose }: CelebrationOverlayProps) {
         <div className="absolute -left-10 -top-10 h-32 w-32 rounded-full bg-amber-200/40 animate-ping" />
         <div className="absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-emerald-200/40 animate-pulse" />
 
-        <div className="relative space-y-4">
+        <div className="relative space-y-4 text-center">
           <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-amber-100 ring-8 ring-amber-200/60">
             <PartyPopper className="h-10 w-10 text-amber-600 animate-bounce" />
           </div>
@@ -33,11 +33,11 @@ export function CelebrationOverlay({ open, onClose }: CelebrationOverlayProps) {
             <Sparkles className="h-5 w-5 animate-pulse" />
           </div>
 
-          <DialogHeader className="space-y-2 text-center">
-            <DialogTitle className="text-lg font-semibold text-slate-900">
+          <DialogHeader className="space-y-2 text-center sm:text-center">
+            <DialogTitle className="text-center text-lg font-semibold text-slate-900">
               Du hast den kürzesten Weg gefunden.
             </DialogTitle>
-            <DialogDescription className="text-sm text-slate-600">
+            <DialogDescription className="text-center text-sm text-slate-600">
               Starke Lösung. Dieser Durchlauf ist optimal.
             </DialogDescription>
           </DialogHeader>

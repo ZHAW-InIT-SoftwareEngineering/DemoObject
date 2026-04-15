@@ -50,6 +50,7 @@ export function useShortestPathFlow({
 
   useEffect(() => {
     setVisibleExplorationStepCount(0);
+    setIsShortestPathPlaybackActive(false);
   }, [submissionScopeKey]);
 
   useEffect(() => {
@@ -105,20 +106,31 @@ export function useShortestPathFlow({
   const [explorationPlaybackKey, setExplorationPlaybackKey] = useState(0);
   const [visibleExplorationStepCount, setVisibleExplorationStepCount] =
     useState(0);
+  const [isShortestPathPlaybackActive, setIsShortestPathPlaybackActive] =
+    useState(false);
 
   const triggerShortestPathPlayback = useCallback(() => {
     setVisibleExplorationStepCount(0);
+    setIsShortestPathPlaybackActive(true);
     setShortestPathPlaybackKey((key) => key + 1);
   }, []);
 
-  const handleShortestPathPlaybackComplete = useCallback(() => {}, []);
-  const { visibleNodePath: displayedShortestPathNodePath } = useEdgePlayback({
-    nodePath: visibleExplorationStepCount > 0 ? [] : shortestPathNodePath,
+  const handleShortestPathPlaybackComplete = useCallback(() => {
+    setIsShortestPathPlaybackActive(false);
+  }, []);
+  const { visibleNodePath: animatedShortestPathNodePath } = useEdgePlayback({
+    nodePath: isShortestPathPlaybackActive ? shortestPathNodePath : [],
     onComplete: handleShortestPathPlaybackComplete,
     stepMs: SHORTEST_PATH_STEP_MS,
     settleMs: 0,
     restartKey: shortestPathPlaybackKey,
   });
+  const displayedShortestPathNodePath =
+    visibleExplorationStepCount > 0
+      ? []
+      : isShortestPathPlaybackActive
+        ? animatedShortestPathNodePath
+        : shortestPathNodePath;
 
   useEffect(() => {
     if (explorationPlaybackKey === 0 || visibleExplorationStepCount === 0) {

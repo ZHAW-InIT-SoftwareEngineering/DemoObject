@@ -28,167 +28,196 @@ export const Maze = z.object({
 export type Maze = z.infer<typeof Maze>;
 export type MazeId = Maze["mazeId"];
 
+const WIDTH = 10;
+const HEIGHT = 10;
 
-const WIDTH = 8;
-const HEIGHT = 8;
+// Node ids are assigned row-by-row from top-left to bottom-right:
+// `mazeNodeId = y * WIDTH + x`
+// row 0 => 0  1  2  3  4  5  6  7  8  9
+// row 1 => 10 11 12 13 14 15 16 17 18 19
+// row 2 => 20 21 22 23 24 25 26 27 28 29
 
-// Walls are defined between adjacent cells. Key format: `${x},${y}`.
-// Vertical walls are between (x,y) and (x+1,y).
-// Horizontal walls are between (x,y) and (x,y+1).
-const verticalWallCoords = new Set<string>();
-const horizontalWallCoords = new Set<string>();
+type WallKey = `${number}-${number}`;
+type AdjacentWall = {
+  from: number;
+  to: number;
+};
 
-// Helper to add vertical wall segments with an optional gap list
-function addVerticalWallColumn(x: number, yStart: number, yEnd: number, gaps: number[] = []) {
-  for (let y = yStart; y <= yEnd; y++) {
-    if (gaps.includes(y)) continue;
-    verticalWallCoords.add(`${x},${y}`);
+function getNodeCoord(nodeId: number) {
+  if (nodeId < 0 || nodeId >= WIDTH * HEIGHT) {
+    throw new Error(`Node id ${nodeId} is out of bounds for a ${WIDTH}x${HEIGHT} maze`);
   }
+
+  return {
+    x: nodeId % WIDTH,
+    y: Math.floor(nodeId / WIDTH),
+  };
 }
 
-// Helper to add horizontal wall segments with an optional gap list
-function addHorizontalWallRow(y: number, xStart: number, xEnd: number, gaps: number[] = []) {
-  for (let x = xStart; x <= xEnd; x++) {
-    if (gaps.includes(x)) continue;
-    horizontalWallCoords.add(`${x},${y}`);
+function toWallKey(fromNodeId: number, toNodeId: number): WallKey {
+  const minNodeId = Math.min(fromNodeId, toNodeId);
+  const maxNodeId = Math.max(fromNodeId, toNodeId);
+  return `${minNodeId}-${maxNodeId}`;
+}
+
+function wall(fromNodeId: number, toNodeId: number): AdjacentWall {
+  const from = getNodeCoord(fromNodeId);
+  const to = getNodeCoord(toNodeId);
+  const manhattanDistance = Math.abs(from.x - to.x) + Math.abs(from.y - to.y);
+
+  if (manhattanDistance !== 1) {
+    throw new Error(
+      `Walls can only be defined between orthogonally adjacent node ids: ${fromNodeId} <-> ${toNodeId}`,
+    );
   }
+
+  const normalizedFrom = Math.min(fromNodeId, toNodeId);
+  const normalizedTo = Math.max(fromNodeId, toNodeId);
+  return { from: normalizedFrom, to: normalizedTo };
 }
 
-// Define a few corridors with gaps to keep the maze connected
-addVerticalWallColumn(3, 0, 11, [7]);   // gap at y=7
-addVerticalWallColumn(7, 2, 11, [3]); // gap at y=3
+function createBlockedWallKeySet(walls: readonly AdjacentWall[]) {
+  const wallKeys = new Set<WallKey>();
 
-addHorizontalWallRow(4, 0, 6, [3]);    // gap at x=3
-addHorizontalWallRow(8, 4, 11, [10]);  // gap at x=10
-
-type Coord = [number, number];
-type EdgeCoords = [Coord, Coord];
-
-function edge(x1: number, y1: number, x2: number, y2: number): EdgeCoords {
-  return [[x1, y1], [x2, y2]];
-}
-
-function setVerticalWall(x: number, y: number, isBlocked: boolean) {
-  const key = `${x},${y}`;
-  if (isBlocked) {
-    verticalWallCoords.add(key);
-  } else {
-    verticalWallCoords.delete(key);
-  }
-}
-
-function setHorizontalWall(x: number, y: number, isBlocked: boolean) {
-  const key = `${x},${y}`;
-  if (isBlocked) {
-    horizontalWallCoords.add(key);
-  } else {
-    horizontalWallCoords.delete(key);
-  }
-}
-
-function applyEdgeAdjustment([[x1, y1], [x2, y2]]: EdgeCoords, isBlocked: boolean) {
-  if (x1 === x2) {
-    const minY = Math.min(y1, y2);
-    const maxY = Math.max(y1, y2);
-    for (let y = minY; y < maxY; y++) {
-      setHorizontalWall(x1, y, isBlocked);
+  for (const currentWall of walls) {
+    const wallKey = toWallKey(currentWall.from, currentWall.to);
+    if (wallKeys.has(wallKey)) {
+      throw new Error(`Duplicate wall definition detected: ${currentWall.from} <-> ${currentWall.to}`);
     }
-    return;
+    wallKeys.add(wallKey);
   }
 
-  if (y1 === y2) {
-    const minX = Math.min(x1, x2);
-    const maxX = Math.max(x1, x2);
-    for (let x = minX; x < maxX; x++) {
-      setVerticalWall(x, y1, isBlocked);
-    }
-    return;
-  }
-
-  throw new Error(`Unsupported diagonal edge adjustment: (${x1},${y1})-(${x2},${y2})`);
+  return wallKeys;
 }
 
-function applyEdgeAdjustments(edges: EdgeCoords[], isBlocked: boolean) {
-  for (const currentEdge of edges) {
-    applyEdgeAdjustment(currentEdge, isBlocked);
-  }
-}
+// Single source of truth for the active maze layout.
+// Add `wall(fromId, toId)` to block movement between two adjacent fields.
+// Remove the line again if you want to reopen that connection.
+const blockedWalls: AdjacentWall[] = [
 
-// Base explicit edge adjustments for this maze variant.
-const baseBlockedEdges: EdgeCoords[] = [
-  edge(1, 2, 2, 2), edge(1, 3, 2, 3), edge(0, 1, 1, 1), edge(0, 2, 1, 2),
-  edge(0, 6, 1, 6), edge(0, 7, 1, 7), edge(1, 6, 2, 6), edge(1, 7, 2, 7),
-  edge(1, 9, 2, 9), edge(0, 9, 1, 9), edge(1, 10, 2, 10), edge(5, 0, 6, 0),
-  edge(5, 2, 6, 2), edge(8, 2, 9, 2), edge(9, 2, 10, 2), edge(10, 1, 11, 1),
-  edge(8, 1, 8, 2), edge(9, 1, 9, 2), edge(11, 1, 11, 2), edge(8, 3, 8, 4),
-  edge(9, 3, 9, 4), edge(1, 3, 1, 4), edge(1, 5, 1, 6), edge(1, 9, 1, 10),
-  edge(2, 0, 3, 0), edge(2, 1, 3, 1), edge(2, 3, 3, 3),
+  wall(31,41),
+  wall(32,42),
+  wall(1,11),
+  wall(11,12),
+  wall(46,56),
+  wall(96,97),
+  wall(5,15),
+  wall(17,27),
+  wall(69,79),
+  wall(84,85),
+  wall(94,95),
+  wall(74,75),
+  wall(71,72),
+
+  // Barrier between columns 0 and 1.
+  wall(10, 11),
+
+  // Barrier between columns 1 and 2.
+  wall(41, 42),
+
+  // Barrier between columns 2 and 3.
+  wall(2, 3),
+  wall(22, 23),
+  wall(32, 33),
+  wall(42, 43),
+  wall(52, 53),
+  wall(62, 63),
+  wall(82, 83),
+
+  // Barrier between columns 5 and 6.
+  wall(15, 16),
+  wall(25, 26),
+  wall(35, 36),
+  wall(45, 46),
+  wall(55, 56),
+  wall(65, 66),
+  wall(95, 96),
+
+  // Barrier between columns 7 and 8.
+  wall(7, 8),
+  wall(17, 18),
+  wall(37, 38),
+  wall(57, 58),
+  wall(67, 68),
+  wall(77, 78),
+  wall(87, 88),
+
+  // Barrier between rows 2 and 3.
+  wall(20, 30),
+  wall(21, 31),
+  wall(24, 34),
+  wall(25, 35),
+  wall(26, 36),
+  wall(27, 37),
+  wall(28, 38),
+
+  // Barrier between columns 3 and 4
+  wall(13, 14),
+  wall(33, 34),
+
+  // Barrier between rows 4 and 5
+  wall(44, 45),
+  wall(49, 59),
+  wall(48, 49),
+
+  // Barrier between columns 4 and 5
+  wall(44, 54),
+
+  // Barrier between rows 5 and 6.
+  wall(51, 61),
+  wall(52, 62),
+  wall(53, 63),
+  wall(54, 64),
+  wall(57, 67),
+  wall(58, 68),
+
+  // Barrier between rows 7 and 8.
+  wall(70, 80),
+  wall(72, 82),
+  wall(73, 83),
+  wall(74, 84),
+  wall(75, 85),
+  wall(76, 86),
+  wall(78, 88),
+
+  // Barrier between rows 8 and 9.
+  wall(18, 19),
+  wall(28, 29),
+  wall(68, 69),
+  wall(82, 92),
+
+  // Barrier between columns 8 and 9.
+  wall(84, 94)
+
 ];
 
-const baseOpenEdges: EdgeCoords[] = [
-  edge(4, 2, 5, 2), edge(2, 5, 2, 6), edge(1, 4, 1, 5), edge(3, 0, 4, 0),
-  edge(3, 2, 4, 2),
-];
-
-// Additional explicit edge adjustments requested incrementally.
-const additionalBlockedEdges: EdgeCoords[] = [
-  edge(1, 1, 2, 1), edge(5, 1, 6, 1), edge(5, 6, 5, 7), edge(6, 6, 6, 7),
-  edge(7, 6, 7, 7), edge(4, 7, 4, 8), edge(5, 7, 5, 8), edge(6, 7, 6, 8),
-  edge(9, 4, 10, 4), edge(9, 5, 10, 5), edge(9, 6, 10, 6), edge(9, 8, 10, 8),
-  edge(10, 3, 10, 4), edge(11, 4, 11, 5), edge(10, 5, 10, 6), edge(4, 10, 4, 11),
-  edge(5, 10, 5, 11), edge(7, 10, 7, 11),
-  edge(9, 9, 9, 10),
-  edge(9, 9, 10, 9), edge(9, 10, 10, 10), edge(10, 10, 10, 11),
-  edge(6, 3, 7, 3), edge(7, 3, 8, 3), edge(7, 1, 8, 1),
-  edge(11, 6, 11, 7), edge(11, 7, 11, 8), edge(2, 5, 2, 6), edge(3, 6, 3, 7),
-  edge(5, 9, 5, 10), edge(2, 9, 2, 10), edge(7, 9, 7, 10),
-];
-
-const additionalOpenEdges: EdgeCoords[] = [
-  edge(3, 4, 4, 4), edge(5, 8, 5, 9), edge(1, 4, 2, 4), edge(7, 5, 8, 5),
-  edge(10, 11, 11, 11), edge(3, 10, 4, 10), edge(7, 9, 8, 9),
-];
-
-applyEdgeAdjustments(baseBlockedEdges, true);
-applyEdgeAdjustments(baseOpenEdges, false);
-applyEdgeAdjustments(additionalBlockedEdges, true);
-applyEdgeAdjustments(additionalOpenEdges, false);
-
-function hasVerticalWall(x: number, y: number) {
-  return verticalWallCoords.has(`${x},${y}`);
-}
-
-function hasHorizontalWall(x: number, y: number) {
-  return horizontalWallCoords.has(`${x},${y}`);
-}
+const blockedWallKeys = createBlockedWallKeySet(blockedWalls);
 
 function buildMaze(mazeId: number): Maze {
-  const nodes = [];
-  const edges = [];
-  const walls = [];
+  const nodes: Maze["nodes"] = [];
+  const edges: Maze["edges"] = [];
+  const walls: Maze["walls"] = [];
 
   for (let y = 0; y < HEIGHT; y++) {
     for (let x = 0; x < WIDTH; x++) {
       const nodeId = y * WIDTH + x;
       nodes.push({ mazeNodeId: nodeId, x, y });
 
-      // Right neighbor (x+1, y)
       if (x + 1 < WIDTH) {
-        const rightId = y * WIDTH + (x + 1);
-        if (!hasVerticalWall(x, y)) {
-          edges.push({ from: nodeId, to: rightId });
-        } else {
+        const rightId = nodeId + 1;
+        if (blockedWallKeys.has(toWallKey(nodeId, rightId))) {
           walls.push({ from: nodeId, to: rightId });
+        } else {
+          edges.push({ from: nodeId, to: rightId });
         }
       }
 
-      // Down neighbor (x, y+1)
       if (y + 1 < HEIGHT) {
-        const downId = (y + 1) * WIDTH + x;
-        if (!hasHorizontalWall(x, y)) {
-          edges.push({ from: nodeId, to: downId });
-        } else {
+        const downId = nodeId + WIDTH;
+        if (blockedWallKeys.has(toWallKey(nodeId, downId))) {
           walls.push({ from: nodeId, to: downId });
+        } else {
+          edges.push({ from: nodeId, to: downId });
         }
       }
     }
@@ -199,9 +228,6 @@ function buildMaze(mazeId: number): Maze {
 
   return { mazeId, startNodeId, endNodeId, nodes, edges, walls };
 }
-
-
-// REMARK: this implies that the maze is build during runtime & then saved in-memory!
 export const mazes: Record<number, Maze> = {
   0: buildMaze(0),
 };

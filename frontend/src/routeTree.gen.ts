@@ -9,12 +9,20 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TheoryRouteImport } from './routes/theory'
 import { Route as MazeRouteImport } from './routes/maze'
 import { Route as ImpressumRouteImport } from './routes/impressum'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MazeIndexRouteImport } from './routes/maze.index'
+import { Route as TheoryShortestPathRouteImport } from './routes/theory.shortestPath'
+import { Route as TheoryDslRouteImport } from './routes/theory.dsl'
 import { Route as MazeAnimationRouteImport } from './routes/maze.animation'
 
+const TheoryRoute = TheoryRouteImport.update({
+  id: '/theory',
+  path: '/theory',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MazeRoute = MazeRouteImport.update({
   id: '/maze',
   path: '/maze',
@@ -35,6 +43,16 @@ const MazeIndexRoute = MazeIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MazeRoute,
 } as any)
+const TheoryShortestPathRoute = TheoryShortestPathRouteImport.update({
+  id: '/shortestPath',
+  path: '/shortestPath',
+  getParentRoute: () => TheoryRoute,
+} as any)
+const TheoryDslRoute = TheoryDslRouteImport.update({
+  id: '/dsl',
+  path: '/dsl',
+  getParentRoute: () => TheoryRoute,
+} as any)
 const MazeAnimationRoute = MazeAnimationRouteImport.update({
   id: '/animation',
   path: '/animation',
@@ -45,13 +63,19 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/impressum': typeof ImpressumRoute
   '/maze': typeof MazeRouteWithChildren
+  '/theory': typeof TheoryRouteWithChildren
   '/maze/animation': typeof MazeAnimationRoute
+  '/theory/dsl': typeof TheoryDslRoute
+  '/theory/shortestPath': typeof TheoryShortestPathRoute
   '/maze/': typeof MazeIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/impressum': typeof ImpressumRoute
+  '/theory': typeof TheoryRouteWithChildren
   '/maze/animation': typeof MazeAnimationRoute
+  '/theory/dsl': typeof TheoryDslRoute
+  '/theory/shortestPath': typeof TheoryShortestPathRoute
   '/maze': typeof MazeIndexRoute
 }
 export interface FileRoutesById {
@@ -59,25 +83,60 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/impressum': typeof ImpressumRoute
   '/maze': typeof MazeRouteWithChildren
+  '/theory': typeof TheoryRouteWithChildren
   '/maze/animation': typeof MazeAnimationRoute
+  '/theory/dsl': typeof TheoryDslRoute
+  '/theory/shortestPath': typeof TheoryShortestPathRoute
   '/maze/': typeof MazeIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/impressum' | '/maze' | '/maze/animation' | '/maze/'
+  fullPaths:
+    | '/'
+    | '/impressum'
+    | '/maze'
+    | '/theory'
+    | '/maze/animation'
+    | '/theory/dsl'
+    | '/theory/shortestPath'
+    | '/maze/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/impressum' | '/maze/animation' | '/maze'
-  id: '__root__' | '/' | '/impressum' | '/maze' | '/maze/animation' | '/maze/'
+  to:
+    | '/'
+    | '/impressum'
+    | '/theory'
+    | '/maze/animation'
+    | '/theory/dsl'
+    | '/theory/shortestPath'
+    | '/maze'
+  id:
+    | '__root__'
+    | '/'
+    | '/impressum'
+    | '/maze'
+    | '/theory'
+    | '/maze/animation'
+    | '/theory/dsl'
+    | '/theory/shortestPath'
+    | '/maze/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ImpressumRoute: typeof ImpressumRoute
   MazeRoute: typeof MazeRouteWithChildren
+  TheoryRoute: typeof TheoryRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/theory': {
+      id: '/theory'
+      path: '/theory'
+      fullPath: '/theory'
+      preLoaderRoute: typeof TheoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/maze': {
       id: '/maze'
       path: '/maze'
@@ -106,6 +165,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MazeIndexRouteImport
       parentRoute: typeof MazeRoute
     }
+    '/theory/shortestPath': {
+      id: '/theory/shortestPath'
+      path: '/shortestPath'
+      fullPath: '/theory/shortestPath'
+      preLoaderRoute: typeof TheoryShortestPathRouteImport
+      parentRoute: typeof TheoryRoute
+    }
+    '/theory/dsl': {
+      id: '/theory/dsl'
+      path: '/dsl'
+      fullPath: '/theory/dsl'
+      preLoaderRoute: typeof TheoryDslRouteImport
+      parentRoute: typeof TheoryRoute
+    }
     '/maze/animation': {
       id: '/maze/animation'
       path: '/animation'
@@ -128,10 +201,24 @@ const MazeRouteChildren: MazeRouteChildren = {
 
 const MazeRouteWithChildren = MazeRoute._addFileChildren(MazeRouteChildren)
 
+interface TheoryRouteChildren {
+  TheoryDslRoute: typeof TheoryDslRoute
+  TheoryShortestPathRoute: typeof TheoryShortestPathRoute
+}
+
+const TheoryRouteChildren: TheoryRouteChildren = {
+  TheoryDslRoute: TheoryDslRoute,
+  TheoryShortestPathRoute: TheoryShortestPathRoute,
+}
+
+const TheoryRouteWithChildren =
+  TheoryRoute._addFileChildren(TheoryRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ImpressumRoute: ImpressumRoute,
   MazeRoute: MazeRouteWithChildren,
+  TheoryRoute: TheoryRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

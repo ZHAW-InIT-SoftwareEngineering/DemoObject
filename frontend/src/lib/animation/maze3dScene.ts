@@ -2,6 +2,7 @@ import type { MazesMazeIdGet200Response } from "@/api";
 import type { AnimationSceneData, Vec3, WallSegment } from "./types";
 import type { NodePath } from "@/lib/path/transforms";
 import { WALL_HEIGHT, WALL_THICKNESS, WORLD_SCALE } from "./constants";
+import { buildMazeWallCoordSegments, getMazeBounds } from "@/lib/mazeGeometry";
 
 const EMPTY_SCENE_DATA: AnimationSceneData = {
   wallSegments: [],
@@ -24,13 +25,9 @@ export function buildAnimationSceneData(
   if (!maze) return EMPTY_SCENE_DATA;
 
   const nodes = maze.nodes ?? [];
-  const walls = maze.walls ?? [];
   if (nodes.length === 0) return EMPTY_SCENE_DATA;
 
-  const minX = Math.min(...nodes.map((n) => n.x));
-  const maxX = Math.max(...nodes.map((n) => n.x));
-  const minY = Math.min(...nodes.map((n) => n.y));
-  const maxY = Math.max(...nodes.map((n) => n.y));
+  const { minX, maxX, minY, maxY } = getMazeBounds(nodes);
   const centerX = (minX + maxX) / 2;
   const centerY = (minY + maxY) / 2;
 
@@ -64,73 +61,12 @@ export function buildAnimationSceneData(
   };
 
   const wallSegments: WallSegment[] = [];
-  for (const edge of walls) {
-    const from = nodeWorldById.get(edge.from);
-    const to = nodeWorldById.get(edge.to);
-    appendWallFromNodePair(from, to, wallSegments);
-  }
-
-  const startNode = nodes.find((node) => node.mazeNodeId === maze.startNodeId);
-  if (startNode) {
-    const startX = startNode.x;
-    const startY = startNode.y;
-
-    type BoundarySide = "left" | "right" | "top" | "bottom";
-
-    const boundaryCandidates: BoundarySide[] = [];
-    if (startX === minX) boundaryCandidates.push("left");
-    if (startX === maxX) boundaryCandidates.push("right");
-    if (startY === minY) boundaryCandidates.push("top");
-    if (startY === maxY) boundaryCandidates.push("bottom");
-
-    const openingSide =
-      boundaryCandidates[0] ??
-      ([
-        { side: "left" as const, distance: startX - minX },
-        { side: "right" as const, distance: maxX - startX },
-        { side: "top" as const, distance: startY - minY },
-        { side: "bottom" as const, distance: maxY - startY },
-      ].sort((a, b) => a.distance - b.distance)[0]?.side ?? "left");
-
-    for (let y = minY; y <= maxY; y++) {
-      const isLeftOpening = openingSide === "left" && y === startY;
-      if (!isLeftOpening) {
-        appendWallFromNodePair(
-          toWorld(minX, y),
-          toWorld(minX - 1, y),
-          wallSegments,
-        );
-      }
-
-      const isRightOpening = openingSide === "right" && y === startY;
-      if (!isRightOpening) {
-        appendWallFromNodePair(
-          toWorld(maxX, y),
-          toWorld(maxX + 1, y),
-          wallSegments,
-        );
-      }
-    }
-
-    for (let x = minX; x <= maxX; x++) {
-      const isTopOpening = openingSide === "top" && x === startX;
-      if (!isTopOpening) {
-        appendWallFromNodePair(
-          toWorld(x, minY),
-          toWorld(x, minY - 1),
-          wallSegments,
-        );
-      }
-
-      const isBottomOpening = openingSide === "bottom" && x === startX;
-      if (!isBottomOpening) {
-        appendWallFromNodePair(
-          toWorld(x, maxY),
-          toWorld(x, maxY + 1),
-          wallSegments,
-        );
-      }
-    }
+  for (const wall of buildMazeWallCoordSegments(maze)) {
+    appendWallFromNodePair(
+      toWorld(wall.from.x, wall.from.y),
+      toWorld(wall.to.x, wall.to.y),
+      wallSegments,
+    );
   }
 
   const toRouteLine = (path: NodePath): Vec3[] =>

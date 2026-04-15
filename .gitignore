@@ -29,3 +29,5 @@ replay_pid*
 /frontend/docs
 frontend/dist
 backend/dist
+.codex
+.vscode

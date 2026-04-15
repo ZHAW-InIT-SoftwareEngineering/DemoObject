@@ -25,6 +25,7 @@ type MazePanelProps = {
   showExplorationLegend?: boolean;
   userPathLength: number;
   shortestPathLength: number | null | undefined;
+  timerElapsedMs: number;
 };
 
 export function MazePanel({
@@ -44,6 +45,7 @@ export function MazePanel({
   showExplorationLegend = false,
   userPathLength,
   shortestPathLength,
+  timerElapsedMs,
 }: MazePanelProps) {
 
   return (
@@ -54,6 +56,7 @@ export function MazePanel({
             nodePath,
             isPathSubmitted,
             canShowAnimationButton,
+            timerElapsedMs,
           }}
           actions={{ onUndo, onShowAnimation, onOpen3DPreview }}
         />
