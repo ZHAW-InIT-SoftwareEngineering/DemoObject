@@ -104,10 +104,10 @@ const blockedWalls: AdjacentWall[] = [
   wall(5,15),
   wall(17,27),
   wall(69,79),
-  wall(84,85),
-  wall(94,95),
+  wall(95,96),
   wall(74,75),
   wall(71,72),
+  wall(65,75),
 
   // Barrier between columns 0 and 1.
   wall(10, 11),
@@ -131,7 +131,7 @@ const blockedWalls: AdjacentWall[] = [
   wall(45, 46),
   wall(55, 56),
   wall(65, 66),
-  wall(95, 96),
+  wall(85, 86),
 
   // Barrier between columns 7 and 8.
   wall(7, 8),
@@ -176,7 +176,7 @@ const blockedWalls: AdjacentWall[] = [
   wall(72, 82),
   wall(73, 83),
   wall(74, 84),
-  wall(75, 85),
+  wall(84, 85),
   wall(76, 86),
   wall(78, 88),
 
