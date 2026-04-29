@@ -16,34 +16,17 @@ import { mapValues } from '../runtime';
 import type { MazesMazeIdPathsDslPostRequestPathInner } from './MazesMazeIdPathsDslPostRequestPathInner';
 import {
     MazesMazeIdPathsDslPostRequestPathInnerFromJSON,
+    MazesMazeIdPathsDslPostRequestPathInnerFromJSONTyped,
     MazesMazeIdPathsDslPostRequestPathInnerToJSON,
+    MazesMazeIdPathsDslPostRequestPathInnerToJSONTyped,
 } from './MazesMazeIdPathsDslPostRequestPathInner';
-
-/**
- *
- * @export
- * @interface MazesMazeIdShortestPathGet200ResponseExplorationStepsInner
- */
-export interface MazesMazeIdShortestPathGet200ResponseExplorationStepsInner {
-    /**
-     *
-     * @type {MazesMazeIdPathsDslPostRequestPathInner}
-     * @memberof MazesMazeIdShortestPathGet200ResponseExplorationStepsInner
-     */
-    from: MazesMazeIdPathsDslPostRequestPathInner;
-    /**
-     *
-     * @type {MazesMazeIdPathsDslPostRequestPathInner}
-     * @memberof MazesMazeIdShortestPathGet200ResponseExplorationStepsInner
-     */
-    to: MazesMazeIdPathsDslPostRequestPathInner;
-    /**
-     *
-     * @type {boolean}
-     * @memberof MazesMazeIdShortestPathGet200ResponseExplorationStepsInner
-     */
-    discovered: boolean;
-}
+import type { MazesMazeIdShortestPathGet200ResponseExplorationStepsInner } from './MazesMazeIdShortestPathGet200ResponseExplorationStepsInner';
+import {
+    MazesMazeIdShortestPathGet200ResponseExplorationStepsInnerFromJSON,
+    MazesMazeIdShortestPathGet200ResponseExplorationStepsInnerFromJSONTyped,
+    MazesMazeIdShortestPathGet200ResponseExplorationStepsInnerToJSON,
+    MazesMazeIdShortestPathGet200ResponseExplorationStepsInnerToJSONTyped,
+} from './MazesMazeIdShortestPathGet200ResponseExplorationStepsInner';
 
 /**
  * 
@@ -53,31 +36,56 @@ export interface MazesMazeIdShortestPathGet200ResponseExplorationStepsInner {
 export interface MazesMazeIdShortestPathGet200Response {
     /**
      * 
+     * @type {string}
+     * @memberof MazesMazeIdShortestPathGet200Response
+     */
+    algorithm: MazesMazeIdShortestPathGet200ResponseAlgorithmEnum;
+    /**
+     * 
      * @type {Array<MazesMazeIdPathsDslPostRequestPathInner>}
      * @memberof MazesMazeIdShortestPathGet200Response
      */
     path: Array<MazesMazeIdPathsDslPostRequestPathInner>;
-    /**
-     *
-     * @type {Array<MazesMazeIdShortestPathGet200ResponseExplorationStepsInner>}
-     * @memberof MazesMazeIdShortestPathGet200Response
-     */
-    explorationSteps: Array<MazesMazeIdShortestPathGet200ResponseExplorationStepsInner>;
     /**
      * 
      * @type {number}
      * @memberof MazesMazeIdShortestPathGet200Response
      */
     length: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof MazesMazeIdShortestPathGet200Response
+     */
+    cost: number;
+    /**
+     * 
+     * @type {Array<MazesMazeIdShortestPathGet200ResponseExplorationStepsInner>}
+     * @memberof MazesMazeIdShortestPathGet200Response
+     */
+    explorationSteps: Array<MazesMazeIdShortestPathGet200ResponseExplorationStepsInner>;
 }
+
+
+/**
+ * @export
+ */
+export const MazesMazeIdShortestPathGet200ResponseAlgorithmEnum = {
+    Bfs: 'bfs',
+    Dijkstra: 'dijkstra'
+} as const;
+export type MazesMazeIdShortestPathGet200ResponseAlgorithmEnum = typeof MazesMazeIdShortestPathGet200ResponseAlgorithmEnum[keyof typeof MazesMazeIdShortestPathGet200ResponseAlgorithmEnum];
+
 
 /**
  * Check if a given object implements the MazesMazeIdShortestPathGet200Response interface.
  */
 export function instanceOfMazesMazeIdShortestPathGet200Response(value: object): value is MazesMazeIdShortestPathGet200Response {
+    if (!('algorithm' in value) || value['algorithm'] === undefined) return false;
     if (!('path' in value) || value['path'] === undefined) return false;
-    if (!('explorationSteps' in value) || value['explorationSteps'] === undefined) return false;
     if (!('length' in value) || value['length'] === undefined) return false;
+    if (!('cost' in value) || value['cost'] === undefined) return false;
+    if (!('explorationSteps' in value) || value['explorationSteps'] === undefined) return false;
     return true;
 }
 
@@ -91,13 +99,11 @@ export function MazesMazeIdShortestPathGet200ResponseFromJSONTyped(json: any, ig
     }
     return {
         
+        'algorithm': json['algorithm'],
         'path': ((json['path'] as Array<any>).map(MazesMazeIdPathsDslPostRequestPathInnerFromJSON)),
-        'explorationSteps': ((json['explorationSteps'] as Array<any>).map((value: any) => ({
-            'from': MazesMazeIdPathsDslPostRequestPathInnerFromJSON(value['from']),
-            'to': MazesMazeIdPathsDslPostRequestPathInnerFromJSON(value['to']),
-            'discovered': value['discovered'],
-        }))),
         'length': json['length'],
+        'cost': json['cost'],
+        'explorationSteps': ((json['explorationSteps'] as Array<any>).map(MazesMazeIdShortestPathGet200ResponseExplorationStepsInnerFromJSON)),
     };
 }
 
@@ -112,12 +118,11 @@ export function MazesMazeIdShortestPathGet200ResponseToJSONTyped(value?: MazesMa
 
     return {
         
+        'algorithm': value['algorithm'],
         'path': ((value['path'] as Array<any>).map(MazesMazeIdPathsDslPostRequestPathInnerToJSON)),
-        'explorationSteps': ((value['explorationSteps'] as Array<any>).map((value: any) => ({
-            'from': MazesMazeIdPathsDslPostRequestPathInnerToJSON(value['from']),
-            'to': MazesMazeIdPathsDslPostRequestPathInnerToJSON(value['to']),
-            'discovered': value['discovered'],
-        }))),
         'length': value['length'],
+        'cost': value['cost'],
+        'explorationSteps': ((value['explorationSteps'] as Array<any>).map(MazesMazeIdShortestPathGet200ResponseExplorationStepsInnerToJSON)),
     };
 }
+

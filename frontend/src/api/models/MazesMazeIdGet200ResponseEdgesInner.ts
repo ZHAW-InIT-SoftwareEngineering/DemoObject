@@ -31,6 +31,12 @@ export interface MazesMazeIdGet200ResponseEdgesInner {
      * @memberof MazesMazeIdGet200ResponseEdgesInner
      */
     to: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof MazesMazeIdGet200ResponseEdgesInner
+     */
+    weight: number;
 }
 
 /**
@@ -39,6 +45,7 @@ export interface MazesMazeIdGet200ResponseEdgesInner {
 export function instanceOfMazesMazeIdGet200ResponseEdgesInner(value: object): value is MazesMazeIdGet200ResponseEdgesInner {
     if (!('from' in value) || value['from'] === undefined) return false;
     if (!('to' in value) || value['to'] === undefined) return false;
+    if (!('weight' in value) || value['weight'] === undefined) return false;
     return true;
 }
 
@@ -54,6 +61,7 @@ export function MazesMazeIdGet200ResponseEdgesInnerFromJSONTyped(json: any, igno
         
         'from': json['from'],
         'to': json['to'],
+        'weight': json['weight'],
     };
 }
 
@@ -70,6 +78,7 @@ export function MazesMazeIdGet200ResponseEdgesInnerToJSONTyped(value?: MazesMaze
         
         'from': value['from'],
         'to': value['to'],
+        'weight': value['weight'],
     };
 }
 

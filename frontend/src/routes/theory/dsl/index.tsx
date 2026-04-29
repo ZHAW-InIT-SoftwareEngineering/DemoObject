@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { TheoryShortestPathPage } from "@/components/app/theory/shortestPath/TheoryShortestPathPage";
+import { TheoryDslPage } from "@/components/app/theory/dsl/TheoryDslPage";
 import { useDemoSession, useMazeTheoryProgress } from "@/hooks";
 
-export const Route = createFileRoute("/theory/shortestPath")({
-  component: TheoryShortestPathRoutePage,
+export const Route = createFileRoute("/theory/dsl/")({
+  component: TheoryDslRoutePage,
 });
 
-function TheoryShortestPathRoutePage() {
+function TheoryDslRoutePage() {
   const { maze, session } = useDemoSession();
   const { markVisited } = useMazeTheoryProgress({
     mazeId: maze?.mazeId,
@@ -15,8 +15,8 @@ function TheoryShortestPathRoutePage() {
   });
 
   useEffect(() => {
-    markVisited("shortestPath");
+    markVisited("dsl");
   }, [markVisited]);
 
-  return <TheoryShortestPathPage />;
+  return <TheoryDslPage />;
 }

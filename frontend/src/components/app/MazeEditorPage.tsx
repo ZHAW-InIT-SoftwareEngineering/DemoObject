@@ -145,10 +145,15 @@ export function MazeEditorPage() {
       return;
     }
 
-    mazeTimer.beginSubmission();
-    const response = await submitPath();
+    const submissionSnapshot = mazeTimer.beginSubmission();
+    if (!submissionSnapshot) {
+      toast.error("Die Zeit konnte nicht erfasst werden.");
+      return;
+    }
+
+    const response = await submitPath(submissionSnapshot.elapsedMs);
     if (response) {
-      mazeTimer.completeSubmission();
+      mazeTimer.completeSubmission(submissionSnapshot.stoppedAt);
       toast.success("Pfad gesendet.");
       return;
     }

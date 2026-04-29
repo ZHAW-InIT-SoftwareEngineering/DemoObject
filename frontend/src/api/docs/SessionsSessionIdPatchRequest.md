@@ -9,6 +9,7 @@ Name | Type
 `mazeId` | number
 `status` | string
 `path` | [Array&lt;MazesMazeIdPathsDslPostRequestPathInner&gt;](MazesMazeIdPathsDslPostRequestPathInner.md)
+`elapsedMs` | number
 `expiresAt` | Date
 
 ## Example
@@ -21,6 +22,7 @@ const example = {
   "mazeId": null,
   "status": null,
   "path": null,
+  "elapsedMs": null,
   "expiresAt": null,
 } satisfies SessionsSessionIdPatchRequest
 

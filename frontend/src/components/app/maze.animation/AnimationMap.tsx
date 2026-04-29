@@ -1,5 +1,6 @@
 import type { MazesMazeIdGet200Response } from "@/api";
-import { Card, CardContent, Maze } from "@/components/ui";
+import { Maze } from "@/components/app/maze";
+import { Card, CardContent } from "@/components/ui";
 import type { NodePath } from "@/lib/path/transforms";
 
 type AnimationMapProps = {

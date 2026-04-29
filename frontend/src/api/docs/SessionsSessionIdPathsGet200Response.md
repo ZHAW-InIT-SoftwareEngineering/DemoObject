@@ -9,6 +9,7 @@ Name | Type
 `mazeId` | number
 `path` | [Array&lt;MazesMazeIdPathsDslPostRequestPathInner&gt;](MazesMazeIdPathsDslPostRequestPathInner.md)
 `dsl` | Array&lt;string&gt;
+`elapsedMs` | number
 
 ## Example
 
@@ -20,6 +21,7 @@ const example = {
   "mazeId": null,
   "path": null,
   "dsl": null,
+  "elapsedMs": null,
 } satisfies SessionsSessionIdPathsGet200Response
 
 console.log(example)

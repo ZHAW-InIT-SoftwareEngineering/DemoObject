@@ -117,17 +117,22 @@ sessionRouter.put("/:sessionId/paths", async (req, res) => {
     if (!body.success) return res.status(400).json({ error: body.error.issues });
 
     const { sessionId } = params.data;
-    const { path } = body.data;
+    const { path, elapsedMs } = body.data;
 
     const session = await retrieveSessionService(sessionId);
     if (!session) return res.status(404).json({ error: "Session not found" });
 
     const dsl = computeDSLFromPath(path);
 
-    const updated = await updateSessionService(sessionId, { path, dsl });
+    const updated = await updateSessionService(sessionId, { path, dsl, elapsedMs });
     if (!updated) return res.status(404).json({ error: "Session not found" });
 
-    return res.json(StorePathResponse.parse({ mazeId: updated.mazeId, path: updated.path, dsl: updated.dsl }));
+    return res.json(StorePathResponse.parse({
+        mazeId: updated.mazeId,
+        path: updated.path,
+        dsl: updated.dsl,
+        elapsedMs: updated.elapsedMs,
+    }));
 });
 
 sessionRouter.patch("/:sessionId", async (req, res) => {
@@ -156,7 +161,14 @@ sessionRouter.get("/:sessionId/paths", async (req, res) => {
     const { sessionId } = parsed.data
     const session = await retrieveSessionService(sessionId)
 
-    if (!session || !session.path || !session.dsl) return res.status(404).json({ error: "Session path not found" })
+    if (!session || !session.path || !session.dsl || session.elapsedMs === undefined) {
+        return res.status(404).json({ error: "Session path not found" })
+    }
 
-    return res.json(RetrievePathResponse.parse({ mazeId: session.mazeId, path: session.path, dsl: session.dsl }))
+    return res.json(RetrievePathResponse.parse({
+        mazeId: session.mazeId,
+        path: session.path,
+        dsl: session.dsl,
+        elapsedMs: session.elapsedMs,
+    }))
 });

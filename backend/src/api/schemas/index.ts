@@ -1,4 +1,5 @@
 export { ShortestPathResponse, 
+        ShortestPathQuery,
         CompilePathRequest, 
         CompilePathResponse, 
         UpdatePathResponse, 

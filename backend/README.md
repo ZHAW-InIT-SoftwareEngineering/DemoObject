@@ -68,6 +68,52 @@ MONGO_COLLECTION_NAME=SessionCollection
 - `DB_CONN_STRING` differs between local and Docker because `localhost` inside a container points to itself, not the Mongo container.
 - Mongo data is stored in the `mongo-data` Docker volume defined in `docker-compose.yaml`.
 
+## Check Mongo On The VM
+
+If you are connected to the deployment VM, Mongo runs in the `demoobject-mongo` container.
+
+1. Check that Mongo is running:
+
+```bash
+docker ps --filter name=demoobject-mongo
+```
+
+2. Open `mongosh` with auth:
+
+```bash
+docker exec -it demoobject-mongo sh -lc 'mongosh --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin'
+```
+
+Run the following commands only after you see the `mongosh` prompt.
+
+3. List databases:
+
+```javascript
+show dbs
+```
+
+4. Switch to the app database:
+
+```javascript
+use DemoObjectDB
+```
+
+5. List collections:
+
+```javascript
+show collections
+```
+
+6. Read the stored sessions:
+
+```javascript
+db.SessionCollection.findOne()
+db.SessionCollection.find().sort({ createdAt: -1 }).limit(20).pretty()
+db.SessionCollection.countDocuments()
+```
+
+If your database or collection name is different, use the values from your deploy `.env`.
+
 ## Editing Maze Walls
 
 The shared maze schema lives in [src/domain/maze.ts](./src/domain/maze.ts).

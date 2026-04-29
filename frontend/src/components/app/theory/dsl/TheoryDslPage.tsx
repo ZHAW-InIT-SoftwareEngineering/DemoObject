@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import type { MazesMazeIdGet200ResponseNodesInner } from "@/api";
+import { DslStrip } from "@/components/app/maze/DslStrip";
 import { RouteBackButton } from "@/components/ui/RouteBackButton";
 import { useLocalMazePath, useMazeById } from "@/hooks";
 import {
@@ -9,7 +10,7 @@ import {
 } from "@/lib/theoryDsl";
 import { Card, CardContent } from "@/components/ui";
 import { TheoryDslIntro } from "./TheoryDslIntro";
-import { TheoryDslSandbox } from "./TheoryDslSandbox";
+import { TheoryDslSandbox } from "./TheoryDslDemo";
 
 const THEORY_DSL_MAZE_ID = 1;
 
@@ -63,10 +64,9 @@ export function TheoryDslPage() {
   );
 
   return (
-    <main className="min-h-screen bg-background px-6 py-10">
-      <div className="mx-auto w-full max-w-6xl space-y-8">
+    <main className="min-h-screen bg-background px-4 py-6 sm:px-6 sm:py-8">
+      <div className="mx-auto w-full max-w-3xl space-y-4 sm:space-y-6">
         <RouteBackButton fallbackTo="/maze" />
-
         <TheoryDslIntro />
 
         {loading ? (
@@ -84,13 +84,18 @@ export function TheoryDslPage() {
         ) : null}
 
         {maze ? (
-          <TheoryDslSandbox
-            maze={maze}
-            nodePath={nodePath}
-            theoryDslTokens={theoryDslTokens}
-            moveChoiceByToken={moveChoiceByToken}
-            onSelectNode={selectNode}
-          />
+          <>
+            <DslStrip
+              dsl={theoryDslTokens.length > 0 ? [...theoryDslTokens] : null}
+              autoScrollToLatest
+            />
+            <TheoryDslSandbox
+              maze={maze}
+              nodePath={nodePath}
+              moveChoiceByToken={moveChoiceByToken}
+              onSelectNode={selectNode}
+            />
+          </>
         ) : null}
       </div>
     </main>

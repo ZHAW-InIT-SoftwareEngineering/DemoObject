@@ -15,15 +15,13 @@
 
 import * as runtime from '../runtime';
 import type {
-  MazesMazeIdPathsDslPostRequest,
   SessionsPost201Response,
   SessionsPostRequest,
   SessionsSessionIdPatchRequest,
   SessionsSessionIdPathsGet200Response,
+  SessionsSessionIdPathsPutRequest,
 } from '../models/index';
 import {
-    MazesMazeIdPathsDslPostRequestFromJSON,
-    MazesMazeIdPathsDslPostRequestToJSON,
     SessionsPost201ResponseFromJSON,
     SessionsPost201ResponseToJSON,
     SessionsPostRequestFromJSON,
@@ -32,6 +30,8 @@ import {
     SessionsSessionIdPatchRequestToJSON,
     SessionsSessionIdPathsGet200ResponseFromJSON,
     SessionsSessionIdPathsGet200ResponseToJSON,
+    SessionsSessionIdPathsPutRequestFromJSON,
+    SessionsSessionIdPathsPutRequestToJSON,
 } from '../models/index';
 
 export interface SessionsPostOperationRequest {
@@ -47,9 +47,9 @@ export interface SessionsSessionIdPathsGetRequest {
     sessionId: string;
 }
 
-export interface SessionsSessionIdPathsPutRequest {
+export interface SessionsSessionIdPathsPutOperationRequest {
     sessionId: string;
-    mazesMazeIdPathsDslPostRequest?: MazesMazeIdPathsDslPostRequest;
+    sessionsSessionIdPathsPutRequest?: SessionsSessionIdPathsPutRequest;
 }
 
 /**
@@ -169,7 +169,7 @@ export class SessionsApi extends runtime.BaseAPI {
     /**
      * Store a user-selected path and its automatically transpiled DSL representation bund to a session 
      */
-    async sessionsSessionIdPathsPutRaw(requestParameters: SessionsSessionIdPathsPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<SessionsSessionIdPathsGet200Response>> {
+    async sessionsSessionIdPathsPutRaw(requestParameters: SessionsSessionIdPathsPutOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<SessionsSessionIdPathsGet200Response>> {
         if (requestParameters['sessionId'] == null) {
             throw new runtime.RequiredError(
                 'sessionId',
@@ -192,7 +192,7 @@ export class SessionsApi extends runtime.BaseAPI {
             method: 'PUT',
             headers: headerParameters,
             query: queryParameters,
-            body: MazesMazeIdPathsDslPostRequestToJSON(requestParameters['mazesMazeIdPathsDslPostRequest']),
+            body: SessionsSessionIdPathsPutRequestToJSON(requestParameters['sessionsSessionIdPathsPutRequest']),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => SessionsSessionIdPathsGet200ResponseFromJSON(jsonValue));
@@ -201,7 +201,7 @@ export class SessionsApi extends runtime.BaseAPI {
     /**
      * Store a user-selected path and its automatically transpiled DSL representation bund to a session 
      */
-    async sessionsSessionIdPathsPut(requestParameters: SessionsSessionIdPathsPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SessionsSessionIdPathsGet200Response> {
+    async sessionsSessionIdPathsPut(requestParameters: SessionsSessionIdPathsPutOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SessionsSessionIdPathsGet200Response> {
         const response = await this.sessionsSessionIdPathsPutRaw(requestParameters, initOverrides);
         return await response.value();
     }

@@ -45,6 +45,12 @@ export interface SessionsSessionIdPathsGet200Response {
      * @memberof SessionsSessionIdPathsGet200Response
      */
     dsl: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof SessionsSessionIdPathsGet200Response
+     */
+    elapsedMs: number;
 }
 
 /**
@@ -54,6 +60,7 @@ export function instanceOfSessionsSessionIdPathsGet200Response(value: object): v
     if (!('mazeId' in value) || value['mazeId'] === undefined) return false;
     if (!('path' in value) || value['path'] === undefined) return false;
     if (!('dsl' in value) || value['dsl'] === undefined) return false;
+    if (!('elapsedMs' in value) || value['elapsedMs'] === undefined) return false;
     return true;
 }
 
@@ -70,6 +77,7 @@ export function SessionsSessionIdPathsGet200ResponseFromJSONTyped(json: any, ign
         'mazeId': json['mazeId'],
         'path': ((json['path'] as Array<any>).map(MazesMazeIdPathsDslPostRequestPathInnerFromJSON)),
         'dsl': json['dsl'],
+        'elapsedMs': json['elapsedMs'],
     };
 }
 
@@ -87,6 +95,7 @@ export function SessionsSessionIdPathsGet200ResponseToJSONTyped(value?: Sessions
         'mazeId': value['mazeId'],
         'path': ((value['path'] as Array<any>).map(MazesMazeIdPathsDslPostRequestPathInnerToJSON)),
         'dsl': value['dsl'],
+        'elapsedMs': value['elapsedMs'],
     };
 }
 

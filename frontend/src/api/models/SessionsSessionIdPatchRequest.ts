@@ -47,6 +47,12 @@ export interface SessionsSessionIdPatchRequest {
     path?: Array<MazesMazeIdPathsDslPostRequestPathInner>;
     /**
      * 
+     * @type {number}
+     * @memberof SessionsSessionIdPatchRequest
+     */
+    elapsedMs?: number;
+    /**
+     * 
      * @type {Date}
      * @memberof SessionsSessionIdPatchRequest
      */
@@ -86,6 +92,7 @@ export function SessionsSessionIdPatchRequestFromJSONTyped(json: any, ignoreDisc
         'mazeId': json['mazeId'],
         'status': json['status'] == null ? undefined : json['status'],
         'path': json['path'] == null ? undefined : ((json['path'] as Array<any>).map(MazesMazeIdPathsDslPostRequestPathInnerFromJSON)),
+        'elapsedMs': json['elapsedMs'] == null ? undefined : json['elapsedMs'],
         'expiresAt': json['expiresAt'] == null ? undefined : (new Date(json['expiresAt'])),
     };
 }
@@ -104,6 +111,7 @@ export function SessionsSessionIdPatchRequestToJSONTyped(value?: SessionsSession
         'mazeId': value['mazeId'],
         'status': value['status'],
         'path': value['path'] == null ? undefined : ((value['path'] as Array<any>).map(MazesMazeIdPathsDslPostRequestPathInnerToJSON)),
+        'elapsedMs': value['elapsedMs'],
         'expiresAt': value['expiresAt'] == null ? value['expiresAt'] : value['expiresAt'].toISOString().substring(0,10),
     };
 }

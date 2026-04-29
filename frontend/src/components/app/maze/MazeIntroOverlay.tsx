@@ -67,14 +67,14 @@ export function MazeIntroOverlay({
                 Finde den kürzesten Weg zum Eis und gib genau diesen Pfad ein.
               </p>
               <p>
-                Zuerst jedoch ein wenig benötigte Theorie.
+                Doch zuvor ist ein wenig Verständnis nötig:
               </p>
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/80 p-3 sm:p-4">
             <p className="text-center text-sm font-medium text-slate-800">
-              Lies zuerst beide Theorie-Seiten.
+              Lerne beide Themen kennen:
             </p>
 
             <div className="flex items-center gap-2 sm:gap-3">
@@ -90,7 +90,7 @@ export function MazeIntroOverlay({
                 size="sm"
                 className="min-w-0 flex-1 bg-slate-900 text-white hover:bg-slate-800"
               >
-                <Link to="/theory/dsl">Theorie: DSL</Link>
+                <Link to="/theory/dsl">Thema: DSL</Link>
               </Button>
             </div>
 
@@ -108,7 +108,7 @@ export function MazeIntroOverlay({
                 className="min-w-0 flex-1 bg-slate-900 text-white hover:bg-slate-800"
               >
                 <Link to="/theory/shortestPath">
-                  Theorie: kürzester Pfad
+                  Thema: kürzester Pfad
                 </Link>
               </Button>
             </div>

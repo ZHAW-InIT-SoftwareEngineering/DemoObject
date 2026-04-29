@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   readPersistedDemoMazeTimer,
   writePersistedDemoMazeTimer,
@@ -13,12 +13,18 @@ type UseMazeTimerOptions = {
   sessionId?: string | null;
 };
 
+export type MazeTimerSubmissionSnapshot = {
+  elapsedMs: number;
+  stoppedAt: number;
+};
+
 export function useMazeTimer({ mazeId, sessionId }: UseMazeTimerOptions) {
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [submittedAt, setSubmittedAt] = useState<number | null>(null);
   const [pendingStopAt, setPendingStopAt] = useState<number | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [now, setNow] = useState(() => Date.now());
+  const pendingStopAtRef = useRef<number | null>(null);
 
   const timerScopeKey =
     mazeId !== null && mazeId !== undefined && sessionId
@@ -28,6 +34,7 @@ export function useMazeTimer({ mazeId, sessionId }: UseMazeTimerOptions) {
   useEffect(() => {
     setHydrated(false);
     setPendingStopAt(null);
+    pendingStopAtRef.current = null;
 
     if (mazeId === null || mazeId === undefined || !sessionId || !timerScopeKey) {
       setStartedAt(null);
@@ -65,13 +72,25 @@ export function useMazeTimer({ mazeId, sessionId }: UseMazeTimerOptions) {
     };
   }, [pendingStopAt, startedAt, submittedAt]);
 
-  const beginSubmission = useCallback(() => {
-    if (startedAt === null || submittedAt !== null || pendingStopAt !== null) {
-      return;
+  const beginSubmission = useCallback((): MazeTimerSubmissionSnapshot | null => {
+    if (
+      startedAt === null ||
+      submittedAt !== null ||
+      pendingStopAtRef.current !== null
+    ) {
+      return null;
     }
 
-    setPendingStopAt(Date.now());
-  }, [pendingStopAt, startedAt, submittedAt]);
+    const stoppedAt = Date.now();
+    pendingStopAtRef.current = stoppedAt;
+    setPendingStopAt(stoppedAt);
+    setNow(stoppedAt);
+
+    return {
+      elapsedMs: Math.max(0, stoppedAt - startedAt),
+      stoppedAt,
+    };
+  }, [startedAt, submittedAt]);
 
   const start = useCallback(() => {
     if (
@@ -86,6 +105,7 @@ export function useMazeTimer({ mazeId, sessionId }: UseMazeTimerOptions) {
 
     const nextStartedAt = Date.now();
     writePersistedDemoMazeTimer(sessionId, mazeId, nextStartedAt, null);
+    pendingStopAtRef.current = null;
     setStartedAt(nextStartedAt);
     setSubmittedAt(null);
     setPendingStopAt(null);
@@ -93,13 +113,14 @@ export function useMazeTimer({ mazeId, sessionId }: UseMazeTimerOptions) {
   }, [mazeId, sessionId, startedAt, submittedAt]);
 
   const cancelSubmission = useCallback(() => {
-    if (pendingStopAt === null) return;
+    if (pendingStopAtRef.current === null) return;
 
+    pendingStopAtRef.current = null;
     setPendingStopAt(null);
     setNow(Date.now());
-  }, [pendingStopAt]);
+  }, []);
 
-  const completeSubmission = useCallback(() => {
+  const completeSubmission = useCallback((stoppedAt?: number) => {
     if (
       mazeId === null ||
       mazeId === undefined ||
@@ -110,13 +131,15 @@ export function useMazeTimer({ mazeId, sessionId }: UseMazeTimerOptions) {
       return;
     }
 
-    const finalSubmittedAt = pendingStopAt ?? Date.now();
+    const finalSubmittedAt =
+      stoppedAt ?? pendingStopAtRef.current ?? pendingStopAt ?? Date.now();
     writePersistedDemoMazeTimer(
       sessionId,
       mazeId,
       startedAt,
       finalSubmittedAt,
     );
+    pendingStopAtRef.current = null;
     setSubmittedAt(finalSubmittedAt);
     setPendingStopAt(null);
     setNow(finalSubmittedAt);

@@ -1,6 +1,12 @@
 import { Router } from "express";
 import { registry } from "../../openapi/openapiRegistry";
-import { CompilePathRequest, CompilePathResponse, ShortestPathResponse, MazeIdParams } from "../schemas";
+import {
+  CompilePathRequest,
+  CompilePathResponse,
+  ShortestPathQuery,
+  ShortestPathResponse,
+  MazeIdParams,
+} from "../schemas";
 import { getMazeById, computeDSLFromPath, computeShortestPath } from "../../services";
 import { Maze } from "../../domain";
 import { isValidPath } from "../../util";
@@ -51,11 +57,12 @@ registry.registerPath({
     path: "/mazes/{mazeId}/shortest-path",
     tags: ["mazes"],
     request: {
-        params: MazeIdParams
+        params: MazeIdParams,
+        query: ShortestPathQuery,
     },
     responses: {
         200: {
-            description: "Find shortest path between two nodes using BFS",
+            description: "Find shortest path between two nodes using BFS or Dijkstra",
             content: { "application/json": { schema: ShortestPathResponse } },
         },
         400: { description: "Invalid request" },
@@ -99,8 +106,11 @@ mazeRouter.get("/:mazeId/shortest-path", (req, res) => {
     const params = MazeIdParams.safeParse(req.params)
     if (!params.success) return res.status(400).json({ error: params.error.issues })
     const mazeId = params.data.mazeId
+    const query = ShortestPathQuery.safeParse(req.query)
+    if (!query.success) return res.status(400).json({ error: query.error.issues })
+    const algorithm = query.data.algorithm ?? "bfs"
 
-    const result = computeShortestPath(mazeId);
+    const result = computeShortestPath(mazeId, algorithm);
     if (!result) return res.status(404).json({ error: "Maze or path not found" });
 
     return res.json(ShortestPathResponse.parse(result));

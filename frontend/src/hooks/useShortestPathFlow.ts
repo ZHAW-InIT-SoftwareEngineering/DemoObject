@@ -9,7 +9,10 @@ import {
   writePersistedDemoPathSubmissionShortestPath,
 } from "@/lib/demoPathSubmissionStorage";
 import { undirectedEdgeKey } from "@/lib/path/transforms";
-import { getShortestPath as getShortestPathService } from "../services/maze";
+import {
+  getShortestPath as getShortestPathService,
+  ShortestPathAlgorithm,
+} from "../services/maze";
 import { useEdgePlayback } from "./useEdgePlayback";
 import { usePerfectPathCelebration } from "./usePerfectPathCelebration";
 import { useShortestPathNodePath } from "./useShortestPathNodePath";
@@ -184,7 +187,10 @@ export function useShortestPathFlow({
       return null;
     }
 
-    const shortestPathResponse = await getShortestPathService(maze.mazeId);
+    const shortestPathResponse = await getShortestPathService(
+      maze.mazeId,
+      ShortestPathAlgorithm.Bfs,
+    );
     if (!shortestPathResponse) {
       return null;
     }

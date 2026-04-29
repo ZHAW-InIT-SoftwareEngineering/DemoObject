@@ -8,6 +8,7 @@ export const Session = z.object({
     status: z.enum(["CREATED", "ON-GOING", "CLOSED"]).default("CREATED"),
     path: Path.optional(),
     dsl: z.array(z.string()).optional(),
+    elapsedMs: z.number().int().nonnegative().optional(),
     createdAt: z.date().default(() => new Date()),
     expiresAt: z.date().optional(),
 });

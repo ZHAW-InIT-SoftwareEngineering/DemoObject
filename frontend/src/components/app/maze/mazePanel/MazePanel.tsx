@@ -2,11 +2,14 @@ import type {
   MazesMazeIdGet200Response,
   MazesMazeIdGet200ResponseNodesInner,
 } from "@/api";
-import { Card, CardContent, Maze, Separator } from "@/components/ui";
+import { Card, CardContent, Separator } from "@/components/ui";
+import { Maze } from "./Maze";
 import { MazePanelHeader } from "./MazePanelHeader";
 import type { NodePath } from "@/lib/path/transforms";
 import { PathInfo } from "@/components/app/maze/PathInfo";
-
+import { MazeLegendSection } from "@/components/app/maze/MazeLegendSection";
+import { MAZE_LEGEND_DIVIDER_CLASS_NAME } from "@/components/app/maze/mazeLegendStyles";
+import { cn } from "@/lib/utils";
 
 type MazePanelProps = {
   maze: MazesMazeIdGet200Response;
@@ -47,7 +50,6 @@ export function MazePanel({
   shortestPathLength,
   timerElapsedMs,
 }: MazePanelProps) {
-
   return (
     <Card className="py-4">
       <CardContent className="px-4 space-y-3">
@@ -61,55 +63,17 @@ export function MazePanel({
           actions={{ onUndo, onShowAnimation, onOpen3DPreview }}
         />
         <Separator />
-        <PathInfo
-          userPathLength={userPathLength}
-          shortestPathLength={shortestPathLength}
-        />
-        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-700">
-          <div className="flex items-center gap-2">
-            <span className="h-3 w-3 rounded-full bg-green-600 ring-2 ring-green-900" />
-            <span>Start</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="h-3 w-3 rounded-full bg-red-600 ring-2 ring-red-900" />
-            <span>Ziel</span>
-          </div>
-        </div>
-        {showExplorationLegend && (
-          <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-800">
-            <div className="mb-2 font-medium">Legende zur Exploration</div>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <div className="flex items-center gap-2">
-                <span
-                  className="h-3 w-3 rounded-full"
-                  style={{ backgroundColor: "#ff2d95" }}
-                />
-                <span>Aktuell entdeckte Kante</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span
-                  className="h-3 w-3 rounded-full"
-                  style={{ backgroundColor: "#7c3aed" }}
-                />
-                <span>Aktuell geprüfte bekannte Kante</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span
-                  className="h-3 w-3 rounded-full"
-                  style={{ backgroundColor: "#fff200" }}
-                />
-                <span>Bereits entdeckte Kanten</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span
-                  className="h-3 w-3 rounded-full"
-                  style={{ backgroundColor: "#a3e635" }}
-                />
-                <span>Bereits geprüfte bekannte Kanten</span>
-              </div>
-            </div>
-          </div>
-        )}
+        <MazeLegendSection
+          title="Legende:"
+          explorationLegend={showExplorationLegend ? {} : null}
+        >
+          <PathInfo
+            className={cn("border-t pt-3", MAZE_LEGEND_DIVIDER_CLASS_NAME)}
+            shortestPathLength={shortestPathLength}
+            userPathLength={userPathLength}
+            variant="plain"
+          />
+        </MazeLegendSection>
         <div className="w-full aspect-square touch-none overscroll-contain">
           <Maze
             maze={maze}
