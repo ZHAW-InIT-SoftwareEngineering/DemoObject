@@ -7,7 +7,7 @@ All URIs are relative to *http://localhost*
 | [**sessionsPost**](SessionsApi.md#sessionspostoperation) | **POST** /sessions | Create a new session and return a sessionId (and QR payload) |
 | [**sessionsSessionIdPatch**](SessionsApi.md#sessionssessionidpatchoperation) | **PATCH** /sessions/{sessionId} | Update stored information (status, path or expiresAt) for a specific session |
 | [**sessionsSessionIdPathsGet**](SessionsApi.md#sessionssessionidpathsget) | **GET** /sessions/{sessionId}/paths | Retrieve stored path for a session |
-| [**sessionsSessionIdPathsPut**](SessionsApi.md#sessionssessionidpathsput) | **PUT** /sessions/{sessionId}/paths | Store a user-selected path and its automatically transpiled DSL representation bund to a session  |
+| [**sessionsSessionIdPathsPut**](SessionsApi.md#sessionssessionidpathsputoperation) | **PUT** /sessions/{sessionId}/paths | Store a user-selected path and its automatically transpiled DSL representation bund to a session  |
 
 
 
@@ -72,6 +72,7 @@ No authorization required
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **201** | Session created |  * Location - Cannoncial URI of the new created session resource <br>  |
+| **404** | Maze not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 
@@ -213,7 +214,7 @@ No authorization required
 
 ## sessionsSessionIdPathsPut
 
-> SessionsSessionIdPathsGet200Response sessionsSessionIdPathsPut(sessionId, mazesMazeIdPathsDslPostRequest)
+> SessionsSessionIdPathsGet200Response sessionsSessionIdPathsPut(sessionId, sessionsSessionIdPathsPutRequest)
 
 Store a user-selected path and its automatically transpiled DSL representation bund to a session 
 
@@ -224,7 +225,7 @@ import {
   Configuration,
   SessionsApi,
 } from '';
-import type { SessionsSessionIdPathsPutRequest } from '';
+import type { SessionsSessionIdPathsPutOperationRequest } from '';
 
 async function example() {
   console.log("🚀 Testing  SDK...");
@@ -233,9 +234,9 @@ async function example() {
   const body = {
     // string
     sessionId: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
-    // MazesMazeIdPathsDslPostRequest (optional)
-    mazesMazeIdPathsDslPostRequest: ...,
-  } satisfies SessionsSessionIdPathsPutRequest;
+    // SessionsSessionIdPathsPutRequest (optional)
+    sessionsSessionIdPathsPutRequest: ...,
+  } satisfies SessionsSessionIdPathsPutOperationRequest;
 
   try {
     const data = await api.sessionsSessionIdPathsPut(body);
@@ -255,7 +256,7 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **sessionId** | `string` |  | [Defaults to `undefined`] |
-| **mazesMazeIdPathsDslPostRequest** | [MazesMazeIdPathsDslPostRequest](MazesMazeIdPathsDslPostRequest.md) |  | [Optional] |
+| **sessionsSessionIdPathsPutRequest** | [SessionsSessionIdPathsPutRequest](SessionsSessionIdPathsPutRequest.md) |  | [Optional] |
 
 ### Return type
 

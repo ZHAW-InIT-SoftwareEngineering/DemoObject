@@ -1,6 +1,7 @@
 import type { MazesMazeIdGet200ResponseNodesInner } from "@/api";
+import { error } from "three";
 
-export type TheoryDslToken = "UP" | "RIGHT" | "DOWN" | "LEFT" | "MOVE";
+export type TheoryDslToken = "UP" | "RIGHT" | "DOWN" | "LEFT";
 
 type TheoryDslTokenMeta = {
   label: string;
@@ -11,30 +12,29 @@ type TheoryDslTokenMeta = {
 const THEORY_DSL_TOKEN_META: Record<TheoryDslToken, TheoryDslTokenMeta> = {
   UP: {
     label: "Nach oben",
-    shortLabel: "Hoch",
+    shortLabel: "HOCH",
     order: 0,
   },
   RIGHT: {
     label: "Nach rechts",
-    shortLabel: "Rechts",
+    shortLabel: "RECHTS",
     order: 1,
   },
   DOWN: {
     label: "Nach unten",
-    shortLabel: "Runter",
+    shortLabel: "RUNTER",
     order: 2,
   },
   LEFT: {
     label: "Nach links",
-    shortLabel: "Links",
+    shortLabel: "LINKS",
     order: 3,
   },
-  MOVE: {
-    label: "Zum Nachbarknoten",
-    shortLabel: "Schritt",
-    order: 4,
-  },
 };
+
+function isTheoryDslToken(token: string): token is TheoryDslToken {
+  return Object.prototype.hasOwnProperty.call(THEORY_DSL_TOKEN_META, token);
+}
 
 export function getTheoryDslToken(
   from: Pick<MazesMazeIdGet200ResponseNodesInner, "x" | "y">,
@@ -48,11 +48,23 @@ export function getTheoryDslToken(
   if (dx === 0 && dy === 1) return "DOWN";
   if (dx === -1 && dy === 0) return "LEFT";
 
-  return "MOVE";
+  throw new Error;
 }
 
 export function getTheoryDslTokenMeta(token: TheoryDslToken): TheoryDslTokenMeta {
   return THEORY_DSL_TOKEN_META[token];
+}
+
+export function getDslTokenMeta(token: string): TheoryDslTokenMeta {
+  if (isTheoryDslToken(token)) {
+    return getTheoryDslTokenMeta(token);
+  }
+
+  return {
+    label: token,
+    shortLabel: token,
+    order: Number.MAX_SAFE_INTEGER,
+  };
 }
 
 export function nodePathToTheoryDslTokens(

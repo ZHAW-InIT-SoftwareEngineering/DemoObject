@@ -45,6 +45,7 @@ function isShortestPathResponse(
 
   const record = value as Partial<MazesMazeIdShortestPathGet200Response>;
   return (
+    (record.algorithm === "bfs" || record.algorithm === "dijkstra") &&
     Array.isArray(record.path) &&
     record.path.every(isCoordPathEntry) &&
     Array.isArray(record.explorationSteps) &&
@@ -55,15 +56,20 @@ function isShortestPathResponse(
         from?: unknown;
         to?: unknown;
         discovered?: unknown;
+        improved?: unknown;
+        candidateCost?: unknown;
       };
 
       return (
         isCoordPathEntry(explorationStep.from) &&
         isCoordPathEntry(explorationStep.to) &&
-        typeof explorationStep.discovered === "boolean"
+        typeof explorationStep.discovered === "boolean" &&
+        typeof explorationStep.improved === "boolean" &&
+        typeof explorationStep.candidateCost === "number"
       );
     }) &&
-    typeof record.length === "number"
+    typeof record.length === "number" &&
+    typeof record.cost === "number"
   );
 }
 

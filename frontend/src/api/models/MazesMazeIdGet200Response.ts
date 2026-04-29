@@ -13,6 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { MazesMazeIdGet200ResponseWallsInner } from './MazesMazeIdGet200ResponseWallsInner';
+import {
+    MazesMazeIdGet200ResponseWallsInnerFromJSON,
+    MazesMazeIdGet200ResponseWallsInnerFromJSONTyped,
+    MazesMazeIdGet200ResponseWallsInnerToJSON,
+    MazesMazeIdGet200ResponseWallsInnerToJSONTyped,
+} from './MazesMazeIdGet200ResponseWallsInner';
 import type { MazesMazeIdGet200ResponseEdgesInner } from './MazesMazeIdGet200ResponseEdgesInner';
 import {
     MazesMazeIdGet200ResponseEdgesInnerFromJSON,
@@ -66,10 +73,10 @@ export interface MazesMazeIdGet200Response {
     edges: Array<MazesMazeIdGet200ResponseEdgesInner>;
     /**
      * 
-     * @type {Array<MazesMazeIdGet200ResponseEdgesInner>}
+     * @type {Array<MazesMazeIdGet200ResponseWallsInner>}
      * @memberof MazesMazeIdGet200Response
      */
-    walls?: Array<MazesMazeIdGet200ResponseEdgesInner>;
+    walls?: Array<MazesMazeIdGet200ResponseWallsInner>;
 }
 
 /**
@@ -99,7 +106,7 @@ export function MazesMazeIdGet200ResponseFromJSONTyped(json: any, ignoreDiscrimi
         'endNodeId': json['endNodeId'],
         'nodes': ((json['nodes'] as Array<any>).map(MazesMazeIdGet200ResponseNodesInnerFromJSON)),
         'edges': ((json['edges'] as Array<any>).map(MazesMazeIdGet200ResponseEdgesInnerFromJSON)),
-        'walls': json['walls'] == null ? undefined : ((json['walls'] as Array<any>).map(MazesMazeIdGet200ResponseEdgesInnerFromJSON)),
+        'walls': json['walls'] == null ? undefined : ((json['walls'] as Array<any>).map(MazesMazeIdGet200ResponseWallsInnerFromJSON)),
     };
 }
 
@@ -119,7 +126,7 @@ export function MazesMazeIdGet200ResponseToJSONTyped(value?: MazesMazeIdGet200Re
         'endNodeId': value['endNodeId'],
         'nodes': ((value['nodes'] as Array<any>).map(MazesMazeIdGet200ResponseNodesInnerToJSON)),
         'edges': ((value['edges'] as Array<any>).map(MazesMazeIdGet200ResponseEdgesInnerToJSON)),
-        'walls': value['walls'] == null ? undefined : ((value['walls'] as Array<any>).map(MazesMazeIdGet200ResponseEdgesInnerToJSON)),
+        'walls': value['walls'] == null ? undefined : ((value['walls'] as Array<any>).map(MazesMazeIdGet200ResponseWallsInnerToJSON)),
     };
 }
 

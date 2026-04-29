@@ -8,6 +8,7 @@ Name | Type
 ------------ | -------------
 `from` | number
 `to` | number
+`weight` | number
 
 ## Example
 
@@ -18,6 +19,7 @@ import type { MazesMazeIdGet200ResponseEdgesInner } from ''
 const example = {
   "from": null,
   "to": null,
+  "weight": null,
 } satisfies MazesMazeIdGet200ResponseEdgesInner
 
 console.log(example)

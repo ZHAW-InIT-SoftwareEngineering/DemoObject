@@ -42,6 +42,7 @@ export interface MazesMazeIdPathsDslPostOperationRequest {
 
 export interface MazesMazeIdShortestPathGetRequest {
     mazeId: number | null;
+    algorithm?: MazesMazeIdShortestPathGetAlgorithmEnum;
 }
 
 /**
@@ -138,6 +139,10 @@ export class MazesApi extends runtime.BaseAPI {
 
         const queryParameters: any = {};
 
+        if (requestParameters['algorithm'] != null) {
+            queryParameters['algorithm'] = requestParameters['algorithm'];
+        }
+
         const headerParameters: runtime.HTTPHeaders = {};
 
 
@@ -162,3 +167,12 @@ export class MazesApi extends runtime.BaseAPI {
     }
 
 }
+
+/**
+ * @export
+ */
+export const MazesMazeIdShortestPathGetAlgorithmEnum = {
+    Bfs: 'bfs',
+    Dijkstra: 'dijkstra'
+} as const;
+export type MazesMazeIdShortestPathGetAlgorithmEnum = typeof MazesMazeIdShortestPathGetAlgorithmEnum[keyof typeof MazesMazeIdShortestPathGetAlgorithmEnum];

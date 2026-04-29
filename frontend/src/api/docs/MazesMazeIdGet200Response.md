@@ -11,7 +11,7 @@ Name | Type
 `endNodeId` | number
 `nodes` | [Array&lt;MazesMazeIdGet200ResponseNodesInner&gt;](MazesMazeIdGet200ResponseNodesInner.md)
 `edges` | [Array&lt;MazesMazeIdGet200ResponseEdgesInner&gt;](MazesMazeIdGet200ResponseEdgesInner.md)
-`walls` | [Array&lt;MazesMazeIdGet200ResponseEdgesInner&gt;](MazesMazeIdGet200ResponseEdgesInner.md)
+`walls` | [Array&lt;MazesMazeIdGet200ResponseWallsInner&gt;](MazesMazeIdGet200ResponseWallsInner.md)
 
 ## Example
 

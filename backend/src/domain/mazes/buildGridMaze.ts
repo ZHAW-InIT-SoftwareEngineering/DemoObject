@@ -7,9 +7,14 @@ export type AdjacentWall = {
   to: number;
 };
 
+export type AdjacentWeightedEdge = AdjacentWall & {
+  weight: number;
+};
+
 type BuildGridMazeConfig = {
   mazeId: number;
   blockedWalls: readonly AdjacentWall[];
+  weightedEdges?: readonly AdjacentWeightedEdge[];
   startNodeId?: number;
   endNodeId?: number;
 };
@@ -58,6 +63,21 @@ export function createGridMazeFactory(width: number, height: number) {
     return { from: normalizedFrom, to: normalizedTo };
   }
 
+  function weightedEdge(
+    fromNodeId: number,
+    toNodeId: number,
+    weight: number,
+  ): AdjacentWeightedEdge {
+    if (!Number.isInteger(weight) || weight <= 0) {
+      throw new Error(`Edge weights must be positive integers. Received ${weight}.`);
+    }
+
+    return {
+      ...wall(fromNodeId, toNodeId),
+      weight,
+    };
+  }
+
   function createBlockedWallKeySet(walls: readonly AdjacentWall[]) {
     const wallKeys = new Set<WallKey>();
 
@@ -74,9 +94,27 @@ export function createGridMazeFactory(width: number, height: number) {
     return wallKeys;
   }
 
+  function createEdgeWeightByKey(weightedEdges: readonly AdjacentWeightedEdge[]) {
+    const edgeWeightByKey = new Map<WallKey, number>();
+
+    for (const weightedConnection of weightedEdges) {
+      const edgeKey = toWallKey(weightedConnection.from, weightedConnection.to);
+      if (edgeWeightByKey.has(edgeKey)) {
+        throw new Error(
+          `Duplicate edge weight definition detected: ${weightedConnection.from} <-> ${weightedConnection.to}`,
+        );
+      }
+
+      edgeWeightByKey.set(edgeKey, weightedConnection.weight);
+    }
+
+    return edgeWeightByKey;
+  }
+
   function buildMaze({
     mazeId,
     blockedWalls,
+    weightedEdges = [],
     startNodeId = 0,
     endNodeId = totalNodes - 1,
   }: BuildGridMazeConfig): Maze {
@@ -84,9 +122,16 @@ export function createGridMazeFactory(width: number, height: number) {
     assertNodeIdInBounds(endNodeId, "End node id");
 
     const blockedWallKeys = createBlockedWallKeySet(blockedWalls);
+    const edgeWeightByKey = createEdgeWeightByKey(weightedEdges);
     const nodes: Maze["nodes"] = [];
     const edges: Maze["edges"] = [];
     const walls: Maze["walls"] = [];
+
+    for (const blockedWallKey of blockedWallKeys) {
+      if (edgeWeightByKey.has(blockedWallKey)) {
+        throw new Error(`Cannot assign a weight to a blocked wall (${blockedWallKey}).`);
+      }
+    }
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
@@ -95,19 +140,29 @@ export function createGridMazeFactory(width: number, height: number) {
 
         if (x + 1 < width) {
           const rightId = nodeId + 1;
-          if (blockedWallKeys.has(toWallKey(nodeId, rightId))) {
+          const rightEdgeKey = toWallKey(nodeId, rightId);
+          if (blockedWallKeys.has(rightEdgeKey)) {
             walls.push({ from: nodeId, to: rightId });
           } else {
-            edges.push({ from: nodeId, to: rightId });
+            edges.push({
+              from: nodeId,
+              to: rightId,
+              weight: edgeWeightByKey.get(rightEdgeKey) ?? 1,
+            });
           }
         }
 
         if (y + 1 < height) {
           const downId = nodeId + width;
-          if (blockedWallKeys.has(toWallKey(nodeId, downId))) {
+          const downEdgeKey = toWallKey(nodeId, downId);
+          if (blockedWallKeys.has(downEdgeKey)) {
             walls.push({ from: nodeId, to: downId });
           } else {
-            edges.push({ from: nodeId, to: downId });
+            edges.push({
+              from: nodeId,
+              to: downId,
+              weight: edgeWeightByKey.get(downEdgeKey) ?? 1,
+            });
           }
         }
       }
@@ -116,5 +171,5 @@ export function createGridMazeFactory(width: number, height: number) {
     return { mazeId, startNodeId, endNodeId, nodes, edges, walls };
   }
 
-  return { buildMaze, wall };
+  return { buildMaze, wall, weightedEdge };
 }

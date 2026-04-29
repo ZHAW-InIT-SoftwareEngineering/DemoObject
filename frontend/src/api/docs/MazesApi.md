@@ -141,6 +141,7 @@ No authorization required
 |-------------|-------------|------------------|
 | **200** | Compile a user-provided maze path do DSL |  -  |
 | **400** | Invalid request |  -  |
+| **404** | Maze not found |  -  |
 | **412** | Invalid path |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
@@ -148,7 +149,7 @@ No authorization required
 
 ## mazesMazeIdShortestPathGet
 
-> MazesMazeIdShortestPathGet200Response mazesMazeIdShortestPathGet(mazeId)
+> MazesMazeIdShortestPathGet200Response mazesMazeIdShortestPathGet(mazeId, algorithm)
 
 
 
@@ -168,6 +169,8 @@ async function example() {
   const body = {
     // number
     mazeId: 56,
+    // 'bfs' | 'dijkstra' (optional)
+    algorithm: algorithm_example,
   } satisfies MazesMazeIdShortestPathGetRequest;
 
   try {
@@ -188,6 +191,7 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **mazeId** | `number` |  | [Defaults to `undefined`] |
+| **algorithm** | `bfs`, `dijkstra` |  | [Optional] [Defaults to `undefined`] [Enum: bfs, dijkstra] |
 
 ### Return type
 
@@ -206,7 +210,7 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-| **200** | Find shortest path between two nodes using BFS |  -  |
+| **200** | Find shortest path between two nodes using BFS or Dijkstra |  -  |
 | **400** | Invalid request |  -  |
 | **404** | Maze or path not found |  -  |
 

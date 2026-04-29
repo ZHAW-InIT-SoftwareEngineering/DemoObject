@@ -13,24 +13,32 @@ export function TheoryDslIntro() {
         </h1>
       </div>
       <div className="space-y-3 text-base leading-7 text-slate-700">
-        <p>
-          DSL steht für <span className="font-semibold">Domain Specific Language</span>. Statt einen Pfad im
-          Labyrinth zu zeichnen, beschreibst du ihn als Folge klarer
-          Richtungsbloecke wie <span className="font-semibold">Hoch</span>,{" "}
-          <span className="font-semibold">Rechts</span>,{" "}
-          <span className="font-semibold">Runter</span> und{" "}
-          <span className="font-semibold">Links</span>.
-        </p>
-        <p>
-          Anstatt Programmiersprachen zu lernen, kann man mit DSLs programmieren. Dies hat jedoch auch Nachteile.
-          Zum Beispiel ist man durch die DSL darin eingeschränkt, was man alles programmieren kann. 
-          Dies ist normalerweise bei einer sogenannten High-Level-Sprache nicht der Fall.
-        </p>
-        <p>
-          Unten siehst du ein separates Theorie-Labyrinth. Den Pfad gibst du ausschliesslich über das
-          Steuerkreuz mit den DSL-Blöcken ein. Stelle dir vor du schreibst ein Programm anstatt einen Pfad. 
-        </p>
-      </div>
-    </section>
+    <p>
+      <span className="font-semibold">DSL</span> bedeutet{" "}
+      <span className="font-semibold">domänenspezifische Sprache</span>.
+      Das ist eine Sprache, die nur für eine bestimmte Aufgabe gemacht ist.
+    </p>
+
+    <p>
+      In diesem Fall ist die Aufgabe: den Weg durch ein Labyrinth angeben.
+      Dafür gibt es nur wenige Befehle:{" "}
+      <span className="font-semibold">Hoch</span>,{" "}
+      <span className="font-semibold">Rechts</span>,{" "}
+      <span className="font-semibold">Runter</span> und{" "}
+      <span className="font-semibold">Links</span>.
+    </p>
+
+    <p>
+      Statt den Weg zu malen, klickst du die passenden Bausteine aneinander.
+      So entsteht Schritt für Schritt ein kleines Programm.
+    </p>
+
+    <p>
+      Unten kannst du es direkt ausprobieren und selbst einen Weg
+      „programmieren“. Stelle dir dabei vor, dass du so ein Computer-Programm programmierst. 
+    </p>
+
+    </div>
+  </section>
   );
 }

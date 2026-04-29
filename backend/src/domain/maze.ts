@@ -9,6 +9,7 @@ export const MazeNode = z.object({
 export const MazeEdge = z.object({
   from: z.number().int().nonnegative(),
   to: z.number().int().nonnegative(),
+  weight: z.number().int().positive(),
 });
 
 export const MazeWall = z.object({

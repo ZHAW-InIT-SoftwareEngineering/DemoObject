@@ -24,13 +24,12 @@ const blockedWalls = [
   wall(15, 16),
 
   // Barrier between columns 4 and 5.
-  wall(10, 11),
   wall(16, 17),
   wall(22, 23),
   wall(34, 35),
 
   // Barrier between rows 0 and 1.
-  wall(2, 8),
+  wall(1, 7),
   wall(3, 9),
   wall(4, 10),
 

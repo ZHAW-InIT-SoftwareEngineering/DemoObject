@@ -28,9 +28,9 @@ export function TheoryDslDirectionPad({
   return (
     <div className="mx-auto w-fit rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
       <div className="text-center text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-        DSL-Steuerkreuz
+        Steuerkreuz 
       </div>
-      <div className="mt-3 grid grid-cols-3 grid-rows-3 gap-1.5 sm:gap-2">
+      <div className="mt-3 grid grid-cols-3 grid-rows-3 gap-x-1 gap-y-1.5 sm:gap-x-1.5 sm:gap-y-2">
         {DIRECTION_BUTTON_LAYOUT.map(({ token, className }) => {
           const meta = getTheoryDslTokenMeta(token);
           const node = moveChoiceByToken.get(token);
@@ -54,9 +54,6 @@ export function TheoryDslDirectionPad({
               }}
               disabled={!node}
             >
-              <span className="text-[9px] uppercase tracking-[0.18em] sm:text-[10px]">
-                {token}
-              </span>
               <span className="text-xs font-medium sm:text-sm">
                 {meta.shortLabel}
               </span>
@@ -64,7 +61,7 @@ export function TheoryDslDirectionPad({
           );
         })}
         <div className="col-start-2 row-start-2 flex min-h-12 w-16 items-center justify-center rounded-md border border-slate-200 bg-slate-50 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 sm:min-h-14 sm:w-20 sm:text-xs">
-          DSL
+          Pfad
         </div>
       </div>
     </div>

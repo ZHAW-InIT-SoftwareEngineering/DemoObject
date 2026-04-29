@@ -6,8 +6,11 @@
 
 Name | Type
 ------------ | -------------
+`algorithm` | string
 `path` | [Array&lt;MazesMazeIdPathsDslPostRequestPathInner&gt;](MazesMazeIdPathsDslPostRequestPathInner.md)
 `length` | number
+`cost` | number
+`explorationSteps` | [Array&lt;MazesMazeIdShortestPathGet200ResponseExplorationStepsInner&gt;](MazesMazeIdShortestPathGet200ResponseExplorationStepsInner.md)
 
 ## Example
 
@@ -16,8 +19,11 @@ import type { MazesMazeIdShortestPathGet200Response } from ''
 
 // TODO: Update the object below with actual values
 const example = {
+  "algorithm": null,
   "path": null,
   "length": null,
+  "cost": null,
+  "explorationSteps": null,
 } satisfies MazesMazeIdShortestPathGet200Response
 
 console.log(example)

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   MazesMazeIdPathsDslPostRequest,
+  SessionsSessionIdPathsPutRequest,
   SessionsSessionIdPathsGet200Response,
 } from "@/api";
 import {
@@ -61,42 +62,49 @@ export function usePathSubmission({
     setLastSubmittedKey(null);
   }, []);
 
-  const submitPath = useCallback(async () => {
-    if (!sessionId || !apiRequest || mazeId === null || mazeId === undefined) {
-      return null;
-    }
-    if (!submissionScopeKey) {
-      return null;
-    }
-
-    setSubmitting(true);
-    setSubmitError(null);
-
-    try {
-      const response = await sessionsApi.sessionsSessionIdPathsPut({
-        sessionId,
-        mazesMazeIdPathsDslPostRequest: apiRequest,
-      });
-
-      const nextDsl = response.dsl ?? null;
-
-      writePersistedDemoPathSubmissionDsl(sessionId, mazeId, pathKey, nextDsl);
-
-      if (currentSubmissionScopeKeyRef.current === submissionScopeKey) {
-        setDsl(nextDsl);
-        setLastSubmittedKey(pathKey);
+  const submitPath = useCallback(
+    async (elapsedMs: number) => {
+      if (!sessionId || !apiRequest || mazeId === null || mazeId === undefined) {
+        return null;
+      }
+      if (!submissionScopeKey) {
+        return null;
       }
 
-      return response;
-    } catch {
-      if (currentSubmissionScopeKeyRef.current === submissionScopeKey) {
-        setSubmitError("Senden des Pfads fehlgeschlagen.");
+      setSubmitting(true);
+      setSubmitError(null);
+
+      try {
+        const requestBody: SessionsSessionIdPathsPutRequest = {
+          path: apiRequest.path,
+          elapsedMs,
+        };
+        const response = await sessionsApi.sessionsSessionIdPathsPut({
+          sessionId,
+          sessionsSessionIdPathsPutRequest: requestBody,
+        });
+
+        const nextDsl = response.dsl ?? null;
+
+        writePersistedDemoPathSubmissionDsl(sessionId, mazeId, pathKey, nextDsl);
+
+        if (currentSubmissionScopeKeyRef.current === submissionScopeKey) {
+          setDsl(nextDsl);
+          setLastSubmittedKey(pathKey);
+        }
+
+        return response;
+      } catch {
+        if (currentSubmissionScopeKeyRef.current === submissionScopeKey) {
+          setSubmitError("Senden des Pfads fehlgeschlagen.");
+        }
+        return null;
+      } finally {
+        setSubmitting(false);
       }
-      return null;
-    } finally {
-      setSubmitting(false);
-    }
-  }, [apiRequest, mazeId, pathKey, sessionId, submissionScopeKey]);
+    },
+    [apiRequest, mazeId, pathKey, sessionId, submissionScopeKey],
+  );
 
   const isPathSubmitted =
     Boolean(lastSubmittedKey) && pathKey === lastSubmittedKey;
@@ -108,7 +116,9 @@ export function usePathSubmission({
       submitting,
       lastSubmittedKey,
       isPathSubmitted,
-      submitPath: submitPath as () => Promise<SessionsSessionIdPathsGet200Response | null>,
+      submitPath: submitPath as (
+        elapsedMs: number,
+      ) => Promise<SessionsSessionIdPathsGet200Response | null>,
       resetSubmission,
     }),
     [
