@@ -1,5 +1,5 @@
 # DemoObject
-Live under: [demo.init.zhaw.ch](demo.init.zhaw.ch)
+Live under: [demo.init.zhaw.ch](https://demo.init.zhaw.ch)
 
 Here you will find the repository containing all the files for the conceptualization and implementation of the new demo object.
 
