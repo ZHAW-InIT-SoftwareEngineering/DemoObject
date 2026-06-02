@@ -1,52 +1,33 @@
 import type { SessionsPost201Response } from "@/api";
 import {
-  clearSessionStorageItem,
-  readSessionStorageItem,
-  writeSessionStorageItem,
-} from "@/lib/sessionStorage";
+  clearDemoActiveStateData,
+  createEmptyDemoActiveStateData,
+  readDemoActiveStateData,
+  writeDemoActiveStateData,
+} from "@/lib/demoActiveStateStorage";
+import type { PersistedDemoSession } from "@/lib/demoPersistenceTypes";
 
-const STORAGE_KEY = "demo-object.active-session";
-
-export type PersistedDemoSession = {
-  mazeId: number;
-  createdAt: string;
-  session: SessionsPost201Response;
-};
-
-function isPersistedDemoSession(value: unknown): value is PersistedDemoSession {
-  if (!value || typeof value !== "object") return false;
-
-  const record = value as Partial<PersistedDemoSession>;
-  const session = record.session as Partial<SessionsPost201Response> | undefined;
-
-  return (
-    typeof record.mazeId === "number" &&
-    typeof record.createdAt === "string" &&
-    !!session &&
-    typeof session.sessionId === "string" &&
-    typeof session.qrPayload === "string"
-  );
-}
+export type { PersistedDemoSession } from "@/lib/demoPersistenceTypes";
 
 export function readPersistedDemoSession(): PersistedDemoSession | null {
-  return readSessionStorageItem(STORAGE_KEY, isPersistedDemoSession);
+  return readDemoActiveStateData().session;
 }
 
 export function writePersistedDemoSession(
   session: SessionsPost201Response,
   mazeId: number,
 ) {
-  if (typeof window === "undefined") return;
-
   const record: PersistedDemoSession = {
     mazeId,
     createdAt: new Date().toISOString(),
     session,
   };
+  const data = createEmptyDemoActiveStateData();
+  data.session = record;
 
-  writeSessionStorageItem(STORAGE_KEY, record);
+  writeDemoActiveStateData(data);
 }
 
 export function clearPersistedDemoSession() {
-  clearSessionStorageItem(STORAGE_KEY);
+  clearDemoActiveStateData();
 }

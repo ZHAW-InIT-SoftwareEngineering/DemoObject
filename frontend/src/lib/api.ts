@@ -1,9 +1,9 @@
 import { Configuration, MazesApi, SessionsApi } from "../api";
 
-const basePath =
+export const apiBasePath =
     import.meta.env.VITE_API_BASE_URL ?? "/api";
 
-const config = new Configuration({ basePath });
+const config = new Configuration({ basePath: apiBasePath });
 
 export const sessionsApi = new SessionsApi(config);
 export const mazeApi = new MazesApi(config);

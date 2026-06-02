@@ -60,10 +60,11 @@ function getCollectionName(): string {
 
 const collection = () => getDbCollection<Session>(getCollectionName());
 
-export async function insertSessionDoc(sessionId: string, mazeId: number) { 
+export async function insertSessionDoc(sessionId: string, mazeId: number, userName: string) { 
     const doc: Session = Session.parse({
       sessionId: sessionId,
       mazeId: mazeId,
+      userName,
       createdAt: new Date(),
     });
     await collection().insertOne(doc)
@@ -71,6 +72,22 @@ export async function insertSessionDoc(sessionId: string, mazeId: number) {
 };
 
 export async function findSessionDoc(sessionId: string) { return await (collection()).findOne({ sessionId }) };
+
+export async function findSessionDocByUserName(userName: string) {
+    return await collection().findOne({ userName });
+}
+
+export async function findFinalSessionDocsByMazeId(mazeId: number) {
+    return await collection()
+      .find({
+        mazeId,
+        path: { $exists: true },
+        dsl: { $exists: true },
+        elapsedMs: { $exists: true },
+        submittedAt: { $exists: true },
+      })
+      .toArray();
+}
 
 export async function updateSessionDoc(sessionId: string, data: Partial<Session>) {
     const updatedDocument = await collection().findOneAndUpdate(

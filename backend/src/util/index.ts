@@ -1,1 +1,1 @@
-export { isValidPath } from "./pathValidation";
+export { isCompleteStartToGoalPath, isValidPath } from "./pathValidation";

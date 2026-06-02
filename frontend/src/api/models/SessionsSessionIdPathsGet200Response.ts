@@ -51,6 +51,12 @@ export interface SessionsSessionIdPathsGet200Response {
      * @memberof SessionsSessionIdPathsGet200Response
      */
     elapsedMs: number;
+    /**
+     * 
+     * @type {Date}
+     * @memberof SessionsSessionIdPathsGet200Response
+     */
+    submittedAt?: Date;
 }
 
 /**
@@ -78,6 +84,7 @@ export function SessionsSessionIdPathsGet200ResponseFromJSONTyped(json: any, ign
         'path': ((json['path'] as Array<any>).map(MazesMazeIdPathsDslPostRequestPathInnerFromJSON)),
         'dsl': json['dsl'],
         'elapsedMs': json['elapsedMs'],
+        'submittedAt': json['submittedAt'] == null ? undefined : (new Date(json['submittedAt'])),
     };
 }
 
@@ -96,6 +103,6 @@ export function SessionsSessionIdPathsGet200ResponseToJSONTyped(value?: Sessions
         'path': ((value['path'] as Array<any>).map(MazesMazeIdPathsDslPostRequestPathInnerToJSON)),
         'dsl': value['dsl'],
         'elapsedMs': value['elapsedMs'],
+        'submittedAt': value['submittedAt'] == null ? undefined : ((value['submittedAt']).toISOString()),
     };
 }
-

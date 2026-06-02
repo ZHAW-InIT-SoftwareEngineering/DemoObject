@@ -270,6 +270,7 @@ export function MazeEditorPage() {
         <DslStrip dsl={isPathSubmitted ? dsl : null} />
         <MazePanel
           maze={maze}
+          userName={session?.userName ?? null}
           onNodeClick={selectNode}
           onUndo={undoNodeSelection}
           onShowAnimation={handleShowAnimationPathSelection}

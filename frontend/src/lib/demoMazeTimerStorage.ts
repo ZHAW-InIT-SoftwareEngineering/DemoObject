@@ -1,46 +1,22 @@
 import {
-  readSessionStorageItem,
-  writeSessionStorageItem,
-} from "@/lib/sessionStorage";
+  readDemoActiveStateData,
+  updateDemoActiveStateData,
+} from "@/lib/demoActiveStateStorage";
+import type { PersistedDemoMazeTimer } from "@/lib/demoPersistenceTypes";
 
-const STORAGE_KEY_PREFIX = "demo-object.maze-timer";
-
-export type PersistedDemoMazeTimer = {
-  mazeId: number;
-  sessionId: string;
-  startedAt: number;
-  submittedAt: number | null;
-  updatedAt: string;
-};
-
-function isPersistedDemoMazeTimer(
-  value: unknown,
-): value is PersistedDemoMazeTimer {
-  if (!value || typeof value !== "object") return false;
-
-  const record = value as Partial<PersistedDemoMazeTimer>;
-
-  return (
-    typeof record.mazeId === "number" &&
-    typeof record.sessionId === "string" &&
-    typeof record.startedAt === "number" &&
-    (record.submittedAt === null || typeof record.submittedAt === "number") &&
-    typeof record.updatedAt === "string"
-  );
-}
-
-function buildStorageKey(sessionId: string, mazeId: number) {
-  return `${STORAGE_KEY_PREFIX}:${mazeId}:${sessionId}`;
-}
+export type { PersistedDemoMazeTimer } from "@/lib/demoPersistenceTypes";
 
 export function readPersistedDemoMazeTimer(
   sessionId: string,
   mazeId: number,
 ): PersistedDemoMazeTimer | null {
-  return readSessionStorageItem(
-    buildStorageKey(sessionId, mazeId),
-    isPersistedDemoMazeTimer,
-  );
+  const timer = readDemoActiveStateData().mazeTimer;
+
+  if (!timer || timer.sessionId !== sessionId || timer.mazeId !== mazeId) {
+    return null;
+  }
+
+  return timer;
 }
 
 export function writePersistedDemoMazeTimer(
@@ -57,5 +33,8 @@ export function writePersistedDemoMazeTimer(
     updatedAt: new Date().toISOString(),
   };
 
-  writeSessionStorageItem(buildStorageKey(sessionId, mazeId), record);
+  updateDemoActiveStateData((data) => ({
+    ...data,
+    mazeTimer: record,
+  }));
 }

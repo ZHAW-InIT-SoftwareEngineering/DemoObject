@@ -3,6 +3,7 @@ import { MazeTimer } from "@/components/app/maze/MazeTimer";
 import type { NodePath } from "@/lib/path/transforms";
 
 type MazePanelHeaderProps = {
+  userName?: string | null;
   pathState: {
     nodePath: NodePath;
     isPathSubmitted: boolean;
@@ -16,7 +17,11 @@ type MazePanelHeaderProps = {
   };
 };
 
-export function MazePanelHeader({ actions, pathState }: MazePanelHeaderProps) {
+export function MazePanelHeader({
+  actions,
+  pathState,
+  userName,
+}: MazePanelHeaderProps) {
   const { onUndo, onShowAnimation, onOpen3DPreview } = actions;
 
   const canUndo = pathState.nodePath.length >= 2;
@@ -24,6 +29,11 @@ export function MazePanelHeader({ actions, pathState }: MazePanelHeaderProps) {
   return (
     <div className="flex justify-center">
       <div className="flex flex-col items-center gap-2">
+        {userName ? (
+          <div className="rounded border border-slate-200 bg-slate-50 px-3 py-1 text-sm font-semibold text-slate-700">
+            {userName}
+          </div>
+        ) : null}
         <MazeTimer elapsedMs={timerElapsedMs} />
         <div className="flex flex-wrap items-center justify-center gap-2">
           {isPathSubmitted ? (

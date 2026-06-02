@@ -1,35 +1,14 @@
 import type { NodePath } from "@/lib/path/transforms";
 import {
-  clearSessionStorageItem,
-  readSessionStorageItem,
-  writeSessionStorageItem,
-} from "@/lib/sessionStorage";
+  readDemoActiveStateData,
+  updateDemoActiveStateData,
+} from "@/lib/demoActiveStateStorage";
+import type { PersistedDemoDraftPath } from "@/lib/demoPersistenceTypes";
 
-const STORAGE_KEY = "demo-object.draft-path";
-
-export type PersistedDemoDraftPath = {
-  mazeId: number;
-  sessionId: string;
-  nodePath: NodePath;
-  updatedAt: string;
-};
-
-function isPersistedDemoDraftPath(value: unknown): value is PersistedDemoDraftPath {
-  if (!value || typeof value !== "object") return false;
-
-  const record = value as Partial<PersistedDemoDraftPath>;
-
-  return (
-    typeof record.mazeId === "number" &&
-    typeof record.sessionId === "string" &&
-    Array.isArray(record.nodePath) &&
-    record.nodePath.every((nodeId) => typeof nodeId === "number") &&
-    typeof record.updatedAt === "string"
-  );
-}
+export type { PersistedDemoDraftPath } from "@/lib/demoPersistenceTypes";
 
 export function readPersistedDemoDraftPath(): PersistedDemoDraftPath | null {
-  return readSessionStorageItem(STORAGE_KEY, isPersistedDemoDraftPath);
+  return readDemoActiveStateData().draftPath;
 }
 
 export function writePersistedDemoDraftPath(
@@ -37,8 +16,6 @@ export function writePersistedDemoDraftPath(
   mazeId: number,
   nodePath: NodePath,
 ) {
-  if (typeof window === "undefined") return;
-
   const record: PersistedDemoDraftPath = {
     mazeId,
     sessionId,
@@ -46,9 +23,15 @@ export function writePersistedDemoDraftPath(
     updatedAt: new Date().toISOString(),
   };
 
-  writeSessionStorageItem(STORAGE_KEY, record);
+  updateDemoActiveStateData((data) => ({
+    ...data,
+    draftPath: record,
+  }));
 }
 
 export function clearPersistedDemoDraftPath() {
-  clearSessionStorageItem(STORAGE_KEY);
+  updateDemoActiveStateData((data) => ({
+    ...data,
+    draftPath: null,
+  }));
 }

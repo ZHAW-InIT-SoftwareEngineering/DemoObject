@@ -14,6 +14,7 @@ import { Route as MazeRouteRouteImport } from './routes/maze/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MazeIndexRouteImport } from './routes/maze/index'
 import { Route as ImpressumIndexRouteImport } from './routes/impressum/index'
+import { Route as DisplayIndexRouteImport } from './routes/display/index'
 import { Route as TheoryShortestPathIndexRouteImport } from './routes/theory/shortestPath/index'
 import { Route as TheoryDslIndexRouteImport } from './routes/theory/dsl/index'
 import { Route as MazeAnimationIndexRouteImport } from './routes/maze/animation/index'
@@ -43,6 +44,11 @@ const ImpressumIndexRoute = ImpressumIndexRouteImport.update({
   path: '/impressum/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DisplayIndexRoute = DisplayIndexRouteImport.update({
+  id: '/display/',
+  path: '/display/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TheoryShortestPathIndexRoute = TheoryShortestPathIndexRouteImport.update({
   id: '/shortestPath/',
   path: '/shortestPath/',
@@ -63,6 +69,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/maze': typeof MazeRouteRouteWithChildren
   '/theory': typeof TheoryRouteRouteWithChildren
+  '/display/': typeof DisplayIndexRoute
   '/impressum/': typeof ImpressumIndexRoute
   '/maze/': typeof MazeIndexRoute
   '/maze/animation/': typeof MazeAnimationIndexRoute
@@ -72,6 +79,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/theory': typeof TheoryRouteRouteWithChildren
+  '/display': typeof DisplayIndexRoute
   '/impressum': typeof ImpressumIndexRoute
   '/maze': typeof MazeIndexRoute
   '/maze/animation': typeof MazeAnimationIndexRoute
@@ -83,6 +91,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/maze': typeof MazeRouteRouteWithChildren
   '/theory': typeof TheoryRouteRouteWithChildren
+  '/display/': typeof DisplayIndexRoute
   '/impressum/': typeof ImpressumIndexRoute
   '/maze/': typeof MazeIndexRoute
   '/maze/animation/': typeof MazeAnimationIndexRoute
@@ -95,6 +104,7 @@ export interface FileRouteTypes {
     | '/'
     | '/maze'
     | '/theory'
+    | '/display/'
     | '/impressum/'
     | '/maze/'
     | '/maze/animation/'
@@ -104,6 +114,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/theory'
+    | '/display'
     | '/impressum'
     | '/maze'
     | '/maze/animation'
@@ -114,6 +125,7 @@ export interface FileRouteTypes {
     | '/'
     | '/maze'
     | '/theory'
+    | '/display/'
     | '/impressum/'
     | '/maze/'
     | '/maze/animation/'
@@ -125,6 +137,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   MazeRouteRoute: typeof MazeRouteRouteWithChildren
   TheoryRouteRoute: typeof TheoryRouteRouteWithChildren
+  DisplayIndexRoute: typeof DisplayIndexRoute
   ImpressumIndexRoute: typeof ImpressumIndexRoute
 }
 
@@ -163,6 +176,13 @@ declare module '@tanstack/react-router' {
       path: '/impressum'
       fullPath: '/impressum/'
       preLoaderRoute: typeof ImpressumIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/display/': {
+      id: '/display/'
+      path: '/display'
+      fullPath: '/display/'
+      preLoaderRoute: typeof DisplayIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/theory/shortestPath/': {
@@ -221,6 +241,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   MazeRouteRoute: MazeRouteRouteWithChildren,
   TheoryRouteRoute: TheoryRouteRouteWithChildren,
+  DisplayIndexRoute: DisplayIndexRoute,
   ImpressumIndexRoute: ImpressumIndexRoute,
 }
 export const routeTree = rootRouteImport

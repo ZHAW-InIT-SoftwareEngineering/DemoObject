@@ -1,1 +1,7 @@
-export { createSession, getSession, updateSession } from "./sessionRepository"
+export {
+  createSession,
+  getFinalSessionsByMazeId,
+  getSession,
+  getSessionByUserName,
+  updateSession,
+} from "./sessionRepository"
