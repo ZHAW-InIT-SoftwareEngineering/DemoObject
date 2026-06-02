@@ -38,16 +38,14 @@ This document explains the current CI/CD setup in this repository, including the
 2. Each job uses:
    - `contents: read`
    - `packages: write`
-3. Each job validates:
-   - Secret `GHCR_PAT`
-   - Variable `GHCR_USERNAME`
-4. Each job logs into GHCR with `docker/login-action@v3`.
+3. Each job configures the image name from the lower-case GitHub repository owner.
+4. Each job logs into GHCR with `docker/login-action@v3` using the workflow `GITHUB_TOKEN`.
 5. Each job builds with `docker/build-push-action@v6`.
 6. Images are tagged immutably with `${{ github.sha }}`.
 7. Published image names are:
-   - `ghcr.io/<GHCR_USERNAME>/demoobject-backend`
-   - `ghcr.io/<GHCR_USERNAME>/demoobject-frontend`
-   - `ghcr.io/<GHCR_USERNAME>/demoobject-caddy`
+   - `ghcr.io/<lower-case-repository-owner>/demoobject-backend`
+   - `ghcr.io/<lower-case-repository-owner>/demoobject-frontend`
+   - `ghcr.io/<lower-case-repository-owner>/demoobject-caddy`
 8. Image metadata generation is disabled with:
    - `provenance: false`
    - `sbom: false`
@@ -59,12 +57,10 @@ This document explains the current CI/CD setup in this repository, including the
    - `VM_HOST`
    - `VM_USER`
    - `DEPLOY_PATH`
-   - `GHCR_USERNAME`
    - `MONGO_DATABASE`
    - `MONGO_COLLECTION_NAME`
 3. It validates required GitHub secrets:
    - `SSH_PRIVATE_KEY`
-   - `GHCR_PAT`
    - `MONGO_ROOT_USERNAME`
    - `MONGO_ROOT_PASSWORD`
 4. It writes the private key to the runner, adds the VM host key with `ssh-keyscan`, and enables strict host-key checking for SSH connections.
@@ -73,7 +69,7 @@ This document explains the current CI/CD setup in this repository, including the
    - `docker compose version`
 6. It uploads `deploy/docker-compose.prod.yaml` to `${DEPLOY_PATH}/docker-compose.prod.yaml` on the VM.
 7. It then opens an SSH session to the VM and:
-   - Logs in to GHCR on the VM using `GHCR_PAT`
+   - Logs in to GHCR on the VM using the workflow `GITHUB_TOKEN`
    - Exports runtime variables including `IMAGE_TAG=${{ github.sha }}`
    - Runs `docker compose pull mongo api frontend caddy`
    - Runs `docker compose up -d --remove-orphans mongo api frontend caddy`
@@ -180,14 +176,14 @@ This document explains the current CI/CD setup in this repository, including the
 | --- | --- | --- |
 | `VM_HOST` | Variable | SSH host of the production VM |
 | `VM_USER` | Variable | SSH user for remote Docker commands |
-| `GHCR_USERNAME` | Variable | Base image namespace under `ghcr.io/<user>/...` |
 | `DEPLOY_PATH` | Variable | Remote VM path that receives `docker-compose.prod.yaml` |
 | `MONGO_DATABASE` | Variable | Mongo init DB name and backend DB name |
 | `MONGO_COLLECTION_NAME` | Variable | Backend collection name |
 | `SSH_PRIVATE_KEY` | Secret | Private key used by GitHub Actions to SSH to the VM |
-| `GHCR_PAT` | Secret | GHCR login for pushing images and pulling them on the VM |
 | `MONGO_ROOT_USERNAME` | Secret | Mongo root auth and backend connection string input |
 | `MONGO_ROOT_PASSWORD` | Secret | Mongo root auth and backend connection string input |
+| `GHCR_LOGIN_USERNAME` | Runtime env | Set to `${{ github.actor }}` for GHCR login |
+| `GHCR_TOKEN` | Runtime env | Set to `${{ secrets.GITHUB_TOKEN }}` for GHCR push and VM pull |
 | `IMAGE_TAG` | Runtime env | Set during deploy to `${{ github.sha }}` |
 
 ## Chunk 9: Operational Details and Risks
