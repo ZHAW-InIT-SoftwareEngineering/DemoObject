@@ -17,9 +17,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    env:
-      BACKEND_IMAGE: 'ghcr.io/${{ vars.GHCR_USERNAME }}/demoobject-backend'
-      GHCR_USERNAME: ${{ vars.GHCR_USERNAME }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -27,25 +24,20 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Validate GHCR credentials are present
+      - name: Configure GHCR image
+        id: image
         shell: bash
         run: |
           set -euo pipefail
-          if [ -z "${{ secrets.GHCR_PAT }}" ]; then
-            echo "Missing required GitHub Secret: GHCR_PAT" >&2
-            exit 1
-          fi
-          if [ -z "${GHCR_USERNAME}" ]; then
-            echo "Missing required GitHub Variable: GHCR_USERNAME" >&2
-            exit 1
-          fi
+          ghcr_namespace="${GITHUB_REPOSITORY_OWNER,,}"
+          echo "backend_image=ghcr.io/${ghcr_namespace}/demoobject-backend" >> "${GITHUB_OUTPUT}"
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ env.GHCR_USERNAME }}
-          password: ${{ secrets.GHCR_PAT }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push backend image
         uses: docker/build-push-action@v6
@@ -54,7 +46,7 @@ jobs:
           file: ./backend/Dockerfile
           push: true
           tags: |
-            ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+            ${{ steps.image.outputs.backend_image }}:${{ github.sha }}
           provenance: false
           sbom: false
 
@@ -64,9 +56,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    env:
-      FRONTEND_IMAGE: 'ghcr.io/${{ vars.GHCR_USERNAME }}/demoobject-frontend'
-      GHCR_USERNAME: ${{ vars.GHCR_USERNAME }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -74,25 +63,20 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Validate GHCR credentials are present
+      - name: Configure GHCR image
+        id: image
         shell: bash
         run: |
           set -euo pipefail
-          if [ -z "${{ secrets.GHCR_PAT }}" ]; then
-            echo "Missing required GitHub Secret: GHCR_PAT" >&2
-            exit 1
-          fi
-          if [ -z "${GHCR_USERNAME}" ]; then
-            echo "Missing required GitHub Variable: GHCR_USERNAME" >&2
-            exit 1
-          fi
+          ghcr_namespace="${GITHUB_REPOSITORY_OWNER,,}"
+          echo "frontend_image=ghcr.io/${ghcr_namespace}/demoobject-frontend" >> "${GITHUB_OUTPUT}"
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ env.GHCR_USERNAME }}
-          password: ${{ secrets.GHCR_PAT }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push frontend image
         uses: docker/build-push-action@v6
@@ -101,7 +85,7 @@ jobs:
           file: ./frontend/Dockerfile
           push: true
           tags: |
-            ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+            ${{ steps.image.outputs.frontend_image }}:${{ github.sha }}
           provenance: false
           sbom: false
 
@@ -111,9 +95,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    env:
-      CADDY_IMAGE: 'ghcr.io/${{ vars.GHCR_USERNAME }}/demoobject-caddy'
-      GHCR_USERNAME: ${{ vars.GHCR_USERNAME }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -121,25 +102,20 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Validate GHCR credentials are present
+      - name: Configure GHCR image
+        id: image
         shell: bash
         run: |
           set -euo pipefail
-          if [ -z "${{ secrets.GHCR_PAT }}" ]; then
-            echo "Missing required GitHub Secret: GHCR_PAT" >&2
-            exit 1
-          fi
-          if [ -z "${GHCR_USERNAME}" ]; then
-            echo "Missing required GitHub Variable: GHCR_USERNAME" >&2
-            exit 1
-          fi
+          ghcr_namespace="${GITHUB_REPOSITORY_OWNER,,}"
+          echo "caddy_image=ghcr.io/${ghcr_namespace}/demoobject-caddy" >> "${GITHUB_OUTPUT}"
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ env.GHCR_USERNAME }}
-          password: ${{ secrets.GHCR_PAT }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push caddy image
         uses: docker/build-push-action@v6
@@ -148,7 +124,7 @@ jobs:
           file: ./caddy/Dockerfile
           push: true
           tags: |
-            ${{ env.CADDY_IMAGE }}:${{ github.sha }}
+            ${{ steps.image.outputs.caddy_image }}:${{ github.sha }}
           provenance: false
           sbom: false
 
@@ -162,23 +138,32 @@ jobs:
       - build_and_push_caddy
     permissions:
       contents: read
+      packages: read
     env:
       VM_HOST: ${{ vars.VM_HOST }}
       VM_USER: ${{ vars.VM_USER || 'ubuntu' }}
       DEPLOY_PATH: ${{ vars.DEPLOY_PATH || './demoobject' }}
-      BACKEND_IMAGE: 'ghcr.io/${{ vars.GHCR_USERNAME }}/demoobject-backend'
-      FRONTEND_IMAGE: 'ghcr.io/${{ vars.GHCR_USERNAME }}/demoobject-frontend'
-      CADDY_IMAGE: 'ghcr.io/${{ vars.GHCR_USERNAME }}/demoobject-caddy'
-      GHCR_USERNAME: ${{ vars.GHCR_USERNAME }}
       MONGO_DATABASE: ${{ vars.MONGO_DATABASE }}
       MONGO_COLLECTION_NAME: ${{ vars.MONGO_COLLECTION_NAME }}
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      GHCR_PAT: ${{ secrets.GHCR_PAT }}
+      GHCR_LOGIN_USERNAME: ${{ github.actor }}
+      GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       MONGO_ROOT_USERNAME: ${{ secrets.MONGO_ROOT_USERNAME }}
       MONGO_ROOT_PASSWORD: ${{ secrets.MONGO_ROOT_PASSWORD }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Configure GHCR image namespace
+        shell: bash
+        run: |
+          set -euo pipefail
+          ghcr_namespace="${GITHUB_REPOSITORY_OWNER,,}"
+          {
+            echo "BACKEND_IMAGE=ghcr.io/${ghcr_namespace}/demoobject-backend"
+            echo "FRONTEND_IMAGE=ghcr.io/${ghcr_namespace}/demoobject-frontend"
+            echo "CADDY_IMAGE=ghcr.io/${ghcr_namespace}/demoobject-caddy"
+          } >> "${GITHUB_ENV}"
 
       - name: Validate required configuration
         shell: bash
@@ -189,17 +174,20 @@ jobs:
             VM_HOST
             VM_USER
             DEPLOY_PATH
-            BACKEND_IMAGE
-            FRONTEND_IMAGE
-            CADDY_IMAGE
-            GHCR_USERNAME
             MONGO_DATABASE
             MONGO_COLLECTION_NAME
           )
 
+          required_runtime_values=(
+            BACKEND_IMAGE
+            FRONTEND_IMAGE
+            CADDY_IMAGE
+            GHCR_LOGIN_USERNAME
+            GHCR_TOKEN
+          )
+
           required_secrets=(
             SSH_PRIVATE_KEY
-            GHCR_PAT
             MONGO_ROOT_USERNAME
             MONGO_ROOT_PASSWORD
           )
@@ -207,6 +195,13 @@ jobs:
           for key in "${required_vars[@]}"; do
             if [ -z "${!key:-}" ]; then
               echo "Missing required GitHub Variable: ${key}" >&2
+              exit 1
+            fi
+          done
+
+          for key in "${required_runtime_values[@]}"; do
+            if [ -z "${!key:-}" ]; then
+              echo "Missing required workflow runtime value: ${key}" >&2
               exit 1
             fi
           done
@@ -258,8 +253,8 @@ jobs:
           FRONTEND_IMAGE=$(printf '%q' "${FRONTEND_IMAGE}")
           CADDY_IMAGE=$(printf '%q' "${CADDY_IMAGE}")
           IMAGE_TAG=$(printf '%q' "${IMAGE_TAG}")
-          GHCR_USERNAME=$(printf '%q' "${GHCR_USERNAME}")
-          GHCR_PAT=$(printf '%q' "${GHCR_PAT}")
+          GHCR_LOGIN_USERNAME=$(printf '%q' "${GHCR_LOGIN_USERNAME}")
+          GHCR_TOKEN=$(printf '%q' "${GHCR_TOKEN}")
           DEPLOY_PATH=$(printf '%q' "${DEPLOY_PATH}")
           MONGO_ROOT_USERNAME=$(printf '%q' "${MONGO_ROOT_USERNAME}")
           MONGO_ROOT_PASSWORD=$(printf '%q' "${MONGO_ROOT_PASSWORD}")
@@ -280,7 +275,7 @@ jobs:
           export MONGO_DATABASE
           export MONGO_COLLECTION_NAME
 
-          echo "\${GHCR_PAT}" | docker login ghcr.io --username "\${GHCR_USERNAME}" --password-stdin
+          echo "\${GHCR_TOKEN}" | docker login ghcr.io --username "\${GHCR_LOGIN_USERNAME}" --password-stdin
 
           docker compose -f "\${DEPLOY_PATH}/docker-compose.prod.yaml" pull mongo api frontend caddy
           docker compose -f "\${DEPLOY_PATH}/docker-compose.prod.yaml" up -d --remove-orphans mongo api frontend caddy

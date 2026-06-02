@@ -100,17 +100,16 @@ Use **Environment-scoped** secrets/variables (e.g., `production`) so deployments
 2. `VM_USER=ubuntu`
 3. `DEPLOY_PATH=/opt/demoobject`
 4. `FRONTEND_PORT=80`
-5. `BACKEND_IMAGE=ghcr.io/gabc/demoobject-backend`
-6. `FRONTEND_IMAGE=ghcr.io/gabc/demoobject-frontend`
-7. `MONGO_DATABASE=DemoObjectDB`
-8. `MONGO_COLLECTION_NAME=SessionCollection`
+5. `MONGO_DATABASE=DemoObjectDB`
+6. `MONGO_COLLECTION_NAME=SessionCollection`
 
 ### Suggested GitHub Secrets (sensitive)
 
 1. `SSH_PRIVATE_KEY` (PEM content)
 2. `MONGO_ROOT_USERNAME`
 3. `MONGO_ROOT_PASSWORD`
-4. `GHCR_PAT` (only if required; prefer `GITHUB_TOKEN` where possible)
+
+GHCR authentication uses the workflow `GITHUB_TOKEN`, and image names are computed from the lower-case GitHub repository owner.
 
 ## 7. CI/CD Workflow Design (Discussion)
 
@@ -217,8 +216,8 @@ Security note:
    - Start with Phase 1 simple restart deployment.
 3. Registry visibility and naming:
    - Use GHCR public images.
-   - Backend image: `ghcr.io/gabc/demoobject-backend`
-   - Frontend image: `ghcr.io/gabc/demoobject-frontend`
+   - Backend image: `ghcr.io/<lower-case-repository-owner>/demoobject-backend`
+   - Frontend image: `ghcr.io/<lower-case-repository-owner>/demoobject-frontend`
 4. SSH firewall policy for initial rollout:
    - Allow inbound SSH from anywhere temporarily.
    - Keep key-based auth; tighten source allowlist later.
