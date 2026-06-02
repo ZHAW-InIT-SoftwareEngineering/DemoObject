@@ -1,9 +1,10 @@
 # DemoObject
 
-Repository for the DemoObject maze experience.
+Live under: [demo.init.zhaw.ch](https://demo.init.zhaw.ch)
 
-Current branch status: **v1.0.0 release candidate for merge to `main`**. The
-current implementation includes the participant maze flow, generated display
+Here you will find the repository containing all the files for the conceptualization and implementation of the new demo object.
+
+The current implementation includes the participant maze flow, generated display
 usernames, final timed path submissions, shortest-path/DSL support, a public
 display route, MongoDB persistence, and production Docker Compose deployment.
 
