@@ -1,46 +1,22 @@
 import {
-  readSessionStorageItem,
-  writeSessionStorageItem,
-} from "@/lib/sessionStorage";
+  readDemoActiveStateData,
+  updateDemoActiveStateData,
+} from "@/lib/demoActiveStateStorage";
+import type { PersistedDemoTheoryProgress } from "@/lib/demoPersistenceTypes";
 
-const STORAGE_KEY_PREFIX = "demo-object.theory-progress";
-
-export type PersistedDemoTheoryProgress = {
-  mazeId: number;
-  sessionId: string;
-  visitedDsl: boolean;
-  visitedShortestPath: boolean;
-  updatedAt: string;
-};
-
-function isPersistedDemoTheoryProgress(
-  value: unknown,
-): value is PersistedDemoTheoryProgress {
-  if (!value || typeof value !== "object") return false;
-
-  const record = value as Partial<PersistedDemoTheoryProgress>;
-
-  return (
-    typeof record.mazeId === "number" &&
-    typeof record.sessionId === "string" &&
-    typeof record.visitedDsl === "boolean" &&
-    typeof record.visitedShortestPath === "boolean" &&
-    typeof record.updatedAt === "string"
-  );
-}
-
-function buildStorageKey(sessionId: string, mazeId: number) {
-  return `${STORAGE_KEY_PREFIX}:${mazeId}:${sessionId}`;
-}
+export type { PersistedDemoTheoryProgress } from "@/lib/demoPersistenceTypes";
 
 export function readPersistedDemoTheoryProgress(
   sessionId: string,
   mazeId: number,
 ): PersistedDemoTheoryProgress | null {
-  return readSessionStorageItem(
-    buildStorageKey(sessionId, mazeId),
-    isPersistedDemoTheoryProgress,
-  );
+  const progress = readDemoActiveStateData().theoryProgress;
+
+  if (!progress || progress.sessionId !== sessionId || progress.mazeId !== mazeId) {
+    return null;
+  }
+
+  return progress;
 }
 
 export function writePersistedDemoTheoryProgress(
@@ -57,5 +33,8 @@ export function writePersistedDemoTheoryProgress(
     updatedAt: new Date().toISOString(),
   };
 
-  writeSessionStorageItem(buildStorageKey(sessionId, mazeId), record);
+  updateDemoActiveStateData((data) => ({
+    ...data,
+    theoryProgress: record,
+  }));
 }

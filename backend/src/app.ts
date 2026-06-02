@@ -1,8 +1,8 @@
 import express from 'express';
 import swaggerUi from "swagger-ui-express";
-import { mazeRouter } from './api/routes/mazes.routes';
-import { sessionRouter } from './api/routes/sessions.routes';
-import { infraRouter } from './api/routes/infra.routes';
+import { infraRouter } from './api/infra/infra.routes';
+import { mazeRouter } from './api/mazes/mazes.routes';
+import { sessionRouter } from './api/sessions/sessions.routes';
 import { openApiDocument } from './openapi/openapiDocument';
 
 const app = express();

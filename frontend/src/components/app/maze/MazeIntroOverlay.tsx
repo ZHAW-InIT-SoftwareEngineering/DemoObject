@@ -54,21 +54,22 @@ export function MazeIntroOverlay({
             <DialogTitle className="text-xl font-semibold text-slate-900 sm:text-2xl">
               Das Eis schmilzt
             </DialogTitle>
-            <DialogDescription className="space-y-3 text-center text-sm leading-5 text-slate-700 sm:text-center sm:text-base sm:leading-6">
-              <p>
-                Am Ende des Labyrinths wartet ein Eis auf dich, aber nicht mehr
-                lange.
-              </p>
-              <p>
-                Sobald du auf <span className="font-semibold">Los geht&apos;s</span>{" "}
-                klickst, startet die Zeit.
-              </p>
-              <p>
-                Finde den kürzesten Weg zum Eis und gib genau diesen Pfad ein.
-              </p>
-              <p>
-                Doch zuvor ist ein wenig Verständnis nötig:
-              </p>
+            <DialogDescription asChild>
+              <div className="space-y-3 text-center text-sm leading-5 text-slate-700 sm:text-center sm:text-base sm:leading-6">
+                <p>
+                  Am Ende des Labyrinths wartet ein Eis auf dich, aber nicht mehr
+                  lange.
+                </p>
+                <p>
+                  Sobald du auf{" "}
+                  <span className="font-semibold">Los geht&apos;s</span> klickst,
+                  startet die Zeit.
+                </p>
+                <p>
+                  Finde den kürzesten Weg zum Eis und gib genau diesen Pfad ein.
+                </p>
+                <p>Doch zuvor ist ein wenig Verständnis nötig:</p>
+              </div>
             </DialogDescription>
           </DialogHeader>
 

@@ -38,11 +38,14 @@ export function ActionPanel({ maze, pathState, actions }: ActionPanelProps) {
     maze !== null &&
     nodePath.length > 0 &&
     nodePath[nodePath.length - 1] === maze.endNodeId;
+  const startsAtStart =
+    maze !== null && nodePath.length > 0 && nodePath[0] === maze.startNodeId;
 
   const canSubmit =
     Boolean(apiRequest) &&
     !submitting &&
     nodePath.length >= 2 &&
+    startsAtStart &&
     endsAtGoal &&
     pathKey !== lastSubmittedKey &&
     maze !== null;

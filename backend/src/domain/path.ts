@@ -120,7 +120,6 @@ function reconstructPath(
   });
 }
 
-// Compute shortest path using BFS on an undirected unweighted graph.
 export function findPathBFS(maze: Maze): ShortestPathResult | undefined {
   const { nodes, edges, startNodeId, endNodeId } = maze;
 

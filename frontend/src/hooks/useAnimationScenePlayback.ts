@@ -12,6 +12,8 @@ type UseAnimationScenePlaybackOptions = {
   onComplete: () => void;
   stepMs?: number;
   settleMs?: number;
+  restartKey?: number | string;
+  enabled?: boolean;
 };
 
 type UseAnimationScenePlaybackResult = {
@@ -29,12 +31,16 @@ export function useAnimationScenePlayback({
   onComplete,
   stepMs = 220,
   settleMs = 450,
+  restartKey,
+  enabled = true,
 }: UseAnimationScenePlaybackOptions): UseAnimationScenePlaybackResult {
   const { visibleNodePath, progress, total } = useEdgePlayback({
     nodePath,
     onComplete,
     stepMs,
     settleMs,
+    restartKey,
+    enabled,
   });
 
   const sceneData = useMemo(

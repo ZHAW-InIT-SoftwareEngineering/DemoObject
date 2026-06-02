@@ -20,3 +20,15 @@ export function isValidPath(maze: Maze, path: Path): boolean {
   }
   return true;
 }
+
+export function isCompleteStartToGoalPath(maze: Maze, path: Path): boolean {
+  if (path.length < 2) return false;
+  if (!isValidPath(maze, path)) return false;
+
+  const coordToId = new Map(maze.nodes.map((node) => [`${node.x}:${node.y}`, node.mazeNodeId]));
+  const firstNodeId = coordToId.get(`${path[0].x}:${path[0].y}`);
+  const lastPoint = path[path.length - 1];
+  const lastNodeId = coordToId.get(`${lastPoint.x}:${lastPoint.y}`);
+
+  return firstNodeId === maze.startNodeId && lastNodeId === maze.endNodeId;
+}

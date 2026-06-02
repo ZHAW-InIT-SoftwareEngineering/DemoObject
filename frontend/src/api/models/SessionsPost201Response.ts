@@ -30,6 +30,12 @@ export interface SessionsPost201Response {
      * @type {string}
      * @memberof SessionsPost201Response
      */
+    userName: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SessionsPost201Response
+     */
     qrPayload: string;
 }
 
@@ -38,6 +44,7 @@ export interface SessionsPost201Response {
  */
 export function instanceOfSessionsPost201Response(value: object): value is SessionsPost201Response {
     if (!('sessionId' in value) || value['sessionId'] === undefined) return false;
+    if (!('userName' in value) || value['userName'] === undefined) return false;
     if (!('qrPayload' in value) || value['qrPayload'] === undefined) return false;
     return true;
 }
@@ -53,6 +60,7 @@ export function SessionsPost201ResponseFromJSONTyped(json: any, ignoreDiscrimina
     return {
         
         'sessionId': json['sessionId'],
+        'userName': json['userName'],
         'qrPayload': json['qrPayload'],
     };
 }
@@ -69,7 +77,7 @@ export function SessionsPost201ResponseToJSONTyped(value?: SessionsPost201Respon
     return {
         
         'sessionId': value['sessionId'],
+        'userName': value['userName'],
         'qrPayload': value['qrPayload'],
     };
 }
-

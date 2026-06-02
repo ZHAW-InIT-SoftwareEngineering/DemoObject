@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 
 type MazePanelProps = {
   maze: MazesMazeIdGet200Response;
+  userName?: string | null;
   onNodeClick: (node: MazesMazeIdGet200ResponseNodesInner) => void;
   onUndo: () => void;
   onShowAnimation: () => void;
@@ -33,6 +34,7 @@ type MazePanelProps = {
 
 export function MazePanel({
   maze,
+  userName = null,
   onNodeClick,
   onUndo,
   onShowAnimation,
@@ -54,6 +56,7 @@ export function MazePanel({
     <Card className="py-4">
       <CardContent className="px-4 space-y-3">
         <MazePanelHeader
+          userName={userName}
           pathState={{
             nodePath,
             isPathSubmitted,

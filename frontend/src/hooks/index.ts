@@ -1,4 +1,5 @@
 export { DemoSessionProvider, useDemoSession } from "./useDemoSession";
+export { useDisplayFeed } from "./useDisplayFeed";
 export { useAnimationScenePlayback } from "./useAnimationScenePlayback";
 export { useLocalMazePath } from "./useLocalMazePath";
 export { useMazeById } from "./useMazeById";
