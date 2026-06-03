@@ -24,12 +24,12 @@ export function JourneyLighting({
   const rimLightRef = useRef<THREE.PointLight>(null);
   const smoothedRatioRef = useRef(0);
 
-  const baseBgColorRef = useRef(new THREE.Color("#161a22"));
-  const endBgColorRef = useRef(new THREE.Color("#637fa8"));
-  const baseFogColorRef = useRef(new THREE.Color("#1b2029"));
-  const endFogColorRef = useRef(new THREE.Color("#a9bfd4"));
+  const baseBgColorRef = useRef(new THREE.Color("#e9a652"));
+  const endBgColorRef = useRef(new THREE.Color("#ffd18c"));
+  const baseHazeColorRef = useRef(new THREE.Color("#d99a55"));
+  const endHazeColorRef = useRef(new THREE.Color("#ffe0a6"));
   const mixedBgRef = useRef(new THREE.Color());
-  const mixedFogRef = useRef(new THREE.Color());
+  const mixedHazeRef = useRef(new THREE.Color());
 
   useFrame((_, delta) => {
     const targetRatio = getJourneyLightingTargetRatio(progress, total);
@@ -61,12 +61,12 @@ export function JourneyLighting({
     }
 
     if (scene.fog instanceof THREE.Fog) {
-      mixedFogRef.current
-        .copy(baseFogColorRef.current)
-        .lerp(endFogColorRef.current, ratio);
-      scene.fog.color.copy(mixedFogRef.current);
-      scene.fog.near = lightingState.fogNear;
-      scene.fog.far = lightingState.fogFar;
+      mixedHazeRef.current
+        .copy(baseHazeColorRef.current)
+        .lerp(endHazeColorRef.current, ratio);
+      scene.fog.color.copy(mixedHazeRef.current);
+      scene.fog.near = lightingState.hazeNear;
+      scene.fog.far = lightingState.hazeFar;
     }
 
     gl.toneMappingExposure = lightingState.toneMappingExposure;
@@ -74,20 +74,20 @@ export function JourneyLighting({
 
   return (
     <>
-      <ambientLight ref={ambientLiftRef} intensity={0.04} color="#d6dfed" />
+      <ambientLight ref={ambientLiftRef} intensity={0.36} color="#ffe1b6" />
       <directionalLight
         ref={dawnKeyLightRef}
         position={[maxFloorDimension * 0.9, maxFloorDimension * 1.25, -maxFloorDimension * 0.46]}
-        intensity={0.25}
-        color="#dbe9ff"
+        intensity={1.05}
+        color="#fff0bd"
       />
       <pointLight
         ref={rimLightRef}
         position={[0, maxFloorDimension * 0.5, -maxFloorDimension * 0.34]}
-        intensity={0.08}
+        intensity={0.24}
         distance={maxFloorDimension * 3}
         decay={2}
-        color="#c4dbff"
+        color="#ff9e58"
       />
     </>
   );

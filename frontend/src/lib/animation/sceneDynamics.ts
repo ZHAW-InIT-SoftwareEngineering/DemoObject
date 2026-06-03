@@ -44,10 +44,9 @@ type EmergingSunPlacement = {
 
 export function getEmergingSunTargetStrength(progress: number, total: number) {
   const progressRatio = getProgressRatio(progress, total);
-  const emergenceRatio = clamp((progressRatio - 0.24) / 0.76, 0, 1);
-  const easedBaseRatio = Math.pow(emergenceRatio, 0.75);
-  const finaleBoost = smoothstep(0.7, 1, progressRatio);
-  return clamp(easedBaseRatio * 0.85 + finaleBoost * 0.35, 0, 1);
+  const heatRise = smoothstep(0.08, 1, progressRatio);
+  const finaleBoost = smoothstep(0.72, 1, progressRatio);
+  return clamp(0.56 + heatRise * 0.28 + finaleBoost * 0.16, 0, 1);
 }
 
 export function smoothEmergingSunStrength(
@@ -63,8 +62,8 @@ export function getEmergingSunPlacement(
   endPoint: Vec3 | null,
   sunStrength: number,
 ): EmergingSunPlacement {
-  const riseStartY = maxFloorDimension * 0.28;
-  const riseEndY = maxFloorDimension * 0.86;
+  const riseStartY = maxFloorDimension * 0.72;
+  const riseEndY = maxFloorDimension * 1.02;
   const anchorX = endPoint?.[0] ?? maxFloorDimension * 0.3;
   const anchorZ = endPoint?.[2] ?? -maxFloorDimension * 0.3;
   const anchorLength = Math.hypot(anchorX, anchorZ);
@@ -78,7 +77,7 @@ export function getEmergingSunPlacement(
       lerp(riseStartY, riseEndY, sunStrength),
       anchorZ + outwardZ * horizontalOffset,
     ],
-    scale: lerp(0.9, 1.95, sunStrength),
+    scale: lerp(1.35, 2.25, sunStrength),
   };
 }
 
@@ -86,11 +85,11 @@ export function getEmergingSunVisualState(
   sunStrength: number,
 ): EmergingSunVisualState {
   return {
-    coreOpacity: lerp(0, 1, sunStrength),
-    coreEmissiveIntensity: lerp(0.3, 3, sunStrength),
-    haloOpacity: lerp(0, 0.72, sunStrength),
-    keyLightIntensity: lerp(0, 1.9, sunStrength),
-    glowLightIntensity: lerp(0, 1.55, sunStrength),
+    coreOpacity: lerp(0.7, 1, sunStrength),
+    coreEmissiveIntensity: lerp(2.2, 4.2, sunStrength),
+    haloOpacity: lerp(0.34, 0.78, sunStrength),
+    keyLightIntensity: lerp(1.1, 2.8, sunStrength),
+    glowLightIntensity: lerp(0.72, 2.05, sunStrength),
   };
 }
 
@@ -98,8 +97,8 @@ type JourneyLightingState = {
   ambientIntensity: number;
   keyLightIntensity: number;
   rimLightIntensity: number;
-  fogNear: number;
-  fogFar: number;
+  hazeNear: number;
+  hazeFar: number;
   toneMappingExposure: number;
 };
 
@@ -124,171 +123,93 @@ export function getJourneyLightingState(
 ): JourneyLightingState {
   const effectiveMaxFloorDimension = Math.max(maxFloorDimension, 1);
   return {
-    ambientIntensity: lerp(0.04, 0.64, progressRatio),
-    keyLightIntensity: lerp(0.25, 1.72, progressRatio),
-    rimLightIntensity: lerp(0.08, 1.02, progressRatio),
-    fogNear: effectiveMaxFloorDimension * lerp(1.9, 2.8, progressRatio),
-    fogFar: effectiveMaxFloorDimension * lerp(6, 11.5, progressRatio),
-    toneMappingExposure: lerp(1.1, 2.15, progressRatio),
+    ambientIntensity: lerp(0.36, 0.78, progressRatio),
+    keyLightIntensity: lerp(1.05, 2.45, progressRatio),
+    rimLightIntensity: lerp(0.24, 1.12, progressRatio),
+    hazeNear: effectiveMaxFloorDimension * lerp(2.6, 1.72, progressRatio),
+    hazeFar: effectiveMaxFloorDimension * lerp(10.5, 6.9, progressRatio),
+    toneMappingExposure: lerp(1.18, 1.84, progressRatio),
   };
 }
 
-type GroundFogLayerConfig = {
-  radius: number;
-  baseOpacity: number;
-  driftSpeed: number;
-  pulseSpeed: number;
+type HeatShimmerBandConfig = {
+  x: number;
+  z: number;
+  width: number;
+  height: number;
+  rotationY: number;
   phase: number;
-  y: number;
+  speed: number;
+  drift: number;
+  baseOpacity: number;
 };
 
-type GroundFogLayerState = {
-  rotationZ: number;
+type HeatShimmerBandState = {
+  x: number;
+  z: number;
   y: number;
+  rotationY: number;
+  scaleY: number;
   opacity: number;
 };
 
-export function createGroundFogLayerConfigs(maxFloorDimension: number): GroundFogLayerConfig[] {
-  return [
-    {
-      radius: maxFloorDimension * 0.72,
-      baseOpacity: 0.07,
-      driftSpeed: 0.03,
-      pulseSpeed: 0.4,
-      phase: 0.2,
-      y: 0.08,
-    },
-    {
-      radius: maxFloorDimension * 0.93,
-      baseOpacity: 0.06,
-      driftSpeed: -0.02,
-      pulseSpeed: 0.34,
-      phase: 1.4,
-      y: 0.11,
-    },
-    {
-      radius: maxFloorDimension * 1.1,
-      baseOpacity: 0.05,
-      driftSpeed: 0.016,
-      pulseSpeed: 0.28,
-      phase: 2.1,
-      y: 0.14,
-    },
-  ];
-}
-
-export function getGroundFogLayerState(
-  layer: GroundFogLayerConfig,
-  elapsedTime: number,
-): GroundFogLayerState {
-  return {
-    rotationZ: elapsedTime * layer.driftSpeed,
-    y: layer.y + Math.sin(elapsedTime * 0.25 + layer.phase) * 0.02,
-    opacity:
-      layer.baseOpacity +
-      Math.sin(elapsedTime * layer.pulseSpeed + layer.phase) * 0.015,
-  };
-}
-
-type StormCloudConfig = {
-  x: number;
-  z: number;
-  y: number;
-  scale: number;
-  sway: number;
-  phase: number;
-  brightenBias: number;
-  dissolveStart: number;
-  dissolveStrength: number;
-};
-
-type StormCloudPosition = {
-  x: number;
-  y: number;
-  z: number;
-};
-
-type StormCloudVisualState = {
-  alpha: number;
-  brightenRatio: number;
-};
-
-export function createStormCloudConfigs(maxFloorDimension: number): StormCloudConfig[] {
+export function createHeatShimmerBandConfigs(
+  maxFloorDimension: number,
+): HeatShimmerBandConfig[] {
+  const span = maxFloorDimension * 0.78;
   return Array.from({ length: 18 }, (_, index) => {
-    const xBand = maxFloorDimension * 0.92;
-    const zBand = maxFloorDimension * 0.8;
-    const x = ((index * 1.91) % 1) * 2 * xBand - xBand;
-    const z = ((index * 2.37) % 1) * 2 * zBand - zBand;
-    const baseScale = 1.2 + ((index * 1.41) % 1) * 1.2;
-    const isLargeCloud = index % 5 === 0 || index === 7;
-    const shouldDissolve = index % 3 === 0 || index % 7 === 0;
+    const band = index / 18;
+    const x = ((index * 1.73) % 1) * 2 * span - span;
+    const z = ((index * 2.21) % 1) * 2 * span - span;
     return {
       x,
       z,
-      y: 5.5 + (index % 4) * 0.42,
-      scale: isLargeCloud ? baseScale * 1.55 : baseScale,
-      sway: 0.028 + (index % 5) * 0.007,
-      phase: index * 0.73,
-      brightenBias: 0.72 + ((index * 0.19) % 1) * 0.46,
-      dissolveStart: shouldDissolve
-        ? 0.3 + ((index * 0.11) % 1) * 0.2
-        : 0.62 + ((index * 0.17) % 1) * 0.12,
-      dissolveStrength: shouldDissolve ? 0.95 : 0.35,
+      width: maxFloorDimension * (0.09 + ((index * 0.31) % 1) * 0.08),
+      height: maxFloorDimension * (0.13 + ((index * 0.27) % 1) * 0.1),
+      rotationY: band * Math.PI * 2,
+      phase: index * 0.61,
+      speed: 0.7 + ((index * 0.43) % 1) * 0.55,
+      drift: 0.05 + ((index * 0.19) % 1) * 0.08,
+      baseOpacity: 0.045 + ((index * 0.17) % 1) * 0.035,
     };
   });
 }
 
-export function getStormCloudTargetProgressRatio(progress: number, total: number) {
-  return Math.pow(getProgressRatio(progress, total), 0.8);
+export function getHeatwaveTargetIntensity(progress: number, total: number) {
+  const progressRatio = getProgressRatio(progress, total);
+  const lateGlare = smoothstep(0.55, 1, progressRatio);
+  return clamp(0.54 + Math.pow(progressRatio, 0.72) * 0.3 + lateGlare * 0.16, 0, 1);
 }
 
-export function smoothStormCloudProgress(
-  currentRatio: number,
-  targetRatio: number,
+export function smoothHeatwaveIntensity(
+  currentIntensity: number,
+  targetIntensity: number,
   delta: number,
 ) {
-  return smoothValue(currentRatio, targetRatio, delta, 3.8);
+  return smoothValue(currentIntensity, targetIntensity, delta, 3.6);
 }
 
-export function getStormCloudPosition(
-  cloud: StormCloudConfig,
+export function getHeatShimmerBandState(
+  band: HeatShimmerBandConfig,
   elapsedTime: number,
-  progressRatio: number,
-): StormCloudPosition {
+  intensity: number,
+): HeatShimmerBandState {
+  const wave = Math.sin(elapsedTime * band.speed + band.phase);
+  const slowWave = Math.sin(elapsedTime * band.speed * 0.47 + band.phase * 1.7);
   return {
-    x: cloud.x + Math.sin(elapsedTime * cloud.sway + cloud.phase) * 1.2,
-    z: cloud.z + Math.cos(elapsedTime * cloud.sway * 0.7 + cloud.phase) * 0.8,
-    y:
-      cloud.y +
-      Math.sin(elapsedTime * 0.09 + cloud.phase) * 0.07 +
-      progressRatio * cloud.dissolveStrength * 0.16,
+    x: band.x + wave * band.drift * 6,
+    z: band.z + slowWave * band.drift * 4,
+    y: 0.42 + wave * 0.05,
+    rotationY: band.rotationY + slowWave * 0.22,
+    scaleY: 0.82 + intensity * 0.36 + wave * 0.12,
+    opacity: clamp(band.baseOpacity * intensity * (0.72 + wave * 0.28), 0, 0.16),
   };
 }
 
-export function getStormCloudVisualState(
-  cloud: StormCloudConfig,
-  progressRatio: number,
-): StormCloudVisualState {
-  const dissolveRatio = clamp(
-    (progressRatio - cloud.dissolveStart) / (1 - cloud.dissolveStart),
-    0,
-    1,
-  );
-  const baseAlpha = clamp(1 - dissolveRatio * cloud.dissolveStrength, 0, 1);
-  const finalFadeRatio = smoothstep(0.42, 1, progressRatio);
-  return {
-    alpha: baseAlpha * (1 - finalFadeRatio),
-    brightenRatio: clamp(progressRatio * cloud.brightenBias, 0, 1),
-  };
+export function getHeatGlareOpacity(progress: number, total: number) {
+  const progressRatio = getProgressRatio(progress, total);
+  return 0.12 + smoothstep(0.46, 1, progressRatio) * 0.26;
 }
-
-type ThunderStormState = {
-  nextStormAt: number;
-  burstsLeft: number;
-  nextFlashAt: number;
-  flashUntil: number;
-  flashPower: number;
-};
 
 export const FLOWER_PETAL_COLORS = [
   "#ffd166",
@@ -381,71 +302,4 @@ export function getFlowerPetalFrameState(
     rotationZ: swirl,
     scale,
   };
-}
-
-export function createThunderStormState(): ThunderStormState {
-  return {
-    nextStormAt: 0.9,
-    burstsLeft: 0,
-    nextFlashAt: 0,
-    flashUntil: 0,
-    flashPower: 0,
-  };
-}
-
-export function advanceThunderStormState(
-  stormState: ThunderStormState,
-  elapsedTime: number,
-  random: () => number = Math.random,
-): ThunderStormState {
-  let nextStormAt = stormState.nextStormAt;
-  let burstsLeft = stormState.burstsLeft;
-  let nextFlashAt = stormState.nextFlashAt;
-  let flashUntil = stormState.flashUntil;
-  let flashPower = stormState.flashPower;
-  let changed = false;
-
-  if (burstsLeft === 0 && elapsedTime >= nextStormAt) {
-    burstsLeft = 2 + Math.floor(random() * 3);
-    nextFlashAt = elapsedTime + 0.15 + random() * 0.45;
-    nextStormAt = elapsedTime + 3.2 + random() * 4.6;
-    changed = true;
-  }
-
-  if (burstsLeft > 0 && elapsedTime >= nextFlashAt) {
-    flashPower = 5.4 + random() * 4.2;
-    flashUntil = elapsedTime + 0.04 + random() * 0.07;
-    nextFlashAt = elapsedTime + 0.11 + random() * 0.19;
-    burstsLeft -= 1;
-    changed = true;
-  }
-
-  if (!changed) return stormState;
-
-  return {
-    nextStormAt,
-    burstsLeft,
-    nextFlashAt,
-    flashUntil,
-    flashPower,
-  };
-}
-
-export function getThunderLightPosition(elapsedTime: number, maxFloorDimension: number) {
-  return {
-    x: Math.sin(elapsedTime * 0.12) * maxFloorDimension * 0.24,
-    z: Math.cos(elapsedTime * 0.08) * maxFloorDimension * 0.2,
-  };
-}
-
-export function getThunderLightIntensity(
-  elapsedTime: number,
-  currentIntensity: number,
-  delta: number,
-  stormState: ThunderStormState,
-) {
-  if (elapsedTime <= stormState.flashUntil) {
-    return stormState.flashPower;
-  }
-  return Math.max(0, currentIntensity - delta * 18);
 }

@@ -54,20 +54,21 @@ export function MazeExplorationLegend({
       {title ? <div className="mb-2 font-medium">{title}</div> : null}
       <div
         className={cn(
-          "grid grid-cols-1 gap-2 sm:grid-cols-2",
+          "grid grid-cols-1 gap-1",
           gridClassName,
         )}
       >
         {items.map((item) => (
           <div
             key={`${item.color}-${item.label}`}
-            className="flex items-center gap-2"
+            className="block"
           >
             <span
-              className="h-3 w-3 rounded-full"
-              style={{ backgroundColor: item.color }}
-            />
-            <span>{item.label}</span>
+              className="font-medium underline decoration-2 underline-offset-4"
+              style={{ textDecorationColor: item.color }}
+            >
+              {item.label}
+            </span>
           </div>
         ))}
       </div>
