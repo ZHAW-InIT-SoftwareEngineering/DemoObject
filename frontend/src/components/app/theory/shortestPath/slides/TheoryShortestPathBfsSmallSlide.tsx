@@ -13,19 +13,17 @@ const slide = {
   eyebrow: "Was weiss der Algorithmus gerade?",
   title: "Schritt für Schritt",
   description:
-    "Dieser Algorithmus heisst Breitensuche, auf Englisch breadth-first search (BFS). \
-    Er untersucht von einem Startpunkt aus zuerst die direkt benachbarten Felder, dann die nächsten, und so weiter. \
-    Wenn alle Wege gleich viel kosten, findet er damit einen kürzesten Weg. \
-    Wichtig ist: Der Algorithmus hat keinen Blick auf das ganze Labyrinth auf einmal. \
-    Er entdeckt neue Bereiche nur nach und nach. Somit alles Schritt für Schritt.",
+    "Die Breitensuche, auf Englisch breadth-first search (BFS), schaut vom Start aus zuerst auf die direkten Nachbarn, dann auf die nächsten Felder. \
+    Wenn alle Schritte gleich viel kosten, findet sie so einen kürzesten Weg. \
+    Dabei kennt BFS nicht sofort das ganze Labyrinth, sondern entdeckt es Schritt für Schritt.",
   shadowUnobserved: true,
   hint: "Das ganze Labyrinth ist sichtbar. Alles, was der Algorithmus bereits entdeckt hat, liegt im Licht. Der noch unbekannte Rest bleibt im Schatten.",
 } satisfies TheoryShortestPathDemoSlideConfig;
 
 function TheoryShortestPathBfsSmallSlide({
-  onRestart,
+  controls,
 }: TheoryShortestPathSlideComponentProps) {
-  return <TheoryShortestPathDemoSlide slide={slide} onRestart={onRestart} />;
+  return <TheoryShortestPathDemoSlide controls={controls} slide={slide} />;
 }
 
 export const theoryShortestPathBfsSmallSlide = {

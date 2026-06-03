@@ -10,7 +10,7 @@ import {
 } from "@/lib/theoryDsl";
 import { Card, CardContent } from "@/components/ui";
 import { TheoryDslIntro } from "./TheoryDslIntro";
-import { TheoryDslSandbox } from "./TheoryDslDemo";
+import { TheoryDslSandbox } from "./TheoryDslSandbox";
 
 const THEORY_DSL_MAZE_ID = 1;
 
@@ -85,15 +85,15 @@ export function TheoryDslPage() {
 
         {maze ? (
           <>
-            <DslStrip
-              dsl={theoryDslTokens.length > 0 ? [...theoryDslTokens] : null}
-              autoScrollToLatest
-            />
             <TheoryDslSandbox
               maze={maze}
               nodePath={nodePath}
               moveChoiceByToken={moveChoiceByToken}
               onSelectNode={selectNode}
+            />
+            <DslStrip
+              dsl={theoryDslTokens.length > 0 ? [...theoryDslTokens] : null}
+              autoScrollToLatest
             />
           </>
         ) : null}

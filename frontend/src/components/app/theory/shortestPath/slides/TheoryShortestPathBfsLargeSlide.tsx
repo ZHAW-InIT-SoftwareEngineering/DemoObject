@@ -21,9 +21,9 @@ const slide = {
 } satisfies TheoryShortestPathDemoSlideConfig;
 
 function TheoryShortestPathBfsLargeSlide({
-  onRestart,
+  controls,
 }: TheoryShortestPathSlideComponentProps) {
-  return <TheoryShortestPathDemoSlide slide={slide} onRestart={onRestart} />;
+  return <TheoryShortestPathDemoSlide controls={controls} slide={slide} />;
 }
 
 export const theoryShortestPathBfsLargeSlide = {

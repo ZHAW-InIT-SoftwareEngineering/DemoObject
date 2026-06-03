@@ -32,20 +32,27 @@ export function TheoryDslSandbox({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 px-4">
-        <MazeLegendSection title="Legende:" />
-        <div className="w-full aspect-square touch-none overscroll-contain">
-          <Maze
-            maze={maze}
-            className="pointer-events-none h-full w-full rounded border bg-white"
-            selectedNodePath={[...nodePath]}
-            highlightedNodePath={[...nodePath]}
-          />
-        </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="aspect-square w-full touch-none overscroll-contain">
+            <Maze
+              maze={maze}
+              className="pointer-events-none h-full w-full rounded border bg-white"
+              selectedNodePath={[...nodePath]}
+              highlightedNodePath={[...nodePath]}
+            />
+          </div>
 
-        <TheoryDslDirectionPad
-          moveChoiceByToken={moveChoiceByToken}
-          onSelectNode={onSelectNode}
-        />
+          <div className="flex w-full flex-col md:aspect-square">
+            <MazeLegendSection title="Legende:" />
+            <div className="flex flex-1 items-center justify-center">
+              <TheoryDslDirectionPad
+                className="h-full w-full rounded-t-none border-t-0 shadow-none"
+                moveChoiceByToken={moveChoiceByToken}
+                onSelectNode={onSelectNode}
+              />
+            </div>
+          </div>
+        </div>
 
         <div className="flex w-full justify-center">
           <Badge
