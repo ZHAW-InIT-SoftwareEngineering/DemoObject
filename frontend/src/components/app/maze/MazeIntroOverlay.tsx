@@ -39,7 +39,7 @@ export function MazeIntroOverlay({
       >
         <div className="relative space-y-4 sm:space-y-6">
           <div className="flex items-center justify-center gap-3">
-            <div className="flex size-12 items-center justify-center rounded-full border border-orange-200 bg-orange-100 text-orange-700 shadow-sm sm:size-14">
+            <div className="flex size-12 items-center justify-center rounded-full border border-[#b8d8ee] bg-[#e8f3fa] text-[#0b6ea8] shadow-sm sm:size-14">
               <IceCreamCone className="size-8 sm:size-9" />
             </div>
             <div className="flex size-12 items-center justify-center rounded-full bg-slate-900 text-white shadow-sm sm:size-14">

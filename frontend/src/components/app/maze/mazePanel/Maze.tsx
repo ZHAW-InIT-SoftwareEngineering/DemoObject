@@ -4,7 +4,7 @@ import type {
   MazesMazeIdGet200ResponseNodesInner,
 } from "@/api";
 import { useId, useMemo } from "react";
-import { House, IceCreamCone } from "lucide-react";
+import { IceCreamCone, SignpostBig } from "lucide-react";
 import {
   buildMazeWallCoordSegments,
   getMazeBounds,
@@ -75,12 +75,12 @@ const SHADOW_OVERLAY_OPACITY = 0.5;
 const USER_PATH_COLOR = "#2563eb";
 const SHORTEST_PATH_COLOR = "#f59e0b";
 const OVERLAPPING_PATH_COLOR = "#be123c";
-const START_ICON_COLOR = "#15803d";
-const START_ICON_BACKGROUND_COLOR = "#dcfce7";
-const START_ICON_BORDER_COLOR = "#bbf7d0";
-const GOAL_ICON_COLOR = "#c2410c";
-const GOAL_ICON_BACKGROUND_COLOR = "#ffedd5";
-const GOAL_ICON_BORDER_COLOR = "#fed7aa";
+const START_ICON_COLOR = "#b91c1c";
+const START_ICON_BACKGROUND_COLOR = "#fee2e2";
+const START_ICON_BORDER_COLOR = "#fecaca";
+const GOAL_ICON_COLOR = "#15803d";
+const GOAL_ICON_BACKGROUND_COLOR = "#dcfce7";
+const GOAL_ICON_BORDER_COLOR = "#bbf7d0";
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
@@ -536,9 +536,9 @@ export function Maze({
             const isStart = node.mazeNodeId === maze.startNodeId;
             const isEnd = node.mazeNodeId === maze.endNodeId;
             const fill = isStart
-              ? "#ecfdf5"
+              ? "#fef2f2"
               : isEnd
-                ? "#fff7ed"
+                ? "#ecfdf5"
                 : isSelected
                   ? "#dbeafe"
                   : "#f8fafc";
@@ -667,22 +667,22 @@ export function Maze({
             const iconSize = clamp(layout.cellSize * 0.56, 18, 32);
             const iconBackgroundRadius = clamp(layout.cellSize * 0.25, 11, 20);
             const fill = isStart
-              ? "#22c55e"
+              ? "#ef4444"
               : isEnd
-                ? "#ef4444"
+                ? "#22c55e"
                 : isSelected
                   ? "#111827"
                   : "#64748b";
             const strokeColor = isStart
-              ? "#166534"
+              ? "#7f1d1d"
               : isEnd
-                ? "#7f1d1d"
+                ? "#166534"
                 : "#ffffff";
             const strokeWidth = isStart || isEnd ? 3 : 2;
             const selectionRingColor = isStart
-              ? "#166534"
+              ? "#991b1b"
               : isEnd
-                ? "#991b1b"
+                ? "#166534"
                 : "#111827";
 
             return (
@@ -719,7 +719,7 @@ export function Maze({
                       pointerEvents="none"
                     />
                     {isStart ? (
-                      <House
+                      <SignpostBig
                         x={point.x - iconSize / 2}
                         y={point.y - iconSize / 2}
                         width={iconSize}

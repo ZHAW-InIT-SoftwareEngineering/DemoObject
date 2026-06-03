@@ -58,7 +58,11 @@ export function MazePanel({
         <div className="grid items-stretch gap-3 md:grid-cols-2">
           <MazeLegendSection
             title="Legende:"
-            explorationLegend={showExplorationLegend ? {} : null}
+            explorationLegend={
+              showExplorationLegend
+                ? {}
+                : null
+            }
           >
             <PathInfo
               className={cn("border-t pt-3", MAZE_LEGEND_DIVIDER_CLASS_NAME)}

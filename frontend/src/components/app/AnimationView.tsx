@@ -4,12 +4,13 @@ import { Canvas } from "@react-three/fiber";
 import { Line, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { AnimationCameraRig } from "./maze.animation/AnimationCameraRig";
-import { FlickerTorch } from "./maze.animation/scene/FlickerTorch";
 import { EmergingSun } from "./maze.animation/scene/EmergingSun";
 import { JourneyLighting } from "./maze.animation/scene/JourneyLighting";
-import { StormAtmosphere } from "./maze.animation/scene/StormAtmosphere";
+import { HeatwaveAtmosphere } from "./maze.animation/scene/HeatwaveAtmosphere";
+import { IceCreamShopGoal } from "./maze.animation/scene/IceCreamShopGoal";
 import { FlowerFountain } from "./maze.animation/scene/FlowerFountain";
 import { AnimationHud } from "./maze.animation/controll/AnimationHud";
+import { HeatUrgencyOverlay } from "./maze.animation/controll/HeatUrgencyOverlay";
 
 type AnimationViewProps = {
   sceneData: AnimationSceneData;
@@ -47,14 +48,7 @@ export function AnimationView({
   const previewDistance = Math.max(maxFloorDimension * 0.9, 10);
   const minPreviewDistance = Math.max(maxFloorDimension * 0.25, 3);
   const floorInset = 0.16;
-  const torchPositions = useMemo<[number, number, number][]>(
-    () => [
-      [-sceneData.floorSize[0] * 0.32, 1.35, -sceneData.floorSize[1] * 0.3],
-      [sceneData.floorSize[0] * 0.32, 1.35, sceneData.floorSize[1] * 0.3],
-    ],
-    [sceneData.floorSize],
-  );
-  const wallPalette = ["#766851", "#877560", "#695c49", "#8f7e66"] as const;
+  const wallPalette = ["#a68f6c", "#927c60", "#b39773", "#837568"] as const;
   const viewLabel = label ?? `Animation läuft (${progress}/${total})`;
   const shortestRouteLine = useMemo(
     () => elevateRouteLine(sceneData.shortestRouteLine, 0.05),
@@ -87,7 +81,7 @@ export function AnimationView({
   ]);
 
   return (
-    <div className="relative h-[100dvh] w-full overflow-hidden bg-[#161a22]">
+    <div className="relative h-[100dvh] w-full overflow-hidden bg-[#d99b52]">
       <Canvas
         className="h-full w-full"
         shadows
@@ -102,24 +96,24 @@ export function AnimationView({
           gl.shadowMap.enabled = true;
           gl.shadowMap.type = THREE.PCFSoftShadowMap;
           gl.toneMapping = THREE.ACESFilmicToneMapping;
-          gl.toneMappingExposure = 1.14;
+          gl.toneMappingExposure = 1.18;
         }}
       >
-        <color attach="background" args={["#161a22"]} />
+        <color attach="background" args={["#e9a652"]} />
         <fog
           attach="fog"
-          args={["#1b2029", maxFloorDimension * 1.9, maxFloorDimension * 6]}
+          args={["#d99a55", maxFloorDimension * 2.6, maxFloorDimension * 10.5]}
         />
-        <ambientLight intensity={0.48} color="#a08969" />
-        <hemisphereLight args={["#aab7cf", "#2c2219", 0.72]} />
+        <ambientLight intensity={0.64} color="#ffe1b6" />
+        <hemisphereLight args={["#ffe7b8", "#565247", 0.88]} />
         <directionalLight
           position={[
             maxFloorDimension * 0.48,
             maxFloorDimension * 1.25,
             maxFloorDimension * 0.36,
           ]}
-          intensity={1.35}
-          color="#d8e2f4"
+          intensity={2.05}
+          color="#fff0bd"
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
@@ -137,15 +131,15 @@ export function AnimationView({
             maxFloorDimension * 0.9,
             -maxFloorDimension * 0.5,
           ]}
-          intensity={0.6}
-          color="#f2d2a7"
+          intensity={0.54}
+          color="#ff9d5c"
         />
         <pointLight
           position={[0, 1.8, 0]}
-          intensity={0.45}
+          intensity={0.24}
           distance={maxFloorDimension * 2.8}
           decay={2}
-          color="#d8dce8"
+          color="#ffd299"
         />
         <JourneyLighting
           progress={progress}
@@ -158,21 +152,19 @@ export function AnimationView({
           maxFloorDimension={maxFloorDimension}
           endPoint={sceneData.endPoint}
         />
-        <StormAtmosphere
+        <HeatwaveAtmosphere
           maxFloorDimension={maxFloorDimension}
+          floorSize={sceneData.floorSize}
           progress={progress}
           total={total}
         />
-
-        <FlickerTorch position={torchPositions[0]} phase={0} />
-        <FlickerTorch position={torchPositions[1]} phase={1.2} />
 
         <mesh position={[0, -0.42, 0]} receiveShadow>
           <boxGeometry
             args={[sceneData.floorSize[0] + 4, 0.8, sceneData.floorSize[1] + 4]}
           />
           <meshStandardMaterial
-            color="#201d26"
+            color="#3d3934"
             roughness={1}
             metalness={0.03}
           />
@@ -185,8 +177,8 @@ export function AnimationView({
         >
           <planeGeometry args={sceneData.floorSize} />
           <meshStandardMaterial
-            color="#4a3d2d"
-            roughness={0.9}
+            color="#46423b"
+            roughness={0.96}
             metalness={0.08}
           />
         </mesh>
@@ -196,8 +188,8 @@ export function AnimationView({
             args={[maxFloorDimension * 0.12, maxFloorDimension * 0.49, 64]}
           />
           <meshBasicMaterial
-            color="#b48d52"
-            opacity={0.13}
+            color="#ffd07b"
+            opacity={0.11}
             transparent
             side={THREE.DoubleSide}
           />
@@ -273,16 +265,12 @@ export function AnimationView({
         )}
 
         {sceneData.endPoint && (
-          <mesh position={sceneData.endPoint} castShadow>
-            <octahedronGeometry args={[0.24, 0]} />
-            <meshStandardMaterial
-              color="#f97364"
-              emissive="#fb923c"
-              emissiveIntensity={0.5}
-              roughness={0.32}
-              metalness={0.2}
-            />
-          </mesh>
+          <IceCreamShopGoal
+            endPoint={sceneData.endPoint}
+            routeLine={sceneData.routeLine}
+            progress={progress}
+            total={total}
+          />
         )}
 
         {showPlaybackCamera && (
@@ -313,6 +301,7 @@ export function AnimationView({
           />
         )}
       </Canvas>
+      <HeatUrgencyOverlay progress={progress} total={total} />
       <AnimationHud label={viewLabel} onClose={onClose} />
     </div>
   );

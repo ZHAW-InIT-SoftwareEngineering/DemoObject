@@ -121,7 +121,6 @@ export function TheoryShortestPathDemoSlide({
                     label: "Finaler bester Pfad",
                   },
                 ],
-                gridClassName: "grid grid-cols-1 gap-1",
               }}
             />
             {controls}
