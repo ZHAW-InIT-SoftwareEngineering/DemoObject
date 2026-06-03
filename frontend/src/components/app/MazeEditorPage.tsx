@@ -14,6 +14,7 @@ import { AnimationView } from "@/components/app/AnimationView";
 import { CelebrationOverlay } from "@/components/app/maze/CelebrationOverlay";
 import { MazePanel } from "@/components/app/maze/mazePanel/MazePanel";
 import { buildAnimationSceneData } from "@/lib/animation";
+import { ImpressumLink } from "./impressum/ImpressumLink";
 import {
   useDemoSession,
   useMazePathDraft,
@@ -267,7 +268,6 @@ export function MazeEditorPage() {
       <div className="w-full max-w-[520px] space-y-4">
         {error && <div className="text-red-600">{error}</div>}
         {submitError && <div className="text-red-600">{submitError}</div>}
-        <DslStrip dsl={isPathSubmitted ? dsl : null} />
         <MazePanel
           maze={maze}
           userName={session?.userName ?? null}
@@ -288,6 +288,7 @@ export function MazeEditorPage() {
           shortestPathLength={shortestPath?.length}
           timerElapsedMs={mazeTimer.elapsedMs}
         />
+        <DslStrip dsl={isPathSubmitted ? dsl : null} />
         <ActionPanel
           maze={maze}
           pathState={{
@@ -304,6 +305,7 @@ export function MazeEditorPage() {
             onShortestPath: () => void handleShortestPath(),
           }}
         />
+        <ImpressumLink />
       </div>
     </div>
   );

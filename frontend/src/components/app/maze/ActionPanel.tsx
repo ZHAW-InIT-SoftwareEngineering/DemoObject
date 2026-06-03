@@ -4,7 +4,6 @@ import type {
 } from "@/api";
 import { Card, CardContent } from "@/components/ui";
 import { ActionButton } from "../../ui/ActionButton";
-import { ImpressumLink } from "../impressum/ImpressumLink";
 import type { NodePath } from "@/lib/path/transforms";
 
 type ActionPanelProps = {
@@ -81,7 +80,6 @@ export function ActionPanel({ maze, pathState, actions }: ActionPanelProps) {
           </div>
         </CardContent>
       </Card>
-      <ImpressumLink />
     </div>
   );
 }

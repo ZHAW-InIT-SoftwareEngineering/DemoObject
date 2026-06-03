@@ -1,6 +1,5 @@
-import type { ComponentType } from "react";
+import type { ComponentType, ReactNode } from "react";
 import {
-  Button,
   Card,
   CardContent,
   CardDescription,
@@ -38,11 +37,11 @@ export type TheoryShortestPathCarouselItem = {
 };
 
 export type TheoryShortestPathSlideComponentProps = {
-  onRestart: () => void;
+  controls: ReactNode;
 };
 
 export function TheoryShortestPathDemoSlide({
-  onRestart,
+  controls,
   slide,
 }: TheoryShortestPathSlideComponentProps & {
   slide: TheoryShortestPathDemoSlideConfig;
@@ -73,60 +72,60 @@ export function TheoryShortestPathDemoSlide({
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4 px-4 sm:px-6">
-        <MazeLegendSection
-          title="Legende:"
-          explorationLegend={{
-            additionalItems: [
-              {
-                color: "#f59e0b",
-                label: "Finaler bester Pfad",
-              },
-            ],
-            gridClassName:
-              "grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3",
-          }}
-        />
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full sm:w-auto sm:self-start"
-          onClick={onRestart}
-        >
-          Demo neu starten
-        </Button>
-        <div className="aspect-square w-full touch-none overscroll-contain">
-          {demo.maze ? (
-            <Maze
-              maze={demo.maze}
-              className="h-full w-full rounded-xl border bg-white"
-              secondaryHighlightedNodePath={demo.displayedShortestPathNodePath}
-              explorationDiscoveredEdgeKeys={demo.explorationDiscoveredEdgeKeys}
-              explorationSeenEdgeKeys={demo.explorationSeenEdgeKeys}
-              currentExplorationEdgeKey={demo.currentExplorationEdgeKey}
-              currentExplorationEdgeDiscovered={
-                demo.currentExplorationEdgeDiscovered
-              }
-              shadowOverlay={
-                slide.shadowUnobserved
-                  ? {
-                      observedNodeIds: demo.observedNodeIds,
-                      observedEdgeKeys: demo.observedEdgeKeys,
-                      focusNodeId: demo.isAnimating ? demo.focusNodeId : null,
-                    }
-                  : null
-              }
-              viewportCenterNodeId={
-                slide.viewportScale ? demo.focusNodeId : null
-              }
-              viewportScale={slide.viewportScale ?? 1}
-              edgeWeightLabelMode={slide.showAllWeights ? "all" : "none"}
+      <CardContent className="px-4 sm:px-6">
+        <div className="grid items-stretch gap-3 md:grid-cols-2">
+          <div className="aspect-square h-full w-full touch-none overscroll-contain">
+            {demo.maze ? (
+              <Maze
+                maze={demo.maze}
+                className="h-full w-full rounded border bg-white"
+                secondaryHighlightedNodePath={demo.displayedShortestPathNodePath}
+                explorationDiscoveredEdgeKeys={
+                  demo.explorationDiscoveredEdgeKeys
+                }
+                explorationSeenEdgeKeys={demo.explorationSeenEdgeKeys}
+                currentExplorationEdgeKey={demo.currentExplorationEdgeKey}
+                currentExplorationEdgeDiscovered={
+                  demo.currentExplorationEdgeDiscovered
+                }
+                shadowOverlay={
+                  slide.shadowUnobserved
+                    ? {
+                        observedNodeIds: demo.observedNodeIds,
+                        observedEdgeKeys: demo.observedEdgeKeys,
+                        focusNodeId: demo.isAnimating ? demo.focusNodeId : null,
+                      }
+                    : null
+                }
+                viewportCenterNodeId={
+                  slide.viewportScale ? demo.focusNodeId : null
+                }
+                viewportScale={slide.viewportScale ?? 1}
+                edgeWeightLabelMode={slide.showAllWeights ? "all" : "none"}
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center rounded border bg-white text-sm text-slate-600">
+                {demo.loading ? "Labyrinth wird geladen..." : demo.error}
+              </div>
+            )}
+          </div>
+
+          <div className="flex h-full w-full flex-col md:aspect-square">
+            <MazeLegendSection
+              className="space-y-2 rounded-b-none px-2 py-1.5 text-xs"
+              title="Legende:"
+              explorationLegend={{
+                additionalItems: [
+                  {
+                    color: "#f59e0b",
+                    label: "Finaler bester Pfad",
+                  },
+                ],
+                gridClassName: "grid grid-cols-1 gap-1",
+              }}
             />
-          ) : (
-            <div className="flex h-full items-center justify-center rounded-xl border bg-white text-sm text-slate-600">
-              {demo.loading ? "Labyrinth wird geladen..." : demo.error}
-            </div>
-          )}
+            {controls}
+          </div>
         </div>
       </CardContent>
     </Card>

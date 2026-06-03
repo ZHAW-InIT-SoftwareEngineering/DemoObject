@@ -19,16 +19,23 @@ type TheoryDslDirectionPadProps = {
     MazesMazeIdGet200ResponseNodesInner
   >;
   onSelectNode: (node: MazesMazeIdGet200ResponseNodesInner) => void;
+  className?: string;
 };
 
 export function TheoryDslDirectionPad({
+  className,
   moveChoiceByToken,
   onSelectNode,
 }: TheoryDslDirectionPadProps) {
   return (
-    <div className="mx-auto w-fit rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+    <div
+      className={cn(
+        "flex w-fit flex-col items-center justify-center rounded-lg border border-slate-200 bg-white p-3 shadow-sm",
+        className,
+      )}
+    >
       <div className="text-center text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-        Steuerkreuz 
+        Steuerkreuz
       </div>
       <div className="mt-3 grid grid-cols-3 grid-rows-3 gap-x-1 gap-y-1.5 sm:gap-x-1.5 sm:gap-y-2">
         {DIRECTION_BUTTON_LAYOUT.map(({ token, className }) => {

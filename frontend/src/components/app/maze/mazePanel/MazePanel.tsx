@@ -2,7 +2,7 @@ import type {
   MazesMazeIdGet200Response,
   MazesMazeIdGet200ResponseNodesInner,
 } from "@/api";
-import { Card, CardContent, Separator } from "@/components/ui";
+import { Card, CardContent } from "@/components/ui";
 import { Maze } from "./Maze";
 import { MazePanelHeader } from "./MazePanelHeader";
 import type { NodePath } from "@/lib/path/transforms";
@@ -55,28 +55,29 @@ export function MazePanel({
   return (
     <Card className="py-4">
       <CardContent className="px-4 space-y-3">
-        <MazePanelHeader
-          userName={userName}
-          pathState={{
-            nodePath,
-            isPathSubmitted,
-            canShowAnimationButton,
-            timerElapsedMs,
-          }}
-          actions={{ onUndo, onShowAnimation, onOpen3DPreview }}
-        />
-        <Separator />
-        <MazeLegendSection
-          title="Legende:"
-          explorationLegend={showExplorationLegend ? {} : null}
-        >
-          <PathInfo
-            className={cn("border-t pt-3", MAZE_LEGEND_DIVIDER_CLASS_NAME)}
-            shortestPathLength={shortestPathLength}
-            userPathLength={userPathLength}
-            variant="plain"
+        <div className="grid items-stretch gap-3 md:grid-cols-2">
+          <MazeLegendSection
+            title="Legende:"
+            explorationLegend={showExplorationLegend ? {} : null}
+          >
+            <PathInfo
+              className={cn("border-t pt-3", MAZE_LEGEND_DIVIDER_CLASS_NAME)}
+              shortestPathLength={shortestPathLength}
+              userPathLength={userPathLength}
+              variant="plain"
+            />
+          </MazeLegendSection>
+          <MazePanelHeader
+            userName={userName}
+            pathState={{
+              nodePath,
+              isPathSubmitted,
+              canShowAnimationButton,
+              timerElapsedMs,
+            }}
+            actions={{ onUndo, onShowAnimation, onOpen3DPreview }}
           />
-        </MazeLegendSection>
+        </div>
         <div className="w-full aspect-square touch-none overscroll-contain">
           <Maze
             maze={maze}

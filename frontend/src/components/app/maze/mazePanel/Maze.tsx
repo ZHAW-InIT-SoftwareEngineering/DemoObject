@@ -4,6 +4,7 @@ import type {
   MazesMazeIdGet200ResponseNodesInner,
 } from "@/api";
 import { useId, useMemo } from "react";
+import { House, IceCreamCone } from "lucide-react";
 import {
   buildMazeWallCoordSegments,
   getMazeBounds,
@@ -71,6 +72,15 @@ type LayoutMetrics = {
 const DEFAULT_SIZE = 520;
 const PADDING = 20;
 const SHADOW_OVERLAY_OPACITY = 0.5;
+const USER_PATH_COLOR = "#2563eb";
+const SHORTEST_PATH_COLOR = "#f59e0b";
+const OVERLAPPING_PATH_COLOR = "#0d9488";
+const START_ICON_COLOR = "#15803d";
+const START_ICON_BACKGROUND_COLOR = "#dcfce7";
+const START_ICON_BORDER_COLOR = "#bbf7d0";
+const GOAL_ICON_COLOR = "#c2410c";
+const GOAL_ICON_BACKGROUND_COLOR = "#ffedd5";
+const GOAL_ICON_BORDER_COLOR = "#fed7aa";
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
@@ -311,6 +321,15 @@ export function Maze({
     () => nodePathToUndirectedEdgeKeySet(secondaryHighlightedNodePath),
     [secondaryHighlightedNodePath],
   );
+  const overlappingHighlightedEdges = useMemo(() => {
+    const edges = new Set<string>();
+    for (const key of highlightedEdges) {
+      if (secondaryHighlightedEdges.has(key)) {
+        edges.add(key);
+      }
+    }
+    return edges;
+  }, [highlightedEdges, secondaryHighlightedEdges]);
   const explorationDiscoveredEdges = useMemo(
     () => new Set(explorationDiscoveredEdgeKeys),
     [explorationDiscoveredEdgeKeys],
@@ -519,7 +538,7 @@ export function Maze({
             const fill = isStart
               ? "#ecfdf5"
               : isEnd
-                ? "#fef2f2"
+                ? "#fff7ed"
                 : isSelected
                   ? "#dbeafe"
                   : "#f8fafc";
@@ -558,7 +577,7 @@ export function Maze({
             return renderRouteEdge(
               edge,
               pointByNodeId,
-              "#f59e0b",
+              SHORTEST_PATH_COLOR,
               layout.routeOverlayStrokeWidth,
               0.84,
             );
@@ -571,9 +590,22 @@ export function Maze({
             return renderRouteEdge(
               edge,
               pointByNodeId,
-              "#2563eb",
+              USER_PATH_COLOR,
               layout.routeStrokeWidth,
               0.92,
+            );
+          })}
+
+          {edges.map((edge) => {
+            const key = undirectedEdgeKey(edge.from, edge.to);
+            if (!overlappingHighlightedEdges.has(key)) return null;
+
+            return renderRouteEdge(
+              edge,
+              pointByNodeId,
+              OVERLAPPING_PATH_COLOR,
+              layout.routeStrokeWidth,
+              0.96,
             );
           })}
 
@@ -632,6 +664,8 @@ export function Maze({
             const isSelected = selected.has(node.mazeNodeId);
             const isStart = node.mazeNodeId === maze.startNodeId;
             const isEnd = node.mazeNodeId === maze.endNodeId;
+            const iconSize = clamp(layout.cellSize * 0.56, 18, 32);
+            const iconBackgroundRadius = clamp(layout.cellSize * 0.25, 11, 20);
             const fill = isStart
               ? "#22c55e"
               : isEnd
@@ -665,15 +699,60 @@ export function Maze({
                     pointerEvents="none"
                   />
                 )}
-                <circle
-                  cx={point.x}
-                  cy={point.y}
-                  r={layout.markerRadius}
-                  fill={fill}
-                  stroke={strokeColor}
-                  strokeWidth={strokeWidth}
-                  pointerEvents="none"
-                />
+                {isStart || isEnd ? (
+                  <>
+                    <circle
+                      cx={point.x}
+                      cy={point.y}
+                      r={iconBackgroundRadius}
+                      fill={
+                        isStart
+                          ? START_ICON_BACKGROUND_COLOR
+                          : GOAL_ICON_BACKGROUND_COLOR
+                      }
+                      stroke={
+                        isStart
+                          ? START_ICON_BORDER_COLOR
+                          : GOAL_ICON_BORDER_COLOR
+                      }
+                      strokeWidth={2}
+                      pointerEvents="none"
+                    />
+                    {isStart ? (
+                      <House
+                        x={point.x - iconSize / 2}
+                        y={point.y - iconSize / 2}
+                        width={iconSize}
+                        height={iconSize}
+                        color={START_ICON_COLOR}
+                        strokeWidth={2.6}
+                        pointerEvents="none"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <IceCreamCone
+                        x={point.x - iconSize / 2}
+                        y={point.y - iconSize / 2}
+                        width={iconSize}
+                        height={iconSize}
+                        color={GOAL_ICON_COLOR}
+                        strokeWidth={2.6}
+                        pointerEvents="none"
+                        aria-hidden="true"
+                      />
+                    )}
+                  </>
+                ) : (
+                  <circle
+                    cx={point.x}
+                    cy={point.y}
+                    r={layout.markerRadius}
+                    fill={fill}
+                    stroke={strokeColor}
+                    strokeWidth={strokeWidth}
+                    pointerEvents="none"
+                  />
+                )}
               </g>
             );
           })}
