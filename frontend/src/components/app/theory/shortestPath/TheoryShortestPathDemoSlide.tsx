@@ -51,9 +51,9 @@ export function TheoryShortestPathDemoSlide({
     algorithm: slide.algorithm,
     isActive: true,
     explorationStepMs:
-      slide.algorithm === THEORY_SHORTEST_PATH_ALGORITHM.Dijkstra ? 220 : 120,
+      slide.algorithm === THEORY_SHORTEST_PATH_ALGORITHM.Dijkstra ? 120 : 60,
     shortestPathStepMs:
-      slide.algorithm === THEORY_SHORTEST_PATH_ALGORITHM.Dijkstra ? 340 : 240,
+      slide.algorithm === THEORY_SHORTEST_PATH_ALGORITHM.Dijkstra ? 170 : 120,
   });
 
   return (

@@ -32,14 +32,8 @@ export function TheoryShortestPathIntro() {
         </p>
 
         <p>
-          <span className="font-semibold">BFS</span> findet den kürzesten Weg,
-          wenn jeder Schritt gleich viel kostet.{" "}
-          <span className="font-semibold">Dijkstra</span> hilft, wenn Wege
-          unterschiedlich teuer sind.
-        </p>
-
-        <p>
-          Unten siehst du zuerst BFS und danach Dijkstra. So erkennst du, welcher
+          Unten siehst du zuerst zwei <span className="font-semibold">BFS</span>{" "} und danach {" "}
+          <span className="font-semibold">Dijkstra</span>. So erkennst du, welcher
           Algorithmus in welcher Situation das Eis retten kann.
         </p>
       </CardContent>
