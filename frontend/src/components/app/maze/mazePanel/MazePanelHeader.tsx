@@ -45,7 +45,7 @@ export function MazePanelHeader({
             />
           ) : (
             <ActionButton
-              label="Schritt rückgängig"
+              label="Schritt zurück"
               onClick={onUndo}
               disabled={!canUndo}
               className="h-9 px-2 text-xs"

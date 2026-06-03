@@ -22,9 +22,9 @@ export function ResetPathConfirmationOverlay({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md" showCloseButton={false}>
-        <DialogHeader>
-          <DialogTitle>Pfad zurücksetzen</DialogTitle>
-          <DialogDescription>
+        <DialogHeader className="text-center sm:text-center">
+          <DialogTitle className="text-center">Pfad zurücksetzen</DialogTitle>
+          <DialogDescription className="text-center">
             Möchtest du den Pfad wirklich zurücksetzen?
           </DialogDescription>
         </DialogHeader>

@@ -29,11 +29,6 @@ export function TheoryDslIntro() {
     </p>
 
     <p>
-      Statt den Weg zu malen, klickst du die passenden Bausteine aneinander.
-      So entsteht Schritt für Schritt ein kleines Programm.
-    </p>
-
-    <p>
       Unten kannst du es direkt ausprobieren und selbst einen Weg
       „programmieren“. Stelle dir dabei vor, dass du so ein Computer-Programm programmierst. 
     </p>

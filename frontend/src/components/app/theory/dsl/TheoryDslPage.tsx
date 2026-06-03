@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import type { MazesMazeIdGet200ResponseNodesInner } from "@/api";
-import { DslStrip } from "@/components/app/maze/DslStrip";
 import { RouteBackButton } from "@/components/ui/RouteBackButton";
 import { useLocalMazePath, useMazeById } from "@/hooks";
 import {
@@ -89,11 +88,8 @@ export function TheoryDslPage() {
               maze={maze}
               nodePath={nodePath}
               moveChoiceByToken={moveChoiceByToken}
-              onSelectNode={selectNode}
-            />
-            <DslStrip
               dsl={theoryDslTokens.length > 0 ? [...theoryDslTokens] : null}
-              autoScrollToLatest
+              onSelectNode={selectNode}
             />
           </>
         ) : null}
