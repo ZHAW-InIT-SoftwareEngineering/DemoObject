@@ -33,7 +33,7 @@ export function PathInfo({
         {shortestPathLength ?? "-"}
       </span>
 
-      <span className="font-medium underline decoration-2 underline-offset-4 decoration-[#0d9488]">
+      <span className="font-medium underline decoration-2 underline-offset-4 decoration-[#be123c]">
         Überlappende Strecken
       </span>
     </div>

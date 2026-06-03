@@ -148,7 +148,7 @@ export function MazeEditorPage() {
 
     const submissionSnapshot = mazeTimer.beginSubmission();
     if (!submissionSnapshot) {
-      toast.error("Die Zeit konnte nicht erfasst werden.");
+      toast.error("Du kannst nur einen Pfad senden!");
       return;
     }
 
