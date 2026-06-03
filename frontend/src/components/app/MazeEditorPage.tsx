@@ -288,6 +288,7 @@ export function MazeEditorPage() {
           shortestPathLength={shortestPath?.length}
           timerElapsedMs={mazeTimer.elapsedMs}
         />
+        <DslStrip dsl={isPathSubmitted ? dsl : null} />
         <ActionPanel
           maze={maze}
           pathState={{
@@ -304,7 +305,6 @@ export function MazeEditorPage() {
             onShortestPath: () => void handleShortestPath(),
           }}
         />
-        <DslStrip dsl={isPathSubmitted ? dsl : null} />
         <ImpressumLink />
       </div>
     </div>

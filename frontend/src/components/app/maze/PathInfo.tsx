@@ -30,7 +30,11 @@ export function PathInfo({
         Länge des kürzesten Pfads
       </span>
       <span className="text-right tabular-nums">
-        {shortestPathLength ?? "❓"}
+        {shortestPathLength ?? "-"}
+      </span>
+
+      <span className="font-medium underline decoration-2 underline-offset-4 decoration-[#0d9488]">
+        Überlappende Strecken
       </span>
     </div>
   );

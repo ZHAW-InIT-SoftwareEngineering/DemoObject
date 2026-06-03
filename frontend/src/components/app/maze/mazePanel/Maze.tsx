@@ -71,6 +71,9 @@ type LayoutMetrics = {
 const DEFAULT_SIZE = 520;
 const PADDING = 20;
 const SHADOW_OVERLAY_OPACITY = 0.5;
+const USER_PATH_COLOR = "#2563eb";
+const SHORTEST_PATH_COLOR = "#f59e0b";
+const OVERLAPPING_PATH_COLOR = "#0d9488";
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
@@ -311,6 +314,15 @@ export function Maze({
     () => nodePathToUndirectedEdgeKeySet(secondaryHighlightedNodePath),
     [secondaryHighlightedNodePath],
   );
+  const overlappingHighlightedEdges = useMemo(() => {
+    const edges = new Set<string>();
+    for (const key of highlightedEdges) {
+      if (secondaryHighlightedEdges.has(key)) {
+        edges.add(key);
+      }
+    }
+    return edges;
+  }, [highlightedEdges, secondaryHighlightedEdges]);
   const explorationDiscoveredEdges = useMemo(
     () => new Set(explorationDiscoveredEdgeKeys),
     [explorationDiscoveredEdgeKeys],
@@ -558,7 +570,7 @@ export function Maze({
             return renderRouteEdge(
               edge,
               pointByNodeId,
-              "#f59e0b",
+              SHORTEST_PATH_COLOR,
               layout.routeOverlayStrokeWidth,
               0.84,
             );
@@ -571,9 +583,22 @@ export function Maze({
             return renderRouteEdge(
               edge,
               pointByNodeId,
-              "#2563eb",
+              USER_PATH_COLOR,
               layout.routeStrokeWidth,
               0.92,
+            );
+          })}
+
+          {edges.map((edge) => {
+            const key = undirectedEdgeKey(edge.from, edge.to);
+            if (!overlappingHighlightedEdges.has(key)) return null;
+
+            return renderRouteEdge(
+              edge,
+              pointByNodeId,
+              OVERLAPPING_PATH_COLOR,
+              layout.routeStrokeWidth,
+              0.96,
             );
           })}
 
