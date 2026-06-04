@@ -4,10 +4,12 @@ import { Button } from "@/components/ui";
 
 type RouteBackButtonProps = {
   fallbackTo?: string;
+  className?: string;
 };
 
 export function RouteBackButton({
   fallbackTo = "/",
+  className,
 }: RouteBackButtonProps) {
   const navigate = useNavigate();
 
@@ -21,7 +23,12 @@ export function RouteBackButton({
   };
 
   return (
-    <Button variant="outline" size="sm" onClick={handleClick}>
+    <Button
+      variant="outline"
+      size="sm"
+      className={className}
+      onClick={handleClick}
+    >
       <ArrowLeft />
       Zurück
     </Button>
