@@ -15,11 +15,7 @@ type MazePanelProps = {
   maze: MazesMazeIdGet200Response;
   userName?: string | null;
   onNodeClick: (node: MazesMazeIdGet200ResponseNodesInner) => void;
-  onUndo: () => void;
-  onShowAnimation: () => void;
   onOpen3DPreview: () => void;
-  isPathSubmitted: boolean;
-  canShowAnimationButton: boolean;
   nodePath: NodePath;
   secondaryHighlightedNodePath: NodePath;
   explorationDiscoveredEdgeKeys?: readonly string[];
@@ -36,11 +32,7 @@ export function MazePanel({
   maze,
   userName = null,
   onNodeClick,
-  onUndo,
-  onShowAnimation,
   onOpen3DPreview,
-  isPathSubmitted,
-  canShowAnimationButton,
   nodePath,
   secondaryHighlightedNodePath,
   explorationDiscoveredEdgeKeys = [],
@@ -74,12 +66,9 @@ export function MazePanel({
           <MazePanelHeader
             userName={userName}
             pathState={{
-              nodePath,
-              isPathSubmitted,
-              canShowAnimationButton,
               timerElapsedMs,
             }}
-            actions={{ onUndo, onShowAnimation, onOpen3DPreview }}
+            actions={{ onOpen3DPreview }}
           />
         </div>
         <div className="w-full aspect-square touch-none overscroll-contain">

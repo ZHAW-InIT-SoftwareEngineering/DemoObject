@@ -57,7 +57,6 @@ export function MazeEditorPage() {
     pathKey,
     selectNode,
     resetPath,
-    undoNodeSelection,
     userPathLength,
     apiRequest,
   } = mazePathDraft;
@@ -272,11 +271,7 @@ export function MazeEditorPage() {
           maze={maze}
           userName={session?.userName ?? null}
           onNodeClick={selectNode}
-          onUndo={undoNodeSelection}
-          onShowAnimation={handleShowAnimationPathSelection}
           onOpen3DPreview={handleOpen3DPreview}
-          isPathSubmitted={isPathSubmitted}
-          canShowAnimationButton={canShowAnimationButton}
           nodePath={nodePath}
           secondaryHighlightedNodePath={displayedShortestPathNodePath}
           explorationDiscoveredEdgeKeys={explorationDiscoveredEdgeKeys}
@@ -298,11 +293,13 @@ export function MazeEditorPage() {
             pathKey,
             lastSubmittedKey,
             hasShortestPathForCurrentSubmission,
+            canShowAnimationButton,
           }}
           actions={{
             onReset: handleResetPath,
             onSubmit: () => void handleSubmitPath(),
             onShortestPath: () => void handleShortestPath(),
+            onShowAnimation: handleShowAnimationPathSelection,
           }}
         />
         <ImpressumLink />

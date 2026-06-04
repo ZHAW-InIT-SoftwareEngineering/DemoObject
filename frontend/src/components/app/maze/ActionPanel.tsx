@@ -15,11 +15,13 @@ type ActionPanelProps = {
     pathKey: string;
     lastSubmittedKey: string | null;
     hasShortestPathForCurrentSubmission: boolean;
+    canShowAnimationButton: boolean;
   };
   actions: {
     onReset: () => void;
     onSubmit: () => void;
     onShortestPath: () => void;
+    onShowAnimation: () => void;
   };
 };
 
@@ -31,8 +33,9 @@ export function ActionPanel({ maze, pathState, actions }: ActionPanelProps) {
     pathKey,
     lastSubmittedKey,
     hasShortestPathForCurrentSubmission,
+    canShowAnimationButton,
   } = pathState;
-  const { onReset, onSubmit, onShortestPath } = actions;
+  const { onReset, onSubmit, onShortestPath, onShowAnimation } = actions;
   const endsAtGoal =
     maze !== null &&
     nodePath.length > 0 &&
@@ -62,12 +65,6 @@ export function ActionPanel({ maze, pathState, actions }: ActionPanelProps) {
         <CardContent className="px-4">
           <div className="flex flex-col items-stretch gap-2">
             <ActionButton
-              label="Pfad zurücksetzen"
-              onClick={onReset}
-              disabled={isResetDisabled}
-              variant="secondary"
-            />
-            <ActionButton
               label={submitting ? "Wird gesendet..." : "Pfad senden"}
               onClick={onSubmit}
               disabled={isSubmitDisabled}
@@ -76,6 +73,17 @@ export function ActionPanel({ maze, pathState, actions }: ActionPanelProps) {
               label="Kürzester Pfad"
               onClick={onShortestPath}
               disabled={isShortestDisabled}
+            />
+            <ActionButton
+              label="Animation anzeigen"
+              onClick={onShowAnimation}
+              disabled={!canShowAnimationButton}
+            />
+            <ActionButton
+              label="Pfad zurücksetzen"
+              onClick={onReset}
+              disabled={isResetDisabled}
+              variant="secondary"
             />
           </div>
         </CardContent>

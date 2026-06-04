@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import type { MazesMazeIdGet200ResponseNodesInner } from "@/api";
-import { RouteBackButton } from "@/components/ui/RouteBackButton";
 import { useLocalMazePath, useMazeById } from "@/hooks";
 import {
   getTheoryDslToken,
@@ -65,7 +64,6 @@ export function TheoryDslPage() {
   return (
     <main className="min-h-screen bg-background px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto w-full max-w-3xl space-y-4 sm:space-y-6">
-        <RouteBackButton fallbackTo="/maze" />
         <TheoryDslIntro />
 
         {loading ? (

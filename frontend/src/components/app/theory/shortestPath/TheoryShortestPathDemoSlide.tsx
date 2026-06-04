@@ -8,6 +8,7 @@ import {
 } from "@/components/ui";
 import { Maze } from "@/components/app/maze";
 import { MazeLegendSection } from "@/components/app/maze/MazeLegendSection";
+import { RouteBackButton } from "@/components/ui/RouteBackButton";
 import {
   THEORY_SHORTEST_PATH_ALGORITHM,
   useTheoryShortestPathDemo,
@@ -72,7 +73,7 @@ export function TheoryShortestPathDemoSlide({
         </div>
       </CardHeader>
 
-      <CardContent className="px-4 sm:px-6">
+      <CardContent className="space-y-3 px-4 sm:px-6">
         <div className="grid items-stretch gap-3 md:grid-cols-2">
           <div className="aspect-square h-full w-full touch-none overscroll-contain">
             {demo.maze ? (
@@ -124,6 +125,12 @@ export function TheoryShortestPathDemoSlide({
               }}
             />
             {controls}
+          </div>
+        </div>
+
+        <div className="flex w-full justify-center">
+          <div className="flex w-full max-w-[19rem]">
+            <RouteBackButton fallbackTo="/maze" className="w-full" />
           </div>
         </div>
       </CardContent>

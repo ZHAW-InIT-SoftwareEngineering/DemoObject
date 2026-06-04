@@ -42,7 +42,7 @@ export function TheoryShortestPathCarousel() {
           onClick={() => setActiveIndex((currentIndex) => currentIndex - 1)}
           disabled={activeIndex === 0}
         >
-          Zurück
+          Vorherige Demo
         </Button>
         <Button
           type="button"
@@ -51,7 +51,7 @@ export function TheoryShortestPathCarousel() {
           onClick={() => setActiveIndex((currentIndex) => currentIndex + 1)}
           disabled={activeIndex === SLIDES.length - 1}
         >
-          Weiter
+          Nächste Demo
         </Button>
       </div>
     </div>

@@ -1,18 +1,12 @@
 import { ActionButton } from "../../../ui/ActionButton";
 import { MazeTimer } from "@/components/app/maze/MazeTimer";
-import type { NodePath } from "@/lib/path/transforms";
 
 type MazePanelHeaderProps = {
   userName?: string | null;
   pathState: {
-    nodePath: NodePath;
-    isPathSubmitted: boolean;
-    canShowAnimationButton: boolean;
     timerElapsedMs: number;
   };
   actions: {
-    onUndo: () => void;
-    onShowAnimation: () => void;
     onOpen3DPreview: () => void;
   };
 };
@@ -22,10 +16,9 @@ export function MazePanelHeader({
   pathState,
   userName,
 }: MazePanelHeaderProps) {
-  const { onUndo, onShowAnimation, onOpen3DPreview } = actions;
+  const { onOpen3DPreview } = actions;
 
-  const canUndo = pathState.nodePath.length >= 2;
-  const { isPathSubmitted, canShowAnimationButton, timerElapsedMs } = pathState;
+  const { timerElapsedMs } = pathState;
   return (
     <div className="flex h-full flex-col justify-center rounded-md border border-slate-200 bg-white p-3">
       <div className="flex flex-col items-center gap-2">
@@ -36,21 +29,6 @@ export function MazePanelHeader({
         ) : null}
         <MazeTimer elapsedMs={timerElapsedMs} />
         <div className="grid w-full gap-2">
-          {isPathSubmitted ? (
-            <ActionButton
-              label="Animation anzeigen"
-              onClick={onShowAnimation}
-              disabled={!canShowAnimationButton}
-              className="h-9 px-2 text-xs"
-            />
-          ) : (
-            <ActionButton
-              label="Schritt zurück"
-              onClick={onUndo}
-              disabled={!canUndo}
-              className="h-9 px-2 text-xs"
-            />
-          )}
           <ActionButton
             label="Labyrinth in 3D"
             onClick={onOpen3DPreview}
