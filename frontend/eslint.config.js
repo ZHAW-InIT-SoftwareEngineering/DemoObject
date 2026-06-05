@@ -37,7 +37,10 @@ export default defineConfig([
   pluginReact.configs.flat.recommended,
   pluginReact.configs.flat["jsx-runtime"],
   {
-    files: ["src/components/app/animation/**/*.{ts,tsx}"],
+    files: [
+      "src/components/app/AnimationView.tsx",
+      "src/components/app/maze.animation/**/*.{ts,tsx}",
+    ],
     rules: {
       "react/no-unknown-property": "off",
     },

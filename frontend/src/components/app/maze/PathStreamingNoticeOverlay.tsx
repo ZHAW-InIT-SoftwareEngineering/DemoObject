@@ -24,7 +24,7 @@ export function PathStreamingNoticeOverlay({
           <DialogTitle className="text-center">Geschafft</DialogTitle>
           <DialogDescription className="text-center">
             Dein Pfad wird bald auf dem grossen Bildschirm gezeigt. Du hast die
-            Konzepte gemeistert und kannst jetzt dein Eis abholen.
+            Konzepte gemeistert und kannst jetzt deine Glace abholen.
           </DialogDescription>
         </DialogHeader>
 
