@@ -1,4 +1,4 @@
-import { MongoClient, Db, Collection } from "mongodb";
+import { MongoClient, Db, Collection, type Document } from "mongodb";
 import { Session } from "../domain/session";
 import "dotenv/config";
 
@@ -48,7 +48,7 @@ function getDb(): Db {
     } 
 }
 
-function getDbCollection<T = any>(dbCollectionName: string): Collection<T> {
+function getDbCollection<T extends Document = Document>(dbCollectionName: string): Collection<T> {
     return getDb().collection<T>(dbCollectionName);
 }
 
