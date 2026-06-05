@@ -6,6 +6,7 @@ import { useMazeFlow } from "@/components/app/MazeFlowProvider";
 import { DslStrip } from "@/components/app/maze/DslStrip";
 import { ResetPathConfirmationOverlay } from "@/components/app/maze/ResetPathConfirmationOverlay";
 import { MazeIntroOverlay } from "@/components/app/maze/MazeIntroOverlay";
+import { PathStreamingNoticeOverlay } from "@/components/app/maze/PathStreamingNoticeOverlay";
 import {
   AnimationPathSelectionOverlay,
   type AnimationPathChoice,
@@ -14,6 +15,10 @@ import { AnimationView } from "@/components/app/AnimationView";
 import { CelebrationOverlay } from "@/components/app/maze/CelebrationOverlay";
 import { MazePanel } from "@/components/app/maze/mazePanel/MazePanel";
 import { buildAnimationSceneData } from "@/lib/animation";
+import {
+  hasSeenPersistedDemoStreamingNotice,
+  writePersistedDemoStreamingNotice,
+} from "@/lib/demoStreamingNoticeStorage";
 import { ImpressumLink } from "./impressum/ImpressumLink";
 import {
   useDemoSession,
@@ -29,7 +34,12 @@ import type { NodePath } from "@/lib/path/transforms";
 export function MazeEditorPage() {
   const navigate = useNavigate();
   const { error, maze, session } = useDemoSession();
-  const { animationState, startAnimation } = useMazeFlow();
+  const {
+    acknowledgeAnimationView,
+    animationState,
+    startAnimation,
+    viewedAnimationId,
+  } = useMazeFlow();
   const mazePathDraft = useMazePathDraft(maze, session?.sessionId);
   const mazeTimer = useMazeTimer({
     mazeId: maze?.mazeId,
@@ -87,6 +97,7 @@ export function MazeEditorPage() {
     useState(false);
   const [animationPathSelectionOpen, setAnimationPathSelectionOpen] =
     useState(false);
+  const [pathStreamingNoticeOpen, setPathStreamingNoticeOpen] = useState(false);
   const [previewNodePath, setPreviewNodePath] = useState<NodePath>([]);
   const showIntroOverlay = mazeTimer.hydrated && !mazeTimer.hasStarted;
   const canStartMaze = theoryProgress.hydrated && theoryProgress.hasVisitedBoth;
@@ -95,6 +106,30 @@ export function MazeEditorPage() {
     if (animationState.status !== "playing") return;
     void navigate({ to: "/maze/animation", replace: true });
   }, [animationState.status, navigate]);
+
+  useEffect(() => {
+    if (viewedAnimationId === 0) return;
+    if (!maze || !session) {
+      acknowledgeAnimationView();
+      return;
+    }
+
+    if (
+      hasSeenPersistedDemoStreamingNotice(session.sessionId, maze.mazeId)
+    ) {
+      acknowledgeAnimationView();
+      return;
+    }
+
+    writePersistedDemoStreamingNotice(session.sessionId, maze.mazeId);
+    setPathStreamingNoticeOpen(true);
+    acknowledgeAnimationView();
+  }, [
+    acknowledgeAnimationView,
+    maze,
+    session,
+    viewedAnimationId,
+  ]);
 
   const canUseUserPath = nodePath.length > 1;
   const canUseShortestPath = shortestPathNodePath.length > 1;
@@ -220,6 +255,10 @@ export function MazeEditorPage() {
     setPreviewNodePath([]);
   };
 
+  const handleClosePathStreamingNotice = () => {
+    setPathStreamingNoticeOpen(false);
+  };
+
   if (!maze) {
     return null;
   }
@@ -249,6 +288,10 @@ export function MazeEditorPage() {
       <CelebrationOverlay
         open={showCelebrationOverlay}
         onClose={dismissCelebrationOverlay}
+      />
+      <PathStreamingNoticeOverlay
+        open={pathStreamingNoticeOpen}
+        onClose={handleClosePathStreamingNotice}
       />
       <AnimationPathSelectionOverlay
         open={animationPathSelectionOpen}

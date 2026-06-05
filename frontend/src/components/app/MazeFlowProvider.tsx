@@ -24,9 +24,11 @@ type StartAnimationOptions = {
 
 type MazeFlowContextValue = {
   animationState: MazeAnimationState;
+  viewedAnimationId: number;
   startAnimation: (options: StartAnimationOptions) => boolean;
   completeAnimation: () => void;
   closePlayback: () => void;
+  acknowledgeAnimationView: () => void;
 };
 
 function createIdleAnimationState(): MazeAnimationState {
@@ -44,6 +46,7 @@ export function MazeFlowProvider({ children }: { children: ReactNode }) {
   const [animationState, setAnimationState] = useState<MazeAnimationState>(
     createIdleAnimationState,
   );
+  const [viewedAnimationId, setViewedAnimationId] = useState(0);
   const animationStateRef = useRef(animationState);
 
   animationStateRef.current = animationState;
@@ -79,6 +82,7 @@ export function MazeFlowProvider({ children }: { children: ReactNode }) {
 
       const nextAnimationState = createIdleAnimationState();
       animationStateRef.current = nextAnimationState;
+      setViewedAnimationId((currentId) => currentId + 1);
       return nextAnimationState;
     });
   }, []);
@@ -91,18 +95,32 @@ export function MazeFlowProvider({ children }: { children: ReactNode }) {
 
       const nextAnimationState = createIdleAnimationState();
       animationStateRef.current = nextAnimationState;
+      setViewedAnimationId((currentId) => currentId + 1);
       return nextAnimationState;
     });
+  }, []);
+
+  const acknowledgeAnimationView = useCallback(() => {
+    setViewedAnimationId(0);
   }, []);
 
   const value = useMemo<MazeFlowContextValue>(
     () => ({
       animationState,
+      viewedAnimationId,
       startAnimation,
       completeAnimation,
       closePlayback,
+      acknowledgeAnimationView,
     }),
-    [animationState, closePlayback, completeAnimation, startAnimation],
+    [
+      acknowledgeAnimationView,
+      animationState,
+      closePlayback,
+      completeAnimation,
+      startAnimation,
+      viewedAnimationId,
+    ],
   );
 
   return (

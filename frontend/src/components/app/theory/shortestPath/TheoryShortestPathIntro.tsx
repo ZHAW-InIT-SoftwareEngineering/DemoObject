@@ -34,7 +34,7 @@ export function TheoryShortestPathIntro() {
         <p>
           Unten siehst du zuerst zwei <span className="font-semibold">BFS</span>{" "} und danach {" "}
           <span className="font-semibold">Dijkstra</span>. So erkennst du, welcher
-          Algorithmus in welcher Situation das Eis retten kann.
+          Algorithmus in welcher Situation die Glace retten kann.
         </p>
       </CardContent>
     </Card>

@@ -3,11 +3,13 @@ import {
   isPersistedDemoMazeTimer,
   isPersistedDemoPathSubmission,
   isPersistedDemoSession,
+  isPersistedDemoStreamingNotice,
   isPersistedDemoTheoryProgress,
   type PersistedDemoDraftPath,
   type PersistedDemoMazeTimer,
   type PersistedDemoPathSubmission,
   type PersistedDemoSession,
+  type PersistedDemoStreamingNotice,
   type PersistedDemoTheoryProgress,
 } from "@/lib/demoPersistenceTypes";
 
@@ -21,6 +23,7 @@ export type DemoActiveStateData = {
   mazeTimer: PersistedDemoMazeTimer | null;
   theoryProgress: PersistedDemoTheoryProgress | null;
   pathSubmissions: Record<string, PersistedDemoPathSubmission>;
+  streamingNotice: PersistedDemoStreamingNotice | null;
 };
 
 type DemoActiveStateEnvelope = {
@@ -40,6 +43,7 @@ export function createEmptyDemoActiveStateData(): DemoActiveStateData {
     mazeTimer: null,
     theoryProgress: null,
     pathSubmissions: {},
+    streamingNotice: null,
   };
 }
 
@@ -95,6 +99,7 @@ function normalizeDemoActiveStateData(
     mazeTimer: data.mazeTimer,
     theoryProgress: data.theoryProgress,
     pathSubmissions: trimPathSubmissions(data.pathSubmissions),
+    streamingNotice: data.streamingNotice ?? null,
   };
 }
 
@@ -105,6 +110,7 @@ function cloneDemoActiveStateData(data: DemoActiveStateData): DemoActiveStateDat
     mazeTimer: data.mazeTimer,
     theoryProgress: data.theoryProgress,
     pathSubmissions: { ...data.pathSubmissions },
+    streamingNotice: data.streamingNotice,
   };
 }
 
@@ -222,7 +228,10 @@ function isActiveStateData(value: unknown): value is DemoActiveStateData {
     (data.mazeTimer === null || isPersistedDemoMazeTimer(data.mazeTimer)) &&
     (data.theoryProgress === null ||
       isPersistedDemoTheoryProgress(data.theoryProgress)) &&
-    isPathSubmissionRecord(data.pathSubmissions)
+    isPathSubmissionRecord(data.pathSubmissions) &&
+    (data.streamingNotice === undefined ||
+      data.streamingNotice === null ||
+      isPersistedDemoStreamingNotice(data.streamingNotice))
   );
 }
 

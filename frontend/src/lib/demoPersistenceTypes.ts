@@ -43,6 +43,13 @@ export type PersistedDemoPathSubmission = {
   updatedAt: string;
 };
 
+export type PersistedDemoStreamingNotice = {
+  mazeId: number;
+  sessionId: string;
+  seenAt: string;
+  updatedAt: string;
+};
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
@@ -157,6 +164,19 @@ export function isPersistedDemoPathSubmission(
       (Array.isArray(value.dsl) &&
         value.dsl.every((token) => typeof token === "string"))) &&
     (value.shortestPath === null || isShortestPathResponse(value.shortestPath)) &&
+      typeof value.updatedAt === "string"
+  );
+}
+
+export function isPersistedDemoStreamingNotice(
+  value: unknown,
+): value is PersistedDemoStreamingNotice {
+  if (!isRecord(value)) return false;
+
+  return (
+    isFiniteNumber(value.mazeId) &&
+    typeof value.sessionId === "string" &&
+    typeof value.seenAt === "string" &&
     typeof value.updatedAt === "string"
   );
 }
