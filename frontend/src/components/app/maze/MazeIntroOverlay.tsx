@@ -52,12 +52,12 @@ export function MazeIntroOverlay({
               Deine Mission
             </div>
             <DialogTitle className="text-xl font-semibold text-slate-900 sm:text-2xl">
-              Das Eis schmilzt
+              Die Glace schmilzt
             </DialogTitle>
             <DialogDescription asChild>
               <div className="space-y-3 text-center text-sm leading-5 text-slate-700 sm:text-center sm:text-base sm:leading-6">
                 <p>
-                  Am Ende des Labyrinths wartet ein Eis auf dich, aber nicht mehr
+                  Am Ende des Labyrinths wartet eine Glace auf dich, aber nicht mehr
                   lange.
                 </p>
                 <p>
@@ -66,7 +66,7 @@ export function MazeIntroOverlay({
                   startet die Zeit.
                 </p>
                 <p>
-                  Finde den kürzesten Weg zum Eis und gib genau diesen Pfad ein.
+                  Finde den kürzesten Weg zum Glace und gib genau diesen Pfad ein.
                 </p>
                 <p>Doch zuvor ist ein wenig Verständnis nötig:</p>
               </div>
