@@ -61,8 +61,6 @@ class ModelErrorBoundary extends Component<
 export function IceCreamShopGoal({
   endPoint,
   routeLine,
-  progress,
-  total,
 }: IceCreamShopGoalProps) {
   const [modelStatus, setModelStatus] = useState<
     "checking" | "available" | "missing"

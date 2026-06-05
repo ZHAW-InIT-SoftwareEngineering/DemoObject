@@ -1,5 +1,4 @@
 import type { MazesMazeIdGet200ResponseNodesInner } from "@/api";
-import { error } from "three";
 
 export type TheoryDslToken = "UP" | "RIGHT" | "DOWN" | "LEFT";
 
