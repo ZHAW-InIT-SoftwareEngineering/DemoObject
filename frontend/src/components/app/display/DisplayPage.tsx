@@ -50,7 +50,7 @@ export function DisplayPage({ mazeId }: DisplayPageProps) {
   const [nextLoading, setNextLoading] = useState(true);
   const [nextError, setNextError] = useState<string | null>(null);
   const requestInFlightRef = useRef(false);
-  const nextAbortRef = useRef<AbortController | null>(null);
+  const mountedRef = useRef(false);
   const rowRefs = useRef(new Map<string, HTMLDivElement>());
 
   const rankedEntries = useMemo<RankedEntry[]>(() => {
@@ -81,36 +81,34 @@ export function DisplayPage({ mazeId }: DisplayPageProps) {
     if (requestInFlightRef.current) return;
 
     requestInFlightRef.current = true;
-    nextAbortRef.current?.abort();
-    const abortController = new AbortController();
-    nextAbortRef.current = abortController;
     setNextLoading(true);
 
     try {
-      const next = await getDisplayNext(mazeId, abortController.signal);
+      const next = await getDisplayNext(mazeId);
+      if (!mountedRef.current) return;
       setCurrentAnimation(next.animation);
       setNextError(null);
     } catch (error) {
-      if (abortController.signal.aborted) return;
+      if (!mountedRef.current) return;
       setNextError(
         error instanceof Error ? error.message : "Display animation unavailable.",
       );
     } finally {
-      if (!abortController.signal.aborted) {
+      if (mountedRef.current) {
         setNextLoading(false);
-        requestInFlightRef.current = false;
       }
+      requestInFlightRef.current = false;
     }
   }, [mazeId]);
 
   useEffect(() => {
+    mountedRef.current = true;
     setCurrentAnimation(null);
     setNextError(null);
     void requestNextAnimation();
 
     return () => {
-      nextAbortRef.current?.abort();
-      requestInFlightRef.current = false;
+      mountedRef.current = false;
     };
   }, [requestNextAnimation]);
 
