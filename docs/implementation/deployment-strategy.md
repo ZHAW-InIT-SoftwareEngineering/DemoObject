@@ -44,8 +44,8 @@ Already present:
 ## 3. Recommended High-Level Architecture
 
 1. Keep one VM for now.
-2. Run all services using Docker Compose:
-   - `frontend` (public entrypoint)
+2. Run application services using Docker Compose:
+   - `frontend` (internal service reachable by the shared edge proxy)
    - `api` (internal)
    - `mongo` (internal, persistent volume)
 3. Build images in GitHub Actions.
@@ -88,7 +88,7 @@ Keep closed to internet:
 
 Note:
 
-1. Current compose already follows this pattern because only frontend publishes a host port.
+1. Current compose follows this pattern by attaching `frontend` to the shared external Docker network `edge`. Public ports are owned by the separate edge proxy deployment.
 
 ## 6. GitHub Actions Configuration Model
 

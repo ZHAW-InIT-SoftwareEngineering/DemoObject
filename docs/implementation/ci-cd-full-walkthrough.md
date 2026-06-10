@@ -12,9 +12,8 @@ This document explains the current CI/CD setup in this repository, including the
 3. Container images are built from:
    - `backend/Dockerfile`
    - `frontend/Dockerfile`
-   - `caddy/Dockerfile`
 4. Frontend runtime routing is configured in `frontend/nginx/default.conf`.
-5. Edge TLS and public ingress are handled by `caddy/Caddyfile`.
+5. Edge TLS and public ingress are handled by the separate `demo_edge` deployment.
 
 ## Chunk 2: Deploy Workflow Topology
 
@@ -27,14 +26,13 @@ This document explains the current CI/CD setup in this repository, including the
 3. Jobs:
    - `build_and_push_backend`
    - `build_and_push_frontend`
-   - `build_and_push_caddy`
    - `deploy_stack`
-4. `deploy_stack` waits for all three image build jobs.
+4. `deploy_stack` waits for the backend and frontend image build jobs.
 5. Every job in this workflow runs on `ubuntu-latest`.
 
 ## Chunk 3: Build-and-Push Jobs
 
-1. Backend, frontend, and caddy image builds follow the same pattern.
+1. Backend and frontend image builds follow the same pattern.
 2. Each job uses:
    - `contents: read`
    - `packages: write`
@@ -45,7 +43,6 @@ This document explains the current CI/CD setup in this repository, including the
 7. Published image names are:
    - `ghcr.io/<lower-case-repository-owner>/demoobject-backend`
    - `ghcr.io/<lower-case-repository-owner>/demoobject-frontend`
-   - `ghcr.io/<lower-case-repository-owner>/demoobject-caddy`
 8. Image metadata generation is disabled with:
    - `provenance: false`
    - `sbom: false`
@@ -71,8 +68,9 @@ This document explains the current CI/CD setup in this repository, including the
 7. It then opens an SSH session to the VM and:
    - Logs in to GHCR on the VM using the workflow `GITHUB_TOKEN`
    - Exports runtime variables including `IMAGE_TAG=${{ github.sha }}`
-   - Runs `docker compose pull mongo api frontend caddy`
-   - Runs `docker compose up -d --remove-orphans mongo api frontend caddy`
+   - Ensures the external Docker network `edge` exists
+   - Runs `docker compose pull mongo api frontend`
+   - Runs `docker compose up -d --remove-orphans mongo api frontend`
 8. It waits up to about 60 seconds for:
    - `demoobject-api`
    - `demoobject-frontend`
@@ -81,8 +79,7 @@ This document explains the current CI/CD setup in this repository, including the
    - `docker ps`
    - Tail logs for `demoobject-api`
    - Tail logs for `demoobject-frontend`
-10. After the deploy step, it validates `demoobject-caddy` on the VM.
-11. It then verifies public reachability from the GitHub-hosted runner by checking:
+10. It then verifies public reachability through the shared edge proxy from the GitHub-hosted runner by checking:
    - `http://demo.init.zhaw.ch` returns an HTTP redirect
    - the redirect points to `https://demo.init.zhaw.ch`
    - `https://demo.init.zhaw.ch` returns `200` or `304`
@@ -94,7 +91,6 @@ This document explains the current CI/CD setup in this repository, including the
 1. `mongo`
 2. `api`
 3. `frontend`
-4. `caddy`
 
 ### mongo
 
@@ -123,21 +119,13 @@ This document explains the current CI/CD setup in this repository, including the
 1. Image: `${FRONTEND_IMAGE}:${IMAGE_TAG}`
 2. `depends_on` API healthy
 3. Healthcheck: `wget http://127.0.0.1/healthz`
-
-### caddy
-
-1. Image: `${CADDY_IMAGE}:${IMAGE_TAG}`
-2. Publishes:
-   - `80:80`
-   - `443:443`
-   - `443:443/udp`
-3. Depends on healthy `frontend`
-4. Healthcheck probes localhost HTTP with `Host: demo.init.zhaw.ch`
+4. Exposes port `80` on Docker networks only.
+5. Attaches to both the default project network and the external `edge` network.
 
 ### Request path model
 
-1. Browser traffic reaches Caddy on ports `80` and `443`.
-2. Caddy forwards application traffic to `frontend`.
+1. Browser traffic reaches the shared Caddy deployment from `demo_edge` on ports `80` and `443`.
+2. Shared Caddy forwards application traffic to `demoobject-frontend:80` over the external `edge` network.
 3. Frontend Nginx proxies `/api/` to `http://api:3000/`.
 4. Backend routes live at root paths such as `/mazes`, `/sessions`, and `/healthz`.
 
@@ -205,7 +193,5 @@ This document explains the current CI/CD setup in this repository, including the
 4. `deploy/docker-compose.prod.yaml`
 5. `backend/Dockerfile`
 6. `frontend/Dockerfile`
-7. `caddy/Dockerfile`
-8. `frontend/nginx/default.conf`
-9. `caddy/Caddyfile`
-10. `README.md`
+7. `frontend/nginx/default.conf`
+8. `README.md`

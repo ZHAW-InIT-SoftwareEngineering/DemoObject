@@ -22,7 +22,7 @@ services:
       start_period: 10s
 
   api:
-    image: ${BACKEND_IMAGE}:${IMAGE_TAG}
+    image: ${DEMOOBJECT_BACKEND_IMAGE}:${IMAGE_TAG}
     container_name: demoobject-api
     restart: unless-stopped
     environment:
@@ -43,9 +43,14 @@ services:
       start_period: 20s
 
   frontend:
-    image: ${FRONTEND_IMAGE}:${IMAGE_TAG}
+    image: ${DEMOOBJECT_FRONTEND_IMAGE}:${IMAGE_TAG}
     container_name: demoobject-frontend
     restart: unless-stopped
+    expose:
+      - "80"
+    networks:
+      - default
+      - edge
     depends_on:
       api:
         condition: service_healthy
@@ -56,28 +61,9 @@ services:
       retries: 10
       start_period: 10s
 
-  caddy:
-    image: ${CADDY_IMAGE}:${IMAGE_TAG}
-    container_name: demoobject-caddy
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
-    volumes:
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      frontend:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "wget --header='Host: demo.init.zhaw.ch' -qO- http://127.0.0.1/ >/dev/null || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-
 volumes:
   mongo-data:
-  caddy_data:
-  caddy_config:
+
+networks:
+  edge:
+    external: true

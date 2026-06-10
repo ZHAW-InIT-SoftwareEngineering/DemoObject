@@ -1,3 +1,0 @@
-demo.init.zhaw.ch {
-    reverse_proxy frontend:80
-}

@@ -19,9 +19,12 @@ display route, MongoDB persistence, and production Docker Compose deployment.
   - API base in development: `http://localhost:3000`
   - OpenAPI JSON: `http://localhost:3000/openapi.json`
   - Swagger UI: `http://localhost:3000/docs`
-- `deploy/docker-compose.prod.yaml`: production stack with Mongo, API,
-  frontend, and Caddy.
-- `caddy`: reverse proxy image for `demo.init.zhaw.ch`.
+- `deploy/docker-compose.prod.yaml`: production stack with Mongo, API, and
+  frontend. The frontend attaches to the shared external Docker network `edge`
+  for public routing.
+
+Public TLS and domain routing for `demo.init.zhaw.ch` are owned by the separate
+`demo_edge` deployment.
 
 Package versions are currently `1.0.0` for both `frontend/package.json` and
 `backend/package.json`.
@@ -104,8 +107,9 @@ Actions configuration.
 
 Notes:
 
-1. `BACKEND_IMAGE`, `FRONTEND_IMAGE`, and `CADDY_IMAGE` are computed in the workflow from the lower-case GitHub repository owner; no extra image variables are needed.
+1. `BACKEND_IMAGE` and `FRONTEND_IMAGE` are computed in the workflow from the lower-case GitHub repository owner; no extra image variables are needed.
 2. The deploy, cleanup, and audit workflows run on `ubuntu-latest` GitHub-hosted runners. Production Docker commands execute remotely on the VM over SSH.
 3. Set values in `Settings -> Secrets and variables -> Actions` at repository level, or at org level with access to this repo.
 4. GHCR authentication uses the workflow `GITHUB_TOKEN`; no personal access token is required for normal GitHub-hosted deploys from this repository.
 5. `VM_USER` must be able to run `docker` and `docker compose` on the target VM.
+6. The VM must have a shared external Docker network named `edge`. The deploy workflow creates it if it is missing.
