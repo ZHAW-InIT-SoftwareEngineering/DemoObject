@@ -25,10 +25,10 @@ jobs:
       NPM_CONFIG_FETCH_TIMEOUT: "300000"
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: "22"
           cache: npm
@@ -109,7 +109,7 @@ jobs:
       - name: Create or update pull request (attempt 1)
         id: cpr_attempt_1
         continue-on-error: true
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: "chore(deps): daily npm audit fix"
           branch: "chore/daily-npm-audit-fix"
@@ -134,7 +134,7 @@ jobs:
         id: cpr_attempt_2
         if: steps.cpr_attempt_1.outcome == 'failure'
         continue-on-error: true
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: "chore(deps): daily npm audit fix"
           branch: "chore/daily-npm-audit-fix"
@@ -159,7 +159,7 @@ jobs:
         id: cpr_attempt_3
         if: steps.cpr_attempt_1.outcome == 'failure' && steps.cpr_attempt_2.outcome == 'failure'
         continue-on-error: true
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: "chore(deps): daily npm audit fix"
           branch: "chore/daily-npm-audit-fix"

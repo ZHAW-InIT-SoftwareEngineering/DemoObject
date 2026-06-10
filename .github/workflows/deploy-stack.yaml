@@ -19,10 +19,10 @@ jobs:
       packages: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Configure GHCR image
         id: image
@@ -33,14 +33,14 @@ jobs:
           echo "demoobject_backend_image=ghcr.io/${ghcr_namespace}/demoobject-backend" >> "${GITHUB_OUTPUT}"
 
       - name: Log in to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push backend image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./backend
           file: ./backend/Dockerfile
@@ -58,10 +58,10 @@ jobs:
       packages: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Configure GHCR image
         id: image
@@ -72,14 +72,14 @@ jobs:
           echo "demoobject_frontend_image=ghcr.io/${ghcr_namespace}/demoobject-frontend" >> "${GITHUB_OUTPUT}"
 
       - name: Log in to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push frontend image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./frontend
           file: ./frontend/Dockerfile
@@ -111,7 +111,7 @@ jobs:
       MONGO_ROOT_PASSWORD: ${{ secrets.MONGO_ROOT_PASSWORD }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Configure GHCR image namespace
         shell: bash
@@ -217,8 +217,12 @@ jobs:
           MONGO_DATABASE=$(printf '%q' "${MONGO_DATABASE}")
           MONGO_COLLECTION_NAME=$(printf '%q' "${MONGO_COLLECTION_NAME}")
 
+          export DOCKER_CONFIG
+          DOCKER_CONFIG="\$(mktemp -d)"
+
           cleanup() {
             docker logout ghcr.io >/dev/null 2>&1 || true
+            rm -rf "\${DOCKER_CONFIG}"
           }
           trap cleanup EXIT
 
