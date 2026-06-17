@@ -1,5 +1,5 @@
 # BUILD STAGE
-FROM node:25-alpine AS build
+FROM node:24-alpine AS build
 WORKDIR /app
 
 COPY package*.json ./
@@ -18,7 +18,7 @@ RUN npm run build
 
 # ---
 # RUNTIME STAGE
-FROM nginx:1.27-alpine AS runtime
+FROM nginx:stable-alpine AS runtime
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 
