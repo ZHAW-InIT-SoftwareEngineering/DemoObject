@@ -4,6 +4,7 @@ import { registry } from "./openapiRegistry";
 import "../api/infra/infra.routes";
 import "../api/mazes/mazes.routes";
 import "../api/sessions/sessions.routes";
+import "../api/chat/chat.routes";
 
 export const openApiDocument = new OpenApiGeneratorV3(registry.definitions).generateDocument({
   openapi: "3.0.3",
