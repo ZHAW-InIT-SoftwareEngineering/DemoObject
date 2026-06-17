@@ -26,6 +26,7 @@ replay_pid*
 # custom 
 .env
 .env.docker
+node_modules/
 /frontend/docs
 frontend/dist
 backend/dist
