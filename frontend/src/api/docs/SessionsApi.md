@@ -214,7 +214,7 @@ No authorization required
 
 ## sessionsSessionIdPathsPut
 
-> SessionsSessionIdPathsGet200Response sessionsSessionIdPathsPut(sessionId, sessionsSessionIdPathsPutRequest)
+> SessionsSessionIdPathsPut200Response sessionsSessionIdPathsPut(sessionId, sessionsSessionIdPathsPutRequest)
 
 Store a user-selected path and its automatically transpiled DSL representation bund to a session 
 
@@ -260,7 +260,7 @@ example().catch(console.error);
 
 ### Return type
 
-[**SessionsSessionIdPathsGet200Response**](SessionsSessionIdPathsGet200Response.md)
+[**SessionsSessionIdPathsPut200Response**](SessionsSessionIdPathsPut200Response.md)
 
 ### Authorization
 

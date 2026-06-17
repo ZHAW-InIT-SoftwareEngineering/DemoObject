@@ -6,7 +6,7 @@
 
 Name | Type
 ------------ | -------------
-`path` | [Array&lt;MazesMazeIdPathsDslPostRequestPathInner&gt;](MazesMazeIdPathsDslPostRequestPathInner.md)
+`path` | [Array&lt;MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner&gt;](MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner.md)
 
 ## Example
 

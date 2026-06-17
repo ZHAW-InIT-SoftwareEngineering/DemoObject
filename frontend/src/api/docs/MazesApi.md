@@ -4,10 +4,144 @@ All URIs are relative to *http://localhost*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
+| [**mazesMazeIdDisplayFeedGet**](MazesApi.md#mazesmazeiddisplayfeedget) | **GET** /mazes/{mazeId}/display-feed | Retrieve ranked final submissions for a public display leaderboard |
+| [**mazesMazeIdDisplayNextGet**](MazesApi.md#mazesmazeiddisplaynextget) | **GET** /mazes/{mazeId}/display-next | Retrieve the next final submission path for public display animation |
 | [**mazesMazeIdGet**](MazesApi.md#mazesmazeidget) | **GET** /mazes/{mazeId} | Retrieve a maze definition |
 | [**mazesMazeIdPathsDslPost**](MazesApi.md#mazesmazeidpathsdslpostoperation) | **POST** /mazes/{mazeId}/paths/dsl | Compute the DSL of a specific provided path through the maze. |
 | [**mazesMazeIdShortestPathGet**](MazesApi.md#mazesmazeidshortestpathget) | **GET** /mazes/{mazeId}/shortest-path |  |
 
+
+
+## mazesMazeIdDisplayFeedGet
+
+> MazesMazeIdDisplayFeedGet200Response mazesMazeIdDisplayFeedGet(mazeId)
+
+Retrieve ranked final submissions for a public display leaderboard
+
+### Example
+
+```ts
+import {
+  Configuration,
+  MazesApi,
+} from '';
+import type { MazesMazeIdDisplayFeedGetRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const api = new MazesApi();
+
+  const body = {
+    // number
+    mazeId: 56,
+  } satisfies MazesMazeIdDisplayFeedGetRequest;
+
+  try {
+    const data = await api.mazesMazeIdDisplayFeedGet(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **mazeId** | `number` |  | [Defaults to `undefined`] |
+
+### Return type
+
+[**MazesMazeIdDisplayFeedGet200Response**](MazesMazeIdDisplayFeedGet200Response.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: `application/json`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Display feed found |  -  |
+| **404** | Maze not found |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
+## mazesMazeIdDisplayNextGet
+
+> MazesMazeIdDisplayNextGet200Response mazesMazeIdDisplayNextGet(mazeId)
+
+Retrieve the next final submission path for public display animation
+
+### Example
+
+```ts
+import {
+  Configuration,
+  MazesApi,
+} from '';
+import type { MazesMazeIdDisplayNextGetRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const api = new MazesApi();
+
+  const body = {
+    // number
+    mazeId: 56,
+  } satisfies MazesMazeIdDisplayNextGetRequest;
+
+  try {
+    const data = await api.mazesMazeIdDisplayNextGet(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **mazeId** | `number` |  | [Defaults to `undefined`] |
+
+### Return type
+
+[**MazesMazeIdDisplayNextGet200Response**](MazesMazeIdDisplayNextGet200Response.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: `application/json`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Next display animation found |  -  |
+| **404** | Maze not found |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 
 
 ## mazesMazeIdGet

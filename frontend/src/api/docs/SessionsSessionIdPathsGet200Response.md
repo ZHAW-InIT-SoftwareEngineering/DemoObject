@@ -7,7 +7,7 @@
 Name | Type
 ------------ | -------------
 `mazeId` | number
-`path` | [Array&lt;MazesMazeIdPathsDslPostRequestPathInner&gt;](MazesMazeIdPathsDslPostRequestPathInner.md)
+`path` | [Array&lt;MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner&gt;](MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner.md)
 `dsl` | Array&lt;string&gt;
 `elapsedMs` | number
 

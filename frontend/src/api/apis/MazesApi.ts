@@ -15,12 +15,18 @@
 
 import * as runtime from '../runtime';
 import type {
+  MazesMazeIdDisplayFeedGet200Response,
+  MazesMazeIdDisplayNextGet200Response,
   MazesMazeIdGet200Response,
   MazesMazeIdPathsDslPost200Response,
   MazesMazeIdPathsDslPostRequest,
   MazesMazeIdShortestPathGet200Response,
 } from '../models/index';
 import {
+    MazesMazeIdDisplayFeedGet200ResponseFromJSON,
+    MazesMazeIdDisplayFeedGet200ResponseToJSON,
+    MazesMazeIdDisplayNextGet200ResponseFromJSON,
+    MazesMazeIdDisplayNextGet200ResponseToJSON,
     MazesMazeIdGet200ResponseFromJSON,
     MazesMazeIdGet200ResponseToJSON,
     MazesMazeIdPathsDslPost200ResponseFromJSON,
@@ -30,6 +36,14 @@ import {
     MazesMazeIdShortestPathGet200ResponseFromJSON,
     MazesMazeIdShortestPathGet200ResponseToJSON,
 } from '../models/index';
+
+export interface MazesMazeIdDisplayFeedGetRequest {
+    mazeId: number | null;
+}
+
+export interface MazesMazeIdDisplayNextGetRequest {
+    mazeId: number | null;
+}
 
 export interface MazesMazeIdGetRequest {
     mazeId: number | null;
@@ -49,6 +63,80 @@ export interface MazesMazeIdShortestPathGetRequest {
  * 
  */
 export class MazesApi extends runtime.BaseAPI {
+
+    /**
+     * Retrieve ranked final submissions for a public display leaderboard
+     */
+    async mazesMazeIdDisplayFeedGetRaw(requestParameters: MazesMazeIdDisplayFeedGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<MazesMazeIdDisplayFeedGet200Response>> {
+        if (requestParameters['mazeId'] == null) {
+            throw new runtime.RequiredError(
+                'mazeId',
+                'Required parameter "mazeId" was null or undefined when calling mazesMazeIdDisplayFeedGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/mazes/{mazeId}/display-feed`;
+        urlPath = urlPath.replace(`{${"mazeId"}}`, encodeURIComponent(String(requestParameters['mazeId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => MazesMazeIdDisplayFeedGet200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Retrieve ranked final submissions for a public display leaderboard
+     */
+    async mazesMazeIdDisplayFeedGet(requestParameters: MazesMazeIdDisplayFeedGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<MazesMazeIdDisplayFeedGet200Response> {
+        const response = await this.mazesMazeIdDisplayFeedGetRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Retrieve the next final submission path for public display animation
+     */
+    async mazesMazeIdDisplayNextGetRaw(requestParameters: MazesMazeIdDisplayNextGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<MazesMazeIdDisplayNextGet200Response>> {
+        if (requestParameters['mazeId'] == null) {
+            throw new runtime.RequiredError(
+                'mazeId',
+                'Required parameter "mazeId" was null or undefined when calling mazesMazeIdDisplayNextGet().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/mazes/{mazeId}/display-next`;
+        urlPath = urlPath.replace(`{${"mazeId"}}`, encodeURIComponent(String(requestParameters['mazeId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => MazesMazeIdDisplayNextGet200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Retrieve the next final submission path for public display animation
+     */
+    async mazesMazeIdDisplayNextGet(requestParameters: MazesMazeIdDisplayNextGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<MazesMazeIdDisplayNextGet200Response> {
+        const response = await this.mazesMazeIdDisplayNextGetRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
 
     /**
      * Retrieve a maze definition

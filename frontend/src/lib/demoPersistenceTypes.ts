@@ -1,5 +1,5 @@
 import type {
-  MazesMazeIdPathsDslPostRequestPathInner,
+  MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner,
   MazesMazeIdShortestPathGet200Response,
   SessionsPost201Response,
 } from "@/api";
@@ -60,7 +60,7 @@ function isFiniteNumber(value: unknown): value is number {
 
 function isCoordPathEntry(
   value: unknown,
-): value is MazesMazeIdPathsDslPostRequestPathInner {
+): value is MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner {
   if (!isRecord(value)) return false;
 
   return isFiniteNumber(value.x) && isFiniteNumber(value.y);

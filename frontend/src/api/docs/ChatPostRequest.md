@@ -1,24 +1,22 @@
 
-# SessionsSessionIdPathsPutRequest
+# ChatPostRequest
 
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`path` | [Array&lt;MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner&gt;](MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner.md)
-`elapsedMs` | number
+`userMessage` | string
 
 ## Example
 
 ```typescript
-import type { SessionsSessionIdPathsPutRequest } from ''
+import type { ChatPostRequest } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "path": null,
-  "elapsedMs": null,
-} satisfies SessionsSessionIdPathsPutRequest
+  "userMessage": null,
+} satisfies ChatPostRequest
 
 console.log(example)
 
@@ -27,7 +25,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as SessionsSessionIdPathsPutRequest
+const exampleParsed = JSON.parse(exampleJSON) as ChatPostRequest
 console.log(exampleParsed)
 ```
 

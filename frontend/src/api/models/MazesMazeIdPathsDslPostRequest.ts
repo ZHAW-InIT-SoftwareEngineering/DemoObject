@@ -13,13 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
-import type { MazesMazeIdPathsDslPostRequestPathInner } from './MazesMazeIdPathsDslPostRequestPathInner';
+import type { MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner } from './MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner';
 import {
-    MazesMazeIdPathsDslPostRequestPathInnerFromJSON,
-    MazesMazeIdPathsDslPostRequestPathInnerFromJSONTyped,
-    MazesMazeIdPathsDslPostRequestPathInnerToJSON,
-    MazesMazeIdPathsDslPostRequestPathInnerToJSONTyped,
-} from './MazesMazeIdPathsDslPostRequestPathInner';
+    MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInnerFromJSON,
+    MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInnerFromJSONTyped,
+    MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInnerToJSON,
+    MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInnerToJSONTyped,
+} from './MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner';
 
 /**
  * 
@@ -29,10 +29,10 @@ import {
 export interface MazesMazeIdPathsDslPostRequest {
     /**
      * 
-     * @type {Array<MazesMazeIdPathsDslPostRequestPathInner>}
+     * @type {Array<MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner>}
      * @memberof MazesMazeIdPathsDslPostRequest
      */
-    path: Array<MazesMazeIdPathsDslPostRequestPathInner>;
+    path: Array<MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner>;
 }
 
 /**
@@ -53,7 +53,7 @@ export function MazesMazeIdPathsDslPostRequestFromJSONTyped(json: any, ignoreDis
     }
     return {
         
-        'path': ((json['path'] as Array<any>).map(MazesMazeIdPathsDslPostRequestPathInnerFromJSON)),
+        'path': ((json['path'] as Array<any>).map(MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInnerFromJSON)),
     };
 }
 
@@ -68,7 +68,7 @@ export function MazesMazeIdPathsDslPostRequestToJSONTyped(value?: MazesMazeIdPat
 
     return {
         
-        'path': ((value['path'] as Array<any>).map(MazesMazeIdPathsDslPostRequestPathInnerToJSON)),
+        'path': ((value['path'] as Array<any>).map(MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInnerToJSON)),
     };
 }
 

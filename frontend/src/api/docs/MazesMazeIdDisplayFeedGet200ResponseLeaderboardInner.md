@@ -1,30 +1,36 @@
 
-# SessionsSessionIdPatchRequest
+# MazesMazeIdDisplayFeedGet200ResponseLeaderboardInner
 
 
 ## Properties
 
 Name | Type
 ------------ | -------------
+`userName` | string
 `mazeId` | number
-`status` | string
 `path` | [Array&lt;MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner&gt;](MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner.md)
 `elapsedMs` | number
-`expiresAt` | Date
+`submittedAt` | Date
+`rank` | number
+`moveCount` | number
+`pathLength` | number
 
 ## Example
 
 ```typescript
-import type { SessionsSessionIdPatchRequest } from ''
+import type { MazesMazeIdDisplayFeedGet200ResponseLeaderboardInner } from ''
 
 // TODO: Update the object below with actual values
 const example = {
+  "userName": null,
   "mazeId": null,
-  "status": null,
   "path": null,
   "elapsedMs": null,
-  "expiresAt": null,
-} satisfies SessionsSessionIdPatchRequest
+  "submittedAt": null,
+  "rank": null,
+  "moveCount": null,
+  "pathLength": null,
+} satisfies MazesMazeIdDisplayFeedGet200ResponseLeaderboardInner
 
 console.log(example)
 
@@ -33,7 +39,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as SessionsSessionIdPatchRequest
+const exampleParsed = JSON.parse(exampleJSON) as MazesMazeIdDisplayFeedGet200ResponseLeaderboardInner
 console.log(exampleParsed)
 ```
 

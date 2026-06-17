@@ -7,7 +7,7 @@
 Name | Type
 ------------ | -------------
 `algorithm` | string
-`path` | [Array&lt;MazesMazeIdPathsDslPostRequestPathInner&gt;](MazesMazeIdPathsDslPostRequestPathInner.md)
+`path` | [Array&lt;MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner&gt;](MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner.md)
 `length` | number
 `cost` | number
 `explorationSteps` | [Array&lt;MazesMazeIdShortestPathGet200ResponseExplorationStepsInner&gt;](MazesMazeIdShortestPathGet200ResponseExplorationStepsInner.md)

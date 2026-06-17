@@ -1,13 +1,13 @@
 import { useMemo } from "react";
 import type {
+  MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner,
   MazesMazeIdGet200Response,
-  MazesMazeIdPathsDslPostRequestPathInner,
 } from "@/api";
 import { coordPathToNodePath, type NodePath } from "@/lib/path/transforms";
 
 export function useShortestPathNodePath(
   maze: MazesMazeIdGet200Response | null | undefined,
-  path: MazesMazeIdPathsDslPostRequestPathInner[] | null | undefined,
+  path: MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner[] | null | undefined,
 ): NodePath {
   return useMemo(() => {
     if (!maze || !path || path.length === 0) return [];

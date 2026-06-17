@@ -19,6 +19,7 @@ import type {
   SessionsPostRequest,
   SessionsSessionIdPatchRequest,
   SessionsSessionIdPathsGet200Response,
+  SessionsSessionIdPathsPut200Response,
   SessionsSessionIdPathsPutRequest,
 } from '../models/index';
 import {
@@ -30,6 +31,8 @@ import {
     SessionsSessionIdPatchRequestToJSON,
     SessionsSessionIdPathsGet200ResponseFromJSON,
     SessionsSessionIdPathsGet200ResponseToJSON,
+    SessionsSessionIdPathsPut200ResponseFromJSON,
+    SessionsSessionIdPathsPut200ResponseToJSON,
     SessionsSessionIdPathsPutRequestFromJSON,
     SessionsSessionIdPathsPutRequestToJSON,
 } from '../models/index';
@@ -169,7 +172,7 @@ export class SessionsApi extends runtime.BaseAPI {
     /**
      * Store a user-selected path and its automatically transpiled DSL representation bund to a session 
      */
-    async sessionsSessionIdPathsPutRaw(requestParameters: SessionsSessionIdPathsPutOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<SessionsSessionIdPathsGet200Response>> {
+    async sessionsSessionIdPathsPutRaw(requestParameters: SessionsSessionIdPathsPutOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<SessionsSessionIdPathsPut200Response>> {
         if (requestParameters['sessionId'] == null) {
             throw new runtime.RequiredError(
                 'sessionId',
@@ -195,13 +198,13 @@ export class SessionsApi extends runtime.BaseAPI {
             body: SessionsSessionIdPathsPutRequestToJSON(requestParameters['sessionsSessionIdPathsPutRequest']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => SessionsSessionIdPathsGet200ResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => SessionsSessionIdPathsPut200ResponseFromJSON(jsonValue));
     }
 
     /**
      * Store a user-selected path and its automatically transpiled DSL representation bund to a session 
      */
-    async sessionsSessionIdPathsPut(requestParameters: SessionsSessionIdPathsPutOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SessionsSessionIdPathsGet200Response> {
+    async sessionsSessionIdPathsPut(requestParameters: SessionsSessionIdPathsPutOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SessionsSessionIdPathsPut200Response> {
         const response = await this.sessionsSessionIdPathsPutRaw(requestParameters, initOverrides);
         return await response.value();
     }

@@ -81,3 +81,4 @@ export function SessionsPost201ResponseToJSONTyped(value?: SessionsPost201Respon
         'qrPayload': value['qrPayload'],
     };
 }
+

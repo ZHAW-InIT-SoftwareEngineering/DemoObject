@@ -6,8 +6,8 @@
 
 Name | Type
 ------------ | -------------
-`from` | [MazesMazeIdPathsDslPostRequestPathInner](MazesMazeIdPathsDslPostRequestPathInner.md)
-`to` | [MazesMazeIdPathsDslPostRequestPathInner](MazesMazeIdPathsDslPostRequestPathInner.md)
+`from` | [MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner](MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner.md)
+`to` | [MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner](MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner.md)
 `discovered` | boolean
 `improved` | boolean
 `candidateCost` | number

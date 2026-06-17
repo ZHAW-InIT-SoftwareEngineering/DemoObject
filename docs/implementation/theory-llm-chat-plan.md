@@ -25,7 +25,7 @@ The hosted LLM request body is:
 
 ```json
 {
-  "user_message": "What is the capital of France?"
+  "userMessage": "What is the capital of France?"
 }
 ```
 
@@ -46,7 +46,7 @@ Add a DemoObject backend chat proxy endpoint:
   - response: `{ llmAnswer: string }`
 - Add `POST /chat` in the Express backend.
 - Server-side, call `POST https://llm-backend.cloudlab.zhaw.ch/chat` with
-  `{ user_message: userMessage }`.
+  `{ userMessage }`.
 - Map successful hosted responses from `{ llm_answer }` to `{ llmAnswer }`.
 - Return `400` for invalid or empty input.
 - Return `502` with a stable error response if the hosted LLM returns a non-OK
@@ -80,6 +80,7 @@ Add a shared theory chat UI:
 - Open a dialog containing:
   - scrollable message history
   - textarea input
+  - visible message length counter in the input area, formatted like `123/512`
   - send button
   - loading state
   - retry-friendly error message
@@ -87,6 +88,10 @@ Add a shared theory chat UI:
 - Preserve message history while navigating between theory pages, as long as the
   shared theory layout remains mounted.
 - Reset message history on full page reload.
+- Mirror the backend input limit in the UI: messages are trimmed, must contain at
+  least one character, and may contain at most 512 characters. The hosted LLM has
+  a 512-token limit, and a token is at least one character, so 512 characters is
+  a conservative UI-visible limit.
 
 ## Test Plan
 

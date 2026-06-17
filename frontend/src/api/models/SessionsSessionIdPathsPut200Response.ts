@@ -24,51 +24,58 @@ import {
 /**
  * 
  * @export
- * @interface SessionsSessionIdPathsGet200Response
+ * @interface SessionsSessionIdPathsPut200Response
  */
-export interface SessionsSessionIdPathsGet200Response {
+export interface SessionsSessionIdPathsPut200Response {
     /**
      * 
      * @type {number}
-     * @memberof SessionsSessionIdPathsGet200Response
+     * @memberof SessionsSessionIdPathsPut200Response
      */
     mazeId: number;
     /**
      * 
      * @type {Array<MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner>}
-     * @memberof SessionsSessionIdPathsGet200Response
+     * @memberof SessionsSessionIdPathsPut200Response
      */
     path: Array<MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner>;
     /**
      * 
      * @type {Array<string>}
-     * @memberof SessionsSessionIdPathsGet200Response
+     * @memberof SessionsSessionIdPathsPut200Response
      */
     dsl: Array<string>;
     /**
      * 
      * @type {number}
-     * @memberof SessionsSessionIdPathsGet200Response
+     * @memberof SessionsSessionIdPathsPut200Response
      */
     elapsedMs: number;
+    /**
+     * 
+     * @type {Date}
+     * @memberof SessionsSessionIdPathsPut200Response
+     */
+    submittedAt: Date;
 }
 
 /**
- * Check if a given object implements the SessionsSessionIdPathsGet200Response interface.
+ * Check if a given object implements the SessionsSessionIdPathsPut200Response interface.
  */
-export function instanceOfSessionsSessionIdPathsGet200Response(value: object): value is SessionsSessionIdPathsGet200Response {
+export function instanceOfSessionsSessionIdPathsPut200Response(value: object): value is SessionsSessionIdPathsPut200Response {
     if (!('mazeId' in value) || value['mazeId'] === undefined) return false;
     if (!('path' in value) || value['path'] === undefined) return false;
     if (!('dsl' in value) || value['dsl'] === undefined) return false;
     if (!('elapsedMs' in value) || value['elapsedMs'] === undefined) return false;
+    if (!('submittedAt' in value) || value['submittedAt'] === undefined) return false;
     return true;
 }
 
-export function SessionsSessionIdPathsGet200ResponseFromJSON(json: any): SessionsSessionIdPathsGet200Response {
-    return SessionsSessionIdPathsGet200ResponseFromJSONTyped(json, false);
+export function SessionsSessionIdPathsPut200ResponseFromJSON(json: any): SessionsSessionIdPathsPut200Response {
+    return SessionsSessionIdPathsPut200ResponseFromJSONTyped(json, false);
 }
 
-export function SessionsSessionIdPathsGet200ResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean): SessionsSessionIdPathsGet200Response {
+export function SessionsSessionIdPathsPut200ResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean): SessionsSessionIdPathsPut200Response {
     if (json == null) {
         return json;
     }
@@ -78,14 +85,15 @@ export function SessionsSessionIdPathsGet200ResponseFromJSONTyped(json: any, ign
         'path': ((json['path'] as Array<any>).map(MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInnerFromJSON)),
         'dsl': json['dsl'],
         'elapsedMs': json['elapsedMs'],
+        'submittedAt': (new Date(json['submittedAt'])),
     };
 }
 
-export function SessionsSessionIdPathsGet200ResponseToJSON(json: any): SessionsSessionIdPathsGet200Response {
-    return SessionsSessionIdPathsGet200ResponseToJSONTyped(json, false);
+export function SessionsSessionIdPathsPut200ResponseToJSON(json: any): SessionsSessionIdPathsPut200Response {
+    return SessionsSessionIdPathsPut200ResponseToJSONTyped(json, false);
 }
 
-export function SessionsSessionIdPathsGet200ResponseToJSONTyped(value?: SessionsSessionIdPathsGet200Response | null, ignoreDiscriminator: boolean = false): any {
+export function SessionsSessionIdPathsPut200ResponseToJSONTyped(value?: SessionsSessionIdPathsPut200Response | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
@@ -96,6 +104,7 @@ export function SessionsSessionIdPathsGet200ResponseToJSONTyped(value?: Sessions
         'path': ((value['path'] as Array<any>).map(MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInnerToJSON)),
         'dsl': value['dsl'],
         'elapsedMs': value['elapsedMs'],
+        'submittedAt': value['submittedAt'].toISOString(),
     };
 }
 

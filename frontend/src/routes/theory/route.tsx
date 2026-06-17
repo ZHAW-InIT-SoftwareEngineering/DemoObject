@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { StartLoadingScreen } from "@/components/app/index/StartLoadingScreen";
+import { TheoryChatWidget } from "@/components/app/theory/TheoryChatWidget";
 import { useDemoSession } from "@/hooks";
 
 export const Route = createFileRoute("/theory")({
@@ -20,5 +21,10 @@ function TheoryLayout() {
     return loading ? <StartLoadingScreen /> : null;
   }
 
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+      <TheoryChatWidget />
+    </>
+  );
 }

@@ -7,6 +7,7 @@
 Name | Type
 ------------ | -------------
 `sessionId` | string
+`userName` | string
 `qrPayload` | string
 
 ## Example
@@ -17,6 +18,7 @@ import type { SessionsPost201Response } from ''
 // TODO: Update the object below with actual values
 const example = {
   "sessionId": null,
+  "userName": null,
   "qrPayload": null,
 } satisfies SessionsPost201Response
 

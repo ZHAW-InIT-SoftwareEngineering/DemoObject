@@ -13,13 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
-import type { MazesMazeIdPathsDslPostRequestPathInner } from './MazesMazeIdPathsDslPostRequestPathInner';
+import type { MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner } from './MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner';
 import {
-    MazesMazeIdPathsDslPostRequestPathInnerFromJSON,
-    MazesMazeIdPathsDslPostRequestPathInnerFromJSONTyped,
-    MazesMazeIdPathsDslPostRequestPathInnerToJSON,
-    MazesMazeIdPathsDslPostRequestPathInnerToJSONTyped,
-} from './MazesMazeIdPathsDslPostRequestPathInner';
+    MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInnerFromJSON,
+    MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInnerFromJSONTyped,
+    MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInnerToJSON,
+    MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInnerToJSONTyped,
+} from './MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner';
 
 /**
  * 
@@ -29,16 +29,16 @@ import {
 export interface MazesMazeIdShortestPathGet200ResponseExplorationStepsInner {
     /**
      * 
-     * @type {MazesMazeIdPathsDslPostRequestPathInner}
+     * @type {MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner}
      * @memberof MazesMazeIdShortestPathGet200ResponseExplorationStepsInner
      */
-    from: MazesMazeIdPathsDslPostRequestPathInner;
+    from: MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner;
     /**
      * 
-     * @type {MazesMazeIdPathsDslPostRequestPathInner}
+     * @type {MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner}
      * @memberof MazesMazeIdShortestPathGet200ResponseExplorationStepsInner
      */
-    to: MazesMazeIdPathsDslPostRequestPathInner;
+    to: MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner;
     /**
      * 
      * @type {boolean}
@@ -81,8 +81,8 @@ export function MazesMazeIdShortestPathGet200ResponseExplorationStepsInnerFromJS
     }
     return {
         
-        'from': MazesMazeIdPathsDslPostRequestPathInnerFromJSON(json['from']),
-        'to': MazesMazeIdPathsDslPostRequestPathInnerFromJSON(json['to']),
+        'from': MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInnerFromJSON(json['from']),
+        'to': MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInnerFromJSON(json['to']),
         'discovered': json['discovered'],
         'improved': json['improved'],
         'candidateCost': json['candidateCost'],
@@ -100,8 +100,8 @@ export function MazesMazeIdShortestPathGet200ResponseExplorationStepsInnerToJSON
 
     return {
         
-        'from': MazesMazeIdPathsDslPostRequestPathInnerToJSON(value['from']),
-        'to': MazesMazeIdPathsDslPostRequestPathInnerToJSON(value['to']),
+        'from': MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInnerToJSON(value['from']),
+        'to': MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInnerToJSON(value['to']),
         'discovered': value['discovered'],
         'improved': value['improved'],
         'candidateCost': value['candidateCost'],

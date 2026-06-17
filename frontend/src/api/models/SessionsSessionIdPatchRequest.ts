@@ -13,13 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
-import type { MazesMazeIdPathsDslPostRequestPathInner } from './MazesMazeIdPathsDslPostRequestPathInner';
+import type { MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner } from './MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner';
 import {
-    MazesMazeIdPathsDslPostRequestPathInnerFromJSON,
-    MazesMazeIdPathsDslPostRequestPathInnerFromJSONTyped,
-    MazesMazeIdPathsDslPostRequestPathInnerToJSON,
-    MazesMazeIdPathsDslPostRequestPathInnerToJSONTyped,
-} from './MazesMazeIdPathsDslPostRequestPathInner';
+    MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInnerFromJSON,
+    MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInnerFromJSONTyped,
+    MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInnerToJSON,
+    MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInnerToJSONTyped,
+} from './MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner';
 
 /**
  * 
@@ -41,10 +41,10 @@ export interface SessionsSessionIdPatchRequest {
     status?: SessionsSessionIdPatchRequestStatusEnum;
     /**
      * 
-     * @type {Array<MazesMazeIdPathsDslPostRequestPathInner>}
+     * @type {Array<MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner>}
      * @memberof SessionsSessionIdPatchRequest
      */
-    path?: Array<MazesMazeIdPathsDslPostRequestPathInner>;
+    path?: Array<MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInner>;
     /**
      * 
      * @type {number}
@@ -91,7 +91,7 @@ export function SessionsSessionIdPatchRequestFromJSONTyped(json: any, ignoreDisc
         
         'mazeId': json['mazeId'],
         'status': json['status'] == null ? undefined : json['status'],
-        'path': json['path'] == null ? undefined : ((json['path'] as Array<any>).map(MazesMazeIdPathsDslPostRequestPathInnerFromJSON)),
+        'path': json['path'] == null ? undefined : ((json['path'] as Array<any>).map(MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInnerFromJSON)),
         'elapsedMs': json['elapsedMs'] == null ? undefined : json['elapsedMs'],
         'expiresAt': json['expiresAt'] == null ? undefined : (new Date(json['expiresAt'])),
     };
@@ -110,9 +110,9 @@ export function SessionsSessionIdPatchRequestToJSONTyped(value?: SessionsSession
         
         'mazeId': value['mazeId'],
         'status': value['status'],
-        'path': value['path'] == null ? undefined : ((value['path'] as Array<any>).map(MazesMazeIdPathsDslPostRequestPathInnerToJSON)),
+        'path': value['path'] == null ? undefined : ((value['path'] as Array<any>).map(MazesMazeIdDisplayFeedGet200ResponseLeaderboardInnerPathInnerToJSON)),
         'elapsedMs': value['elapsedMs'],
-        'expiresAt': value['expiresAt'] == null ? value['expiresAt'] : value['expiresAt'].toISOString().substring(0,10),
+        'expiresAt': value['expiresAt'] == null ? value['expiresAt'] : value['expiresAt'].toISOString(),
     };
 }
 

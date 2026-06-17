@@ -32,6 +32,8 @@ function parsePositiveInteger(value: string | undefined, defaultValue: number, n
 export const PORT = parsePort(process.env.PORT);
 export const LLM_CHAT_ENDPOINT =
     process.env.LLM_CHAT_ENDPOINT ?? "https://llm-backend.cloudlab.zhaw.ch/chat";
+export const LLM_CHAT_STREAM_ENDPOINT =
+    process.env.LLM_CHAT_STREAM_ENDPOINT ?? `${LLM_CHAT_ENDPOINT.replace(/\/$/, "")}/stream`;
 export const LLM_CHAT_TIMEOUT_MS = parsePositiveInteger(
     process.env.LLM_CHAT_TIMEOUT_MS,
     DEFAULT_LLM_CHAT_TIMEOUT_MS,
