@@ -36,6 +36,11 @@ export function TheoryShortestPathIntro() {
           <span className="font-semibold">Dijkstra</span>. So erkennst du, welcher
           Algorithmus in welcher Situation die Glace retten kann.
         </p>
+
+        <p>
+          Hast du eine Frage? Tippe unten rechts auf das{" "}
+          <span className="font-semibold">Fragezeichen-Icon</span>.
+        </p>
       </CardContent>
     </Card>
   );

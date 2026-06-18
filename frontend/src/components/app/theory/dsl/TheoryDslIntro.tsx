@@ -33,6 +33,11 @@ export function TheoryDslIntro() {
       „programmieren“. Stelle dir dabei vor, dass du so ein Computer-Programm programmierst. 
     </p>
 
+    <p>
+      Hast du eine Frage? Tippe unten rechts auf das{" "}
+      <span className="font-semibold">Fragezeichen-Icon</span>.
+    </p>
+
     </div>
   </section>
   );
